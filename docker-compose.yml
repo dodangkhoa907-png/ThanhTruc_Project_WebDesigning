@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  nhietdoixanh-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nhietdoixanh-web
+    ports:
+      - "80:8080" # Map port 80 của host vào 8080 của container
+    environment:
+      - TZ=Asia/Ho_Chi_Minh # Cấu hình múi giờ Việt Nam
+    restart: unless-stopped # Tự động restart container nếu bị lỗi hoặc server reboot
