@@ -1405,70 +1405,102 @@ textarea.form-control {
 /* ================================================================
    FOOTER
    ================================================================ */
-.footer {
-    background-color: var(--forest);
-    color: var(--white);
-    padding: 60px 24px 30px;
-    text-align: center;
+.footer-nhiet-doi {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #022c16 0%, #000000 100%);
+  color: #ffffff;
+  padding: 5rem 2rem 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-top: 1px solid rgba(74, 222, 128, 0.1);
 }
 
 .footer-content {
-    margin-bottom: 40px;
+  position: relative;
+  z-index: 10;
+  max-width: 1000px;
+  width: 100%;
 }
 
-.footer-content h3 {
-    color: var(--white);
-    font-size: 1.5rem;
-    margin-bottom: 16px;
+.brand-title {
+  color: #4ade80; /* Xanh ngọc sáng */
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
+  letter-spacing: 1px;
 }
 
-.footer-content p {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1rem;
-    margin-bottom: 24px;
+.brand-slogan {
+  color: #a7f3d0;
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .social-links {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
 }
 
-.social-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--white);
-    transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 55px;
+  height: 55px;
+  border-radius: 50px; /* Pill-shape / Tròn */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1.4rem;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.social-icon svg {
-    width: 22px;
-    height: 22px;
-    fill: currentColor;
+.social-btn:hover {
+  transform: translateY(-6px);
+  background: rgba(74, 222, 128, 0.15);
+  border-color: #4ade80;
+  color: #4ade80;
+  box-shadow: 0 0 25px rgba(74, 222, 128, 0.6), 
+              inset 0 0 10px rgba(74, 222, 128, 0.3);
 }
 
-.social-icon:hover {
-    background: var(--lime);
-    color: var(--forest-deep);
-    border-color: var(--lime);
-    transform: translateY(-4px);
-    box-shadow: 0 4px 15px rgba(139, 195, 74, 0.4);
+.copyright {
+  font-size: 0.95rem;
+  color: #6b7280;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 2rem;
+  letter-spacing: 0.5px;
 }
 
-.footer-bottom {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.6);
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
-    padding-top: 24px;
+/* Interactive Cursor Glow */
+.cursor-glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(74,222,128,0.12) 0%, rgba(74,222,128,0) 65%);
+  border-radius: 50%;
+  pointer-events: none; /* Không cản trở click */
+  transform: translate(-50%, -50%);
+  z-index: 1; /* Nằm dưới nội dung (z-index: 10) */
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  filter: blur(30px);
+  top: -1000px; /* Khởi tạo ở ngoài khung hình */
+  left: -1000px;
 }
 
-.footer-bottom span {
-    color: var(--lime);
-    font-weight: 600;
+.footer-nhiet-doi:hover .cursor-glow {
+  opacity: 1;
 }

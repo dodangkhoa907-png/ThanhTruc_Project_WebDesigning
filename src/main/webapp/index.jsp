@@ -14,6 +14,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
 
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <!-- Stylesheet -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
@@ -503,33 +506,22 @@
 <!-- ================================================================
      FOOTER
      ================================================================ -->
-<footer class="footer">
-    <div class="container">
-        <div class="footer-content">
-            <h3>Kết nối với Nhiệt Đới Xanh</h3>
-            <p>Theo dõi chúng tôi để nhận thêm nhiều ưu đãi và thông tin thanh mát mỗi ngày!</p>
-            
-            <div class="social-links">
-                <!-- Facebook -->
-                <a href="https://www.facebook.com/share/1EMX9PdG2D/" target="_blank" class="social-icon" aria-label="Facebook">
-                    <svg viewBox="0 0 24 24"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>
-                </a>
-                <!-- Instagram -->
-                <a href="https://www.instagram.com/nhietdoixanh_05?igsh=dTR0dmgzcWg3aWV3" target="_blank" class="social-icon" aria-label="Instagram">
-                    <svg viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6zm9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25zM12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
-                </a>
-                <!-- TikTok -->
-                <a href="https://tiktok.com/@nuocepnhietdoixanh_05" target="_blank" class="social-icon" aria-label="TikTok">
-                    <svg viewBox="0 0 24 24"><path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.12-3.44-3.17-3.8-5.46-.4-2.51.33-5.17 2.06-7.07 1.28-1.4 3.12-2.3 5.04-2.5 1.24-.13 2.5.05 3.65.55v4.06c-.66-.23-1.38-.34-2.08-.28-1.07.08-2.09.61-2.73 1.45-.69.87-.95 2.05-.71 3.13.25 1.14 1.02 2.11 2.04 2.58 1.04.49 2.27.46 3.28-.08 1.05-.55 1.77-1.57 1.92-2.73.05-.41.05-.83.05-1.24V.02h2.52z"/></svg>
-                </a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>
-                &copy; 2026 <span>Nhiệt Đới Xanh</span>. All rights reserved. Trọn Vị Thanh Mát — Made with 💚 in Vietnam.
-            </p>
-        </div>
+<footer class="footer-nhiet-doi">
+  <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="footer-content">
+    <h2 class="brand-title">Nhiệt Đới Xanh</h2>
+    <p class="brand-slogan">Trọn Vị Thanh Mát - Trái Cây Tươi Mới Mỗi Ngày</p>
+    
+    <div class="social-links">
+      <a href="https://www.facebook.com/share/1EMX9PdG2D/" target="_blank" class="social-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="https://www.instagram.com/nhietdoixanh_05?igsh=dTR0dmgzcWg3aWV3" target="_blank" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://tiktok.com/@nuocepnhietdoixanh_05" target="_blank" class="social-btn" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
     </div>
+    
+    <div class="copyright">
+      &copy; 2026 Nhiệt Đới Xanh. All rights reserved. | Designed by IT Team.
+    </div>
+  </div>
 </footer>
 
 <!-- ================================================================
@@ -613,6 +605,31 @@
                 window.scrollTo({ top: y, behavior: 'smooth' });
             }
         });
+    });
+
+    // ===== Footer Cursor Glow Effect =====
+    document.addEventListener("DOMContentLoaded", () => {
+      const footer = document.querySelector('.footer-nhiet-doi');
+      const cursorGlow = document.getElementById('cursorGlow');
+
+      if (footer && cursorGlow) {
+        footer.addEventListener('mousemove', (e) => {
+          const rect = footer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          
+          cursorGlow.style.left = `${x}px`;
+          cursorGlow.style.top = `${y}px`;
+        });
+
+        footer.addEventListener('mouseenter', () => {
+          cursorGlow.style.opacity = '1';
+        });
+
+        footer.addEventListener('mouseleave', () => {
+          cursorGlow.style.opacity = '0';
+        });
+      }
     });
 </script>
 
