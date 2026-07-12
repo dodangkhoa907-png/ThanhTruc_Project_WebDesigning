@@ -5,35 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f472a149-c38d-44ee-a687-da9671543d01" name="Changes" comment="kkk">
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM_[Changes]/EncodingFilter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM_[Changes]/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM_[Changes]1/EncodingFilter.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM_[Changes]1/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM__Changes_.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_7_12_2026_3_07_PM__Changes_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/catalina.policy" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/catalina.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/context.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/jaspic-providers.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/jaspic-providers.xsd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/logging.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/server.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/tomcat-users.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/tomcat-users.xsd" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.smarttomcat/NhietDoiXanh_Web/conf/web.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/admin.jsp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/images/cam.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/images/duahau.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/images/thom.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/OrderServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/OrderServlet.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/ThankYouServlet.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/ThankYouServlet.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/dao/OrderDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/dao/OrderDAO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/model/Order.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/model/Order.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/util/DBContext.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/util/DBContext.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/admin.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/admin.jsp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
