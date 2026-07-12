@@ -4,40 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt Hàng Thành Công — Nhiệt Đới Xanh</title>
-    <meta name="description" content="Cảm ơn bạn đã đặt hàng tại Nhiệt Đới Xanh. Đơn hàng sẽ được giao trong 20-30 phút.">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
-
+    <title>Nhiệt Đới Xanh - Đặt Hàng Thành Công</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--background);
+            font-family: 'Be Vietnam Pro', sans-serif;
+            margin: 0;
+        }
+        .thankyou-container {
+            text-align: center;
+            background: #ffffff;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            max-width: 500px;
+            width: 90%;
+        }
+        .thankyou-container h1 {
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        .thankyou-container p {
+            color: var(--text);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .success-icon {
+            font-size: 60px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        .btn-home {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-home:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-
-<div class="thankyou-page">
-    <div class="thankyou-card">
-        <!-- Animated Checkmark -->
-        <div class="thankyou-check">
-            <svg viewBox="0 0 24 24">
-                <polyline points="5 12 10 17 19 7"/>
-            </svg>
-        </div>
-
-        <h1>Đặt Hàng Thành Công! 🎉</h1>
-        <p>
-            Cảm ơn bạn đã tin tưởng <strong>Nhiệt Đới Xanh</strong>!<br>
-            Đơn hàng của bạn đang được chuẩn bị và sẽ được giao trong
-            <strong>20-30 phút</strong>.<br>
-            Hãy ngồi thư giãn và chờ ly nước ép tươi mát nhé! 🍹
-        </p>
-
-        <a href="${pageContext.request.contextPath}/" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            Quay Về Trang Chủ
-        </a>
+    <div class="thankyou-container">
+        <div class="success-icon">✔️</div>
+        <h1>Đặt Hàng Thành Công!</h1>
+        <p>Cảm ơn bạn đã lựa chọn <strong>Nhiệt Đới Xanh</strong>. Đơn hàng của bạn đã được ghi nhận và đang được chuẩn bị. Chúng tôi sẽ giao hỏa tốc đến bạn trong thời gian sớm nhất!</p>
+        <a href="${pageContext.request.contextPath}/" class="btn-home">Quay lại trang chủ</a>
     </div>
-</div>
-
 </body>
 </html>
