@@ -22,3 +22,4 @@ public class ThankYouServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/thankyou.jsp").forward(request, response);
     }
 }
+
