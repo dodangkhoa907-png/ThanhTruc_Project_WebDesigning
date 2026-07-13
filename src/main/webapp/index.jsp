@@ -108,8 +108,14 @@
     <section class="story section" id="story">
         <div class="container">
             <div class="story-visual reveal">
+                <div class="story-ambient-glow"></div>
                 <div class="story-image-wrapper">
-                    <span class="story-emoji-large">🌿🍊🥤</span>
+                    <div class="story-glow-container">
+                        <div class="story-glow-blob blob-1"></div>
+                        <div class="story-glow-blob blob-2"></div>
+                        <div class="story-glow-blob blob-3"></div>
+                    </div>
+                    <img src="${pageContext.request.contextPath}/images/story.png" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img">
                 </div>
                 <div class="story-stat">
                     <div class="story-stat-number">100%</div>
