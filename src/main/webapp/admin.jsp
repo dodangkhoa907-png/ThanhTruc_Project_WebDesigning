@@ -1559,8 +1559,256 @@
 #admin-dashboard-wrapper .delay-3{animation-delay:.3s}
 #admin-dashboard-wrapper .delay-4{animation-delay:.4s}
 #admin-dashboard-wrapper .delay-5{animation-delay:.5s}
-#admin-dashboard-wrapper .delay-6{animation-delay:.6s}
-#admin-dashboard-wrapper .delay-7{animation-delay:.7s}
+#admin-dashboard-wrapper  .delay-6{animation-delay:.6s}
+  .delay-7{animation-delay:.7s}
+
+/* ============================================================
+   TESTIMONIALS TAB STYLES
+   ============================================================ */
+#admin-dashboard-wrapper .testimonials-dashboard-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 30px;
+  align-items: start;
+  margin-top: 8px;
+}
+@media (max-width: 992px) {
+  #admin-dashboard-wrapper .testimonials-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+#admin-dashboard-wrapper .testimonial-glass-card {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 30px;
+  transition: var(--transition);
+}
+#admin-dashboard-wrapper .testimonial-glass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+#admin-dashboard-wrapper .star-rating-select-3d {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 16px;
+  transition: all 0.3s var(--ease);
+  cursor: pointer;
+}
+#admin-dashboard-wrapper .star-rating-select-3d select {
+  font-family: var(--font);
+  font-size: 0.95rem;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text);
+  width: 100%;
+  padding: 12px 0;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  z-index: 2;
+}
+#admin-dashboard-wrapper .star-rating-select-3d::after {
+  content: '\f0d7';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  right: 16px;
+  color: var(--green);
+  pointer-events: none;
+}
+#admin-dashboard-wrapper .star-rating-select-3d:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(42,92,56,0.08);
+  background: #fff;
+}
+#admin-dashboard-wrapper .textarea-group-3d {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  transition: all 0.3s var(--ease);
+}
+#admin-dashboard-wrapper .textarea-group-3d:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(42,92,56,0.08);
+  background: #fff;
+}
+#admin-dashboard-wrapper .textarea-group-3d textarea {
+  font-family: var(--font);
+  font-size: 0.95rem;
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text);
+  width: 100%;
+  height: 100px;
+  resize: none;
+}
+#admin-dashboard-wrapper .char-counter-text {
+  align-self: flex-end;
+  font-size: 0.75rem;
+  color: var(--text-s);
+  margin-top: 4px;
+  font-weight: 500;
+}
+#admin-dashboard-wrapper .testimonials-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  max-height: 700px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+#admin-dashboard-wrapper .testimonial-feedback-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  transition: all 0.3s var(--ease);
+}
+#admin-dashboard-wrapper .testimonial-feedback-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(42,92,56,0.08);
+  border-color: rgba(42,92,56,0.15);
+}
+#admin-dashboard-wrapper .testimonial-feedback-card.being-edited {
+  border: 2px dashed var(--mango);
+  background: rgba(255, 159, 28, 0.02);
+}
+#admin-dashboard-wrapper .feedback-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+#admin-dashboard-wrapper .feedback-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid var(--green-l);
+  box-shadow: 0 4px 12px rgba(42,92,56,0.15);
+}
+#admin-dashboard-wrapper .feedback-info {
+  flex: 1;
+  min-width: 0;
+}
+#admin-dashboard-wrapper .feedback-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#admin-dashboard-wrapper .feedback-drink {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--green);
+  background: rgba(42, 92, 56, 0.08);
+  padding: 2px 8px;
+  border-radius: 50px;
+  display: inline-block;
+}
+#admin-dashboard-wrapper .feedback-stars {
+  color: #FFB84D;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+#admin-dashboard-wrapper .feedback-body {
+  font-size: 0.9rem;
+  color: var(--text-s);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-style: italic;
+  word-wrap: break-word;
+}
+#admin-dashboard-wrapper .feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+#admin-dashboard-wrapper .btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s var(--ease);
+  font-size: 0.9rem;
+}
+#admin-dashboard-wrapper .btn-action-edit {
+  background: rgba(255, 159, 28, 0.1);
+  color: var(--mango-d);
+}
+#admin-dashboard-wrapper .btn-action-edit:hover {
+  background: var(--mango);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+#admin-dashboard-wrapper .btn-action-delete {
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--red);
+}
+#admin-dashboard-wrapper .btn-action-delete:hover {
+  background: var(--red);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+#admin-dashboard-wrapper .btn-cancel-edit {
+  display: none;
+  width: 100%;
+  background: transparent;
+  border: 2px solid var(--text-s);
+  color: var(--text-s);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 12px;
+  border-radius: 14px;
+  margin-top: 10px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s var(--ease);
+}
+#admin-dashboard-wrapper .btn-cancel-edit:hover {
+  background: var(--text-s);
+  color: #ffffff;
+}
+#admin-dashboard-wrapper .btn-submit-edit-mode {
+  background: linear-gradient(135deg, var(--mango) 0%, var(--mango-l) 100%) !important;
+  box-shadow: 0 4px 12px rgba(255,159,28,.25) !important;
+}
+#admin-dashboard-wrapper .btn-submit-edit-mode:hover {
+  box-shadow: 0 8px 24px rgba(255,159,28,.35) !important;
+}
+#admin-dashboard-wrapper .modal-overlay.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
 </style>
 </head>
 
@@ -1586,6 +1834,9 @@
         </a>
         <a class="nav-item" href="#" data-tab="tab-platform">
           <span class="nav-icon">🌐</span> Nền tảng
+        </a>
+        <a class="nav-item" href="#" data-tab="tab-testimonials">
+          <span class="nav-icon">💬</span> Phản hồi
         </a>
       </div>
 
@@ -2012,6 +2263,92 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ================================================================
+           TAB 4: QUẢN LÝ PHẢN HỒI KHÁCH HÀNG (CRUD TESTIMONIALS)
+           ================================================================ -->
+      <div id="tab-testimonials" class="tab-content">
+        <div class="testimonials-dashboard-grid animate-in">
+          
+          <!-- LEFT FORM: CREATE / UPDATE -->
+          <div class="testimonial-glass-card">
+            <h3 style="font-size:1.4rem; font-weight:800; color:var(--text); margin-bottom:8px; display:flex; align-items:center; gap:10px;" id="feedbackFormTitle">
+              💬 Thêm Phản Hồi Mới
+            </h3>
+            <p class="form-subtitle" style="font-size:0.88rem; color:var(--text-s); margin-bottom:28px;">Nhập thông tin phản hồi của khách hàng tại đây.</p>
+            
+            <form id="testimonialCrudForm" onsubmit="handleTestimonialSubmit(event)">
+              <input type="hidden" id="t-editId" value="">
+
+              <div class="form-group">
+                <label for="t-customerName">Tên khách hàng</label>
+                <div class="input-group-3d">
+                  <span class="input-icon">👤</span>
+                  <input type="text" id="t-customerName" placeholder="VD: Nguyễn Văn A" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t-drinkName">Loại đồ uống đã thử</label>
+                <div class="input-group-3d">
+                  <span class="input-icon">🍹</span>
+                  <input type="text" id="t-drinkName" placeholder="VD: Mix Cam Cà Rốt" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t-starRating">Đánh giá sao</label>
+                <div class="star-rating-select-3d">
+                  <span class="input-icon" style="margin-right:12px; font-size:1.25rem;">⭐</span>
+                  <select id="t-starRating" required>
+                    <option value="5">⭐⭐⭐⭐⭐ (5 Sao)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 Sao)</option>
+                    <option value="3">⭐⭐⭐ (3 Sao)</option>
+                    <option value="2">⭐⭐ (2 Sao)</option>
+                    <option value="1">⭐ (1 Sao)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t-avatarUrl">URL Ảnh đại diện</label>
+                <div class="input-group-3d">
+                  <span class="input-icon">🖼️</span>
+                  <input type="url" id="t-avatarUrl" placeholder="https://domain.com/avatar.jpg">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="t-feedbackText">Nội dung phản hồi</label>
+                <div class="textarea-group-3d">
+                  <textarea id="t-feedbackText" maxlength="150" oninput="updateTestimonialCharCount()" placeholder="Nội dung phản hồi (tối đa 150 ký tự)..." required></textarea>
+                  <span class="char-counter-text"><span id="t-charCount">0</span>/150 ký tự</span>
+                </div>
+              </div>
+
+              <button type="submit" id="t-btnSubmit" class="btn-submit-3d" style="margin-top:20px;">
+                <span>Thêm Phản Hồi</span>
+              </button>
+
+              <button type="button" id="t-btnCancel" class="btn-cancel-edit" onclick="cancelTestimonialEdit()">
+                ❌ Hủy Cập Nhật
+              </button>
+            </form>
+          </div>
+
+          <!-- RIGHT LIST: FEEDBACKS GRID -->
+          <div class="testimonial-glass-card">
+            <h3 style="font-size:1.4rem; font-weight:800; color:var(--text); margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+              📋 Danh Sách Phản Hồi
+            </h3>
+            
+            <div class="testimonials-cards-grid" id="t-testimonialsGrid">
+              <!-- Rendered by JavaScript -->
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -2470,8 +2807,231 @@
   }
   
   initDonutTooltips();
+
+  // ── Testimonials CRUD Logic ──
+  let testimonials = [
+    {
+      id: 1,
+      name: "Khánh Linh",
+      drink: "Ép Cam Dứa Hấu",
+      rating: 5,
+      text: "Nước ép ngon lắm nha mọi người ơi! Cam rất ngọt thanh, không bị gắt đường hóa học. Giao hàng hỏa tốc trong trường siêu nhanh luôn, 10 điểm!",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120"
+    },
+    {
+      id: 2,
+      name: "Đăng Khoa",
+      drink: "Ép Mix Cam Cà Rốt",
+      rating: 4,
+      text: "Hương vị thơm ngon tự nhiên từ hoa quả chín mọng. Mình rất thích vị chua nhẹ xen lẫn bùi bùi của cà rốt. Sẽ ủng hộ Nhiệt Đới Xanh dài dài.",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"
+    },
+    {
+      id: 3,
+      name: "Minh Thư",
+      drink: "Nước Ép Thơm",
+      rating: 5,
+      text: "Trái cây siêu tươi, ly nước ép đầy đặn uống đã ghê luôn. Các bạn phục vụ rất nhiệt tình, chu đáo. Cực kỳ recommend vị dứa!",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=120"
+    }
+  ];
+
+  let testimonialDeleteTargetId = null;
+
+  function renderTestimonials() {
+    const grid = document.getElementById("t-testimonialsGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    if (testimonials.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-s);">
+          <span style="font-size: 3rem; opacity: 0.2;">💬</span>
+          <p style="margin-top: 16px;">Chưa có phản hồi nào được ghi nhận. Hãy thêm phản hồi mới!</p>
+        </div>
+      `;
+      return;
+    }
+
+    testimonials.forEach(item => {
+      let starsHtml = "";
+      for (let i = 1; i <= 5; i++) {
+        if (i <= item.rating) {
+          starsHtml += '<i class="fa-solid fa-star"></i> ';
+        } else {
+          starsHtml += '<i class="fa-regular fa-star"></i> ';
+        }
+      }
+
+      const avatarImg = item.avatar && item.avatar.trim() !== "" 
+        ? item.avatar 
+        : "https://api.dicebear.com/7.x/adventurer/svg?seed=" + encodeURIComponent(item.name);
+
+      const card = document.createElement("div");
+      card.className = "testimonial-feedback-card";
+      card.setAttribute("data-id", item.id);
+
+      card.innerHTML = `
+        <div>
+          <div class="feedback-header">
+            <img src="${avatarImg}" alt="${item.name}" class="feedback-avatar" onerror="this.src='https://api.dicebear.com/7.x/adventurer/svg?seed=fallback'">
+            <div class="feedback-info">
+              <h3 class="feedback-name" title="${item.name}">${item.name}</h3>
+              <span class="feedback-drink">${item.drink}</span>
+            </div>
+          </div>
+          <div class="feedback-stars">${starsHtml}</div>
+          <p class="feedback-body">"${item.text}"</p>
+        </div>
+        <div class="feedback-actions">
+          <button type="button" class="btn-action btn-action-edit" onclick="editTestimonial(${item.id})" title="Chỉnh sửa">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button type="button" class="btn-action btn-action-delete" onclick="confirmTestimonialDelete(${item.id})" title="Xóa">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function handleTestimonialSubmit(event) {
+    event.preventDefault();
+
+    const editIdVal = document.getElementById("t-editId").value;
+    const name = document.getElementById("t-customerName").value.trim();
+    const drink = document.getElementById("t-drinkName").value.trim();
+    const rating = parseInt(document.getElementById("t-starRating").value);
+    const avatar = document.getElementById("t-avatarUrl").value.trim();
+    const text = document.getElementById("t-feedbackText").value.trim();
+
+    if (!name || !drink || !text) {
+      showToast("Lỗi", "Vui lòng điền đầy đủ thông tin bắt buộc!", "❌");
+      return;
+    }
+
+    if (editIdVal) {
+      const id = parseInt(editIdVal);
+      const index = testimonials.findIndex(item => item.id === id);
+      if (index !== -1) {
+        testimonials[index] = { id, name, drink, rating, text, avatar };
+        showToast("Thành công", "Đã cập nhật phản hồi!", "📝");
+      }
+      cancelTestimonialEdit();
+    } else {
+      const newId = testimonials.length > 0 ? Math.max(...testimonials.map(f => f.id)) + 1 : 1;
+      testimonials.push({ id: newId, name, drink, rating, text, avatar });
+      showToast("Thành công", "Đã thêm phản hồi mới!", "💬");
+      clearTestimonialForm();
+    }
+
+    renderTestimonials();
+  }
+
+  function editTestimonial(id) {
+    const item = testimonials.find(f => f.id === id);
+    if (!item) return;
+
+    document.querySelectorAll(".testimonial-feedback-card").forEach(el => el.classList.remove("being-edited"));
+    const targetCard = document.querySelector(`.testimonial-feedback-card[data-id="${id}"]`);
+    if (targetCard) targetCard.classList.add("being-edited");
+
+    document.getElementById("t-editId").value = item.id;
+    document.getElementById("t-customerName").value = item.name;
+    document.getElementById("t-drinkName").value = item.drink;
+    document.getElementById("t-starRating").value = item.rating;
+    document.getElementById("t-avatarUrl").value = item.avatar || "";
+    document.getElementById("t-feedbackText").value = item.text;
+
+    updateTestimonialCharCount();
+
+    document.getElementById("feedbackFormTitle").innerHTML = '📝 Cập Nhật Phản Hồi';
+    const submitBtn = document.querySelector('#testimonialCrudForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.classList.add("btn-submit-edit-mode");
+      submitBtn.querySelector('span').textContent = "Lưu Cập Nhật";
+    }
+    document.getElementById("t-btnCancel").style.display = "inline-flex";
+
+    // Scroll up smoothly inside tab content
+    const tabContainer = document.getElementById("tab-testimonials");
+    if (tabContainer) tabContainer.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function cancelTestimonialEdit() {
+    clearTestimonialForm();
+    document.querySelectorAll(".testimonial-feedback-card").forEach(el => el.classList.remove("being-edited"));
+    document.getElementById("feedbackFormTitle").innerHTML = '💬 Thêm Phản Hồi Mới';
+    const submitBtn = document.querySelector('#testimonialCrudForm button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.classList.remove("btn-submit-edit-mode");
+      submitBtn.querySelector('span').textContent = "Thêm Phản Hồi";
+    }
+    document.getElementById("t-btnCancel").style.display = "none";
+  }
+
+  function confirmTestimonialDelete(id) {
+    testimonialDeleteTargetId = id;
+    document.getElementById("t-confirmModalOverlay").classList.add("active");
+  }
+
+  function closeTestimonialConfirmModal() {
+    testimonialDeleteTargetId = null;
+    document.getElementById("t-confirmModalOverlay").classList.remove("active");
+  }
+
+  function executeTestimonialDelete() {
+    if (testimonialDeleteTargetId !== null) {
+      const currentEditId = document.getElementById("t-editId").value;
+      if (currentEditId && parseInt(currentEditId) === testimonialDeleteTargetId) {
+        cancelTestimonialEdit();
+      }
+
+      testimonials = testimonials.filter(item => item.id !== testimonialDeleteTargetId);
+      renderTestimonials();
+      showToast("Đã xóa", "Đã xóa phản hồi!", "🗑️");
+    }
+    closeTestimonialConfirmModal();
+  }
+
+  function clearTestimonialForm() {
+    document.getElementById("testimonialCrudForm").reset();
+    document.getElementById("t-editId").value = "";
+    document.getElementById("t-charCount").textContent = "0";
+  }
+
+  window.updateTestimonialCharCount = function() {
+    const text = document.getElementById("t-feedbackText").value;
+    document.getElementById("t-charCount").textContent = text.length;
+  }
+
+  // Expose methods to global window for inline onclick attributes
+  window.editTestimonial = editTestimonial;
+  window.confirmTestimonialDelete = confirmTestimonialDelete;
+  window.closeTestimonialConfirmModal = closeTestimonialConfirmModal;
+  window.executeTestimonialDelete = executeTestimonialDelete;
+  window.cancelTestimonialEdit = cancelTestimonialEdit;
+  window.handleTestimonialSubmit = handleTestimonialSubmit;
+
+  // Initialize testimonials rendering
+  renderTestimonials();
 })();
 </script>
+
+  <!-- Modal Confirmation Dialog for Testimonials -->
+  <div class="modal-overlay" id="t-confirmModalOverlay" style="position: fixed; inset: 0; background: rgba(34, 47, 62, 0.4); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.3s ease;">
+    <div class="confirm-modal" style="background: #ffffff; width: 100%; max-width: 400px; padding: 30px; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); text-align: center;">
+      <div style="font-size: 3rem; color: var(--red); margin-bottom: 16px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text); margin-bottom: 10px;">Xác Nhận Xóa</h3>
+      <p style="font-size: 0.95rem; color: var(--text-s); margin-bottom: 24px;">Bạn có chắc chắn muốn xóa phản hồi này?</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-submit-3d" style="width: auto; padding: 10px 24px; background: var(--red); box-shadow: none;" onclick="executeTestimonialDelete()">Đồng Ý</button>
+        <button class="btn-submit-3d" style="width: auto; padding: 10px 24px; background: #dfe4ea; color: var(--text); box-shadow: none;" onclick="closeTestimonialConfirmModal()">Hủy Bỏ</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
 </body>

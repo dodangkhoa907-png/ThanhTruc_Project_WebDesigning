@@ -349,31 +349,31 @@
 
             <div class="team-grid">
                 <div class="team-card reveal reveal-delay-1">
-                    <img src="https://randomuser.me/api/portraits/women/12.jpg" alt="Oanh" class="team-avatar avatar-oanh">
+                    <img src="${pageContext.request.contextPath}/images/oanh.png" alt="Oanh" class="team-avatar avatar-oanh">
                     <div class="team-name">Oanh</div>
                     <div class="team-role">Founder / Quản lý</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-2">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Tiên" class="team-avatar avatar-tien">
+                    <img src="${pageContext.request.contextPath}/images/tien.png" alt="Tiên" class="team-avatar avatar-tien">
                     <div class="team-name">Tiên</div>
                     <div class="team-role">Marketing</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-3">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Kỳ" class="team-avatar avatar-ky">
+                    <img src="${pageContext.request.contextPath}/images/ky.png" alt="Kỳ" class="team-avatar avatar-ky">
                     <div class="team-name">Kỳ</div>
                     <div class="team-role">Vận hành</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-4">
-                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Thư" class="team-avatar avatar-thu">
+                    <img src="${pageContext.request.contextPath}/images/thu.png" alt="Thư" class="team-avatar avatar-thu">
                     <div class="team-name">Thư</div>
                     <div class="team-role">Chăm sóc khách hàng</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-5">
-                    <img src="https://randomuser.me/api/portraits/women/90.jpg" alt="Trúc" class="team-avatar avatar-truc">
+                    <img src="${pageContext.request.contextPath}/images/truc.png" alt="Trúc" class="team-avatar avatar-truc">
                     <div class="team-name">Trúc</div>
                     <div class="team-role">Tài chính</div>
                 </div>
