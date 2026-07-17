@@ -17,8 +17,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=2">
 </head>
 
 <body class="shop-page-body">
@@ -76,6 +76,7 @@
                                 <input type="checkbox" class="cart-checkbox" id="selectAllCheckbox">
                                 Chọn tất cả
                             </label>
+                            <span class="cart-select-all-count" id="selectAllCount">Đã chọn 0/${fn:length(cartItems)} sản phẩm</span>
                             <button type="button" class="cart-remove-selected-btn" id="removeSelectedBtn" disabled>
                                 <i class="fa-solid fa-trash-can"></i> Xóa đã chọn
                             </button>
@@ -98,7 +99,7 @@
                                             <c:when test="${not empty item.imageUrl}">
                                                 <img src="${pageContext.request.contextPath}${item.imageUrl}" alt="${fn:escapeXml(item.productName)}">
                                             </c:when>
-                                            <c:otherwise><span class="ph-icon">🌿</span></c:otherwise>
+                                            <c:otherwise><i class="fa-solid fa-leaf ph-icon"></i></c:otherwise>
                                         </c:choose>
                                     </div>
 
@@ -108,7 +109,7 @@
                                             <c:if test="${not empty item.categoryName}">
                                                 <span><c:out value="${item.categoryName}"/></span>
                                             </c:if>
-                                            <span class="dot"><c:out value="${item.sizeLabel}"/></span>
+                                            <span class="${not empty item.categoryName ? 'dot' : ''}"><c:out value="${item.sizeLabel}"/></span>
                                         </div>
                                         <div class="cart-item-unit-price">${item.formattedUnitPrice}đ / sản phẩm</div>
                                         <c:if test="${item.unavailable}">
@@ -160,6 +161,9 @@
                         <button type="button" class="btn-shop btn-shop-primary" id="checkoutBtn" disabled>
                             <i class="fa-solid fa-lock"></i> Tiến hành thanh toán
                         </button>
+                        <p class="cart-summary-hint" id="checkoutHint">
+                            Vui lòng chọn ít nhất 1 sản phẩm.
+                        </p>
                         <p class="cart-summary-note">
                             Giá cuối cùng và phí giao hàng sẽ được xác nhận lại ở bước thanh toán.
                         </p>
@@ -192,7 +196,7 @@
     </section>
 
     <div class="toast-stack" id="toastStack" aria-live="polite"></div>
-    <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+    <script src="${pageContext.request.contextPath}/js/cart.js?v=2"></script>
     <script>
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));

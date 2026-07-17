@@ -150,9 +150,11 @@
         if (!list) return; // không phải trang /cart
 
         const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        const selectAllCount = document.getElementById('selectAllCount');
         const removeSelectedBtn = document.getElementById('removeSelectedBtn');
         const checkoutBtn = document.getElementById('checkoutBtn');
         const checkoutBtnMobile = document.getElementById('checkoutBtnMobile');
+        const checkoutHint = document.getElementById('checkoutHint');
 
         function getCards() {
             return Array.from(list.querySelectorAll('.cart-item-card'));
@@ -189,11 +191,13 @@
             if (summaryTotal) summaryTotal.textContent = formatVnd(total);
             if (mobileSelectedCount) mobileSelectedCount.textContent = selectedCount + ' sản phẩm';
             if (mobileTotal) mobileTotal.textContent = formatVnd(total);
+            if (selectAllCount) selectAllCount.textContent = 'Đã chọn ' + selectedCount + '/' + getCards().length + ' sản phẩm';
 
             const hasSelection = selectedCount > 0;
             if (checkoutBtn) checkoutBtn.disabled = !hasSelection;
             if (checkoutBtnMobile) checkoutBtnMobile.disabled = !hasSelection;
             if (removeSelectedBtn) removeSelectedBtn.disabled = !hasSelection;
+            if (checkoutHint) checkoutHint.hidden = hasSelection;
 
             const available = getAvailableCheckboxes();
             if (selectAllCheckbox) {
