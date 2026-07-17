@@ -4,6 +4,7 @@ import com.nhietdoixanh.config.Database;
 import com.nhietdoixanh.dao.OrderDAO;
 import com.nhietdoixanh.model.CartItem;
 import com.nhietdoixanh.model.Order;
+import com.nhietdoixanh.model.OrderAdminFilter;
 import com.nhietdoixanh.model.OrderDetail;
 
 import java.math.BigDecimal;
@@ -17,6 +18,12 @@ public class OrderDaoImpl implements OrderDAO {
     private static final String LIST_SELECT =
             "SELECT o.*, s.FullName AS HandledByName " +
             "FROM Orders o LEFT JOIN Staffs s ON o.HandledBy = s.StaffID ";
+
+    private static final String ADMIN_SEARCH_SELECT =
+            "SELECT o.*, s.FullName AS HandledByName, u.Email AS CustomerEmail " +
+            "FROM Orders o " +
+            "LEFT JOIN Staffs s ON o.HandledBy = s.StaffID " +
+            "LEFT JOIN Users u ON o.UserID = u.UserID ";
 
     @Override
     public int placeOrder(Order order, List<CartItem> cartItems) throws Exception {
@@ -34,8 +41,9 @@ public class OrderDaoImpl implements OrderDAO {
             conn.setAutoCommit(false);
 
             String sqlOrder = "INSERT INTO Orders (UserID, CustomerName, PhoneNumber, ShippingAddress, OrderNote, " +
-                    "TotalAmount, ShippingFee, FinalAmount, PaymentMethod, OrderStatus, CouponCode) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?)";
+                    "TotalAmount, ShippingFee, FinalAmount, PaymentMethod, OrderStatus, CouponCode, " +
+                    "RecipientName, RecipientPhone, ShippingLatitude, ShippingLongitude, StatusUpdatedAt) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING', ?, ?, ?, ?, ?, SYSDATETIME())";
             try (PreparedStatement psOrder = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS)) {
                 if (order.getUserId() != null) psOrder.setInt(1, order.getUserId());
                 else psOrder.setNull(1, Types.INTEGER);
@@ -48,6 +56,10 @@ public class OrderDaoImpl implements OrderDAO {
                 psOrder.setBigDecimal(8, order.getFinalAmount());
                 psOrder.setString(9, order.getPaymentMethod());
                 psOrder.setString(10, order.getCouponCode());
+                psOrder.setNString(11, order.getRecipientName());
+                psOrder.setString(12, order.getRecipientPhone());
+                psOrder.setBigDecimal(13, order.getShippingLatitude());
+                psOrder.setBigDecimal(14, order.getShippingLongitude());
                 psOrder.executeUpdate();
                 try (ResultSet rsKeys = psOrder.getGeneratedKeys()) {
                     if (rsKeys.next()) orderId = rsKeys.getInt(1);
@@ -513,5 +525,173 @@ public class OrderDaoImpl implements OrderDAO {
                 return ps.executeUpdate() > 0;
             }
         }
+    }
+
+    private static final String PRODUCT_SUMMARY_SUBQUERY =
+            "(SELECT STRING_AGG(p.ProductName + ' (' + v.Size + ')', ', ') " +
+            "FROM OrderDetails od JOIN ProductVariants v ON od.VariantID = v.VariantID " +
+            "JOIN Products p ON v.ProductID = p.ProductID WHERE od.OrderID = o.OrderID) AS ProductSummary";
+
+    @Override
+    public List<Order> findOrdersByUserIdFiltered(int userId, String orderStatus, Integer searchOrderId, int offset, int limit) {
+        List<Order> list = new ArrayList<>();
+        boolean hasStatus = orderStatus != null && !orderStatus.isBlank();
+        StringBuilder sql = new StringBuilder("SELECT o.*, s.FullName AS HandledByName, ")
+                .append(PRODUCT_SUMMARY_SUBQUERY)
+                .append(" FROM Orders o LEFT JOIN Staffs s ON o.HandledBy = s.StaffID WHERE o.UserID = ? ");
+        if (hasStatus) sql.append("AND o.OrderStatus = ? ");
+        if (searchOrderId != null) sql.append("AND o.OrderID = ? ");
+        sql.append("ORDER BY o.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            int idx = 1;
+            ps.setInt(idx++, userId);
+            if (hasStatus) ps.setString(idx++, orderStatus);
+            if (searchOrderId != null) ps.setInt(idx++, searchOrderId);
+            ps.setInt(idx++, offset);
+            ps.setInt(idx, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order o = mapRow(rs);
+                    o.setProductSummary(rs.getNString("ProductSummary"));
+                    list.add(o);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public int countOrdersByUserIdFiltered(int userId, String orderStatus, Integer searchOrderId) {
+        boolean hasStatus = orderStatus != null && !orderStatus.isBlank();
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM Orders o WHERE o.UserID = ? ");
+        if (hasStatus) sql.append("AND o.OrderStatus = ? ");
+        if (searchOrderId != null) sql.append("AND o.OrderID = ? ");
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            int idx = 1;
+            ps.setInt(idx++, userId);
+            if (hasStatus) ps.setString(idx++, orderStatus);
+            if (searchOrderId != null) ps.setInt(idx, searchOrderId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public List<Order> adminSearchOrders(OrderAdminFilter filter, int offset, int limit) {
+        List<Order> list = new ArrayList<>();
+        FilterSql f = buildAdminFilterSql(filter);
+        String sql = ADMIN_SEARCH_SELECT + f.whereClause + "ORDER BY o.CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            int idx = bindFilterParams(ps, f.params);
+            ps.setInt(idx++, offset);
+            ps.setInt(idx, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Order o = mapRow(rs);
+                    o.setUserEmail(rs.getString("CustomerEmail"));
+                    list.add(o);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public int countAdminSearchOrders(OrderAdminFilter filter) {
+        FilterSql f = buildAdminFilterSql(filter);
+        String sql = "SELECT COUNT(*) FROM Orders o LEFT JOIN Users u ON o.UserID = u.UserID " + f.whereClause;
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            bindFilterParams(ps, f.params);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    @Override
+    public int adminCancelOrder(int orderId, String reason) throws Exception {
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "UPDATE Orders SET OrderStatus='CANCELLED', CancelReason=?, " +
+                     "CancelledAt=DATEADD(HOUR,7,GETUTCDATE()), StatusUpdatedAt=SYSDATETIME() " +
+                     "WHERE OrderID=? AND OrderStatus IN ('PENDING','CONFIRMED')")) {
+            ps.setNString(1, reason);
+            ps.setInt(2, orderId);
+            return ps.executeUpdate();
+        }
+    }
+
+    /** Kết quả build WHERE cho tìm kiếm admin: mệnh đề SQL (rỗng nếu không filter) + tham số theo đúng thứ tự. */
+    private static final class FilterSql {
+        final String whereClause;
+        final List<Object> params;
+        FilterSql(String whereClause, List<Object> params) {
+            this.whereClause = whereClause;
+            this.params = params;
+        }
+    }
+
+    private FilterSql buildAdminFilterSql(OrderAdminFilter filter) {
+        List<String> clauses = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        if (filter != null) {
+            String keyword = filter.getKeyword();
+            if (keyword != null && !keyword.isBlank()) {
+                clauses.add("(CAST(o.OrderID AS NVARCHAR(20)) LIKE ? OR o.RecipientName LIKE ? OR o.CustomerName LIKE ? " +
+                        "OR o.RecipientPhone LIKE ? OR o.PhoneNumber LIKE ? OR u.Email LIKE ?)");
+                String kw = "%" + keyword.trim() + "%";
+                for (int i = 0; i < 6; i++) params.add(kw);
+            }
+            if (filter.getOrderStatus() != null && !filter.getOrderStatus().isBlank()) {
+                clauses.add("o.OrderStatus = ?");
+                params.add(com.nhietdoixanh.util.OrderStatuses.normalize(filter.getOrderStatus()));
+            }
+            if (filter.getPaymentStatus() != null && !filter.getPaymentStatus().isBlank()) {
+                clauses.add("o.PaymentStatus = ?");
+                params.add(filter.getPaymentStatus());
+            }
+            if (filter.getPaymentMethod() != null && !filter.getPaymentMethod().isBlank()) {
+                clauses.add("o.PaymentMethod = ?");
+                params.add(filter.getPaymentMethod());
+            }
+            if (filter.getFromDate() != null) {
+                clauses.add("o.CreatedAt >= ?");
+                params.add(Timestamp.valueOf(filter.getFromDate().atStartOfDay()));
+            }
+            if (filter.getToDate() != null) {
+                clauses.add("o.CreatedAt < ?");
+                params.add(Timestamp.valueOf(filter.getToDate().plusDays(1).atStartOfDay()));
+            }
+        }
+
+        String where = clauses.isEmpty() ? "" : "WHERE " + String.join(" AND ", clauses) + " ";
+        return new FilterSql(where, params);
+    }
+
+    private int bindFilterParams(PreparedStatement ps, List<Object> params) throws SQLException {
+        int idx = 1;
+        for (Object p : params) {
+            if (p instanceof Timestamp t) ps.setTimestamp(idx++, t);
+            else ps.setNString(idx++, String.valueOf(p));
+        }
+        return idx;
     }
 }

@@ -1,5 +1,7 @@
 package com.nhietdoixanh.controller;
 
+import com.nhietdoixanh.model.CheckoutSelection;
+import com.nhietdoixanh.model.User;
 import com.nhietdoixanh.util.AuditLogger;
 
 import jakarta.servlet.ServletException;
@@ -7,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -36,6 +39,19 @@ public class OrderServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
+
+        // Nếu user đã đăng nhập và đang có một checkoutSelection hợp lệ (từ /cart), đây rõ ràng
+        // là ý định thanh toán giỏ hàng thật — chuyển hướng sang /checkout thay vì xử lý như
+        // form liên hệ nhanh của trang chủ (form này KHÔNG có sản phẩm/giá thật).
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        if (user != null) {
+            CheckoutSelection selection = (CheckoutSelection) session.getAttribute("checkoutSelection");
+            if (selection != null && selection.isUsableBy(user.getUserId())) {
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+        }
 
         // Lấy dữ liệu từ form
         String customerName = request.getParameter("customerName");
@@ -87,8 +103,8 @@ public class OrderServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Không cho phép GET → redirect về trang chủ
-        response.sendRedirect(request.getContextPath() + "/");
+        // Không cho phép GET — route /order chỉ nhận POST từ form liên hệ nhanh trang chủ.
+        response.sendRedirect(request.getContextPath() + "/san-pham");
     }
 
     /**

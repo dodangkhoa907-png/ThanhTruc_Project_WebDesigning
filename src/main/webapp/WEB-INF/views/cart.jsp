@@ -17,8 +17,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=2">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=2">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=3">
 </head>
 
 <body class="shop-page-body">
@@ -29,6 +29,15 @@
 
     <section class="section" style="padding-top:130px;">
         <div class="container">
+
+            <c:set var="flashError" value="${sessionScope.cartFlashError}" />
+            <c:remove var="cartFlashError" scope="session" />
+            <c:if test="${not empty flashError}">
+                <div class="flash-error-banner">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <c:out value="${flashError}"/>
+                </div>
+            </c:if>
 
             <c:choose>
             <c:when test="${not empty cartItems}">

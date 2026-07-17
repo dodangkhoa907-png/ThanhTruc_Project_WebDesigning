@@ -1,7 +1,8 @@
+<%@ page pageEncoding="UTF-8" %>
 <%-- Shared customer navbar. Included via <%@ include %> so it shares the
      caller's pageContext/taglibs. Requires request attribute "currentPage"
      to be set by the caller's servlet for active-state highlighting
-     ("menu" | "products" | "cart"); Home sets nothing and highlights nothing. --%>
+     ("menu" | "products" | "cart" | "account"); Home sets nothing and highlights nothing. --%>
 <nav class="navbar" id="navbar">
     <div class="container">
         <a href="${pageContext.request.contextPath}/" class="navbar-brand">
@@ -31,7 +32,7 @@
             </a>
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
-                    <a href="${pageContext.request.contextPath}/">
+                    <a href="${pageContext.request.contextPath}/account" class="${currentPage == 'account' ? 'active' : ''}">
                         <c:out value="${sessionScope.user.fullName}"/>
                     </a>
                 </c:when>

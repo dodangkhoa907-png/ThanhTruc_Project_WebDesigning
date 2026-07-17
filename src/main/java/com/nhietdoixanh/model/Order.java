@@ -1,5 +1,8 @@
 package com.nhietdoixanh.model;
 
+import com.nhietdoixanh.util.OrderStatuses;
+import com.nhietdoixanh.util.PaymentStatuses;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +45,8 @@ public class Order {
 
     // Bổ sung cho UI
     private String handledByName;
+    private String userEmail;
+    private String productSummary;
     private List<OrderDetail> items;
 
     public Order() {}
@@ -96,6 +101,17 @@ public class Order {
 
     public String getHandledByName() { return handledByName; }
     public void setHandledByName(String handledByName) { this.handledByName = handledByName; }
+
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getProductSummary() { return productSummary; }
+    public void setProductSummary(String productSummary) { this.productSummary = productSummary; }
+
+    /** Nhãn tiếng Việt tính sẵn — dùng trực tiếp trong JSP (${order.orderStatusLabel}) để không hiện mã trạng thái tiếng Anh trần. */
+    public String getOrderStatusLabel() { return OrderStatuses.getLabel(orderStatus); }
+
+    public String getPaymentStatusLabel() { return PaymentStatuses.getLabel(paymentStatus); }
 
     public List<OrderDetail> getItems() { return items; }
     public void setItems(List<OrderDetail> items) { this.items = items; }

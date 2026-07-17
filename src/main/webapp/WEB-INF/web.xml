@@ -26,6 +26,18 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
+    <!-- ===== Default JSP source encoding (Jasper reads statically-included
+         fragments as their own translation unit for encoding purposes; files
+         without their own page directive would otherwise fall back to a
+         non-UTF-8 platform default, corrupting Vietnamese text). ===== -->
+    <jsp-config>
+        <jsp-property-group>
+            <url-pattern>*.jsp</url-pattern>
+            <url-pattern>*.jspf</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>
+    </jsp-config>
+
     <!-- ===== Error Pages ===== -->
     <error-page>
         <error-code>404</error-code>
