@@ -6,9 +6,17 @@ import com.nhietdoixanh.model.CartItem;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class CartItemDaoImpl implements CartItemDao {
+
+    private static final String SELECT_WITH_JOIN =
+            "SELECT c.*, p.ProductName, v.Size, v.Price, v.IsActive AS VariantActive, p.ImageURL " +
+            "FROM CartItems c " +
+            "JOIN ProductVariants v ON c.VariantID = v.VariantID " +
+            "JOIN Products p ON v.ProductID = p.ProductID ";
 
     @Override
     public int insertOrUpdate(int userId, int variantId, int quantity) {
@@ -152,5 +160,80 @@ public class CartItemDaoImpl implements CartItemDao {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Optional<CartItem> findByIdAndUserId(int cartItemId, int userId) {
+        String sql = SELECT_WITH_JOIN + "WHERE c.CartItemID = ? AND c.UserID = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, cartItemId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<CartItem> findSelectedByIdsAndUserId(List<Integer> cartItemIds, int userId) {
+        List<CartItem> list = new ArrayList<>();
+        if (cartItemIds == null || cartItemIds.isEmpty()) return list;
+
+        String placeholders = String.join(",", Collections.nCopies(cartItemIds.size(), "?"));
+        String sql = SELECT_WITH_JOIN + "WHERE c.UserID = ? AND c.CartItemID IN (" + placeholders + ")";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setInt(idx++, userId);
+            for (Integer id : cartItemIds) {
+                ps.setInt(idx++, id);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public void deleteSelectedByUserId(List<Integer> cartItemIds, int userId) {
+        if (cartItemIds == null || cartItemIds.isEmpty()) return;
+
+        String placeholders = String.join(",", Collections.nCopies(cartItemIds.size(), "?"));
+        String sql = "DELETE FROM CartItems WHERE UserID = ? AND CartItemID IN (" + placeholders + ")";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setInt(idx++, userId);
+            for (Integer id : cartItemIds) {
+                ps.setInt(idx++, id);
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private CartItem mapRow(ResultSet rs) throws SQLException {
+        CartItem item = new CartItem();
+        item.setCartItemId(rs.getInt("CartItemID"));
+        item.setUserId(rs.getInt("UserID"));
+        item.setVariantId(rs.getInt("VariantID"));
+        item.setQuantity(rs.getInt("Quantity"));
+        item.setCreatedAt(rs.getTimestamp("CreatedAt"));
+        item.setProductName(rs.getNString("ProductName"));
+        item.setSize(rs.getString("Size"));
+        item.setPrice(rs.getBigDecimal("Price"));
+        item.setImageUrl(rs.getString("ImageURL"));
+        item.setVariantActive(rs.getBoolean("VariantActive"));
+        return item;
     }
 }

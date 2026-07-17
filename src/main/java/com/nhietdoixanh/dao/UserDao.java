@@ -12,4 +12,17 @@ public interface UserDao {
     boolean updateProfile(int userId, String fullName, String phone);
     boolean updateProfileImage(int userId, String profileImage);
     boolean updateLoginInfo(int userId, String ip);
+
+    /** true nếu email đã tồn tại ở MỘT user KHÁC userId (dùng khi đổi email hồ sơ). */
+    boolean emailExistsForOtherUser(String email, int userId);
+
+    /** Alias rõ nghĩa hơn cho updateProfileImage. */
+    default boolean updateAvatar(int userId, String profileImage) {
+        return updateProfileImage(userId, profileImage);
+    }
+
+    /** Alias rõ nghĩa hơn cho updatePassword. */
+    default boolean updatePasswordHash(int userId, String passwordHash) {
+        return updatePassword(userId, passwordHash);
+    }
 }

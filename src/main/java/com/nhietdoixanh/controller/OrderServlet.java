@@ -1,8 +1,6 @@
 package com.nhietdoixanh.controller;
 
-import com.nhietdoixanh.dao.OrderDAO;
-import com.nhietdoixanh.dao.impl.OrderDaoImpl;
-import com.nhietdoixanh.model.Order;
+import com.nhietdoixanh.util.AuditLogger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,20 +9,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Collections;
 
 /**
- * Servlet xử lý đơn đặt hàng KHÁCH VÃNG LAI, KHÔNG giỏ hàng (POST).
- * TẠM THỜI — sẽ thay bằng CheckoutController (giỏ hàng thật) ở Phase giỏ hàng/checkout.
+ * Servlet xử lý form "Đặt hàng nhanh" trên trang chủ (POST) — CHỈ thu thập
+ * thông tin liên hệ (tên/SĐT/địa chỉ), KHÔNG có sản phẩm/số lượng/giá thật.
+ *
+ * ĐÃ VÔ HIỆU HÓA việc tạo Order 0 đồng / không có OrderDetails: trước đây route
+ * này gọi placeOrder() với TotalAmount=FinalAmount=0 và danh sách sản phẩm rỗng,
+ * tạo ra các đơn hàng "ma" trong bảng Orders. OrderDaoImpl.placeOrder() giờ từ
+ * chối đơn không có item / có FinalAmount <= 0 (xem OrderDaoImpl.java).
+ *
+ * Hành vi mới: lưu yêu cầu liên hệ này lại (audit log) và chuyển hướng người
+ * dùng sang trang cảm ơn với thông báo sẽ được liên hệ lại — KHÔNG tạo Order
+ * giả trong DB. Route /cart, /checkout thật sẽ thay thế hoàn toàn form này ở
+ * prompt sau (giỏ hàng + chọn sản phẩm + giá thật).
+ *
  * - Validation: Kiểm tra dữ liệu đầu vào
  * - Chống XSS: Escape HTML entities khi trả lỗi về JSP
- * - Thành công: Redirect về trang cảm ơn
  */
 @WebServlet(name = "OrderServlet", urlPatterns = "/order")
 public class OrderServlet extends HttpServlet {
-
-    private final OrderDAO orderDAO = new OrderDaoImpl();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -66,29 +70,18 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        // ===== XỬ LÝ ĐẶT HÀNG (khách vãng lai, không giỏ hàng — tạm thời) =====
-        Order order = new Order();
-        order.setCustomerName(customerName.trim());
-        order.setPhoneNumber(phoneNumber.trim());
-        order.setShippingAddress(shippingAddress.trim());
-        order.setOrderNote(orderNote != null ? orderNote.trim() : "");
-        order.setTotalAmount(BigDecimal.ZERO);
-        order.setShippingFee(BigDecimal.ZERO);
-        order.setFinalAmount(BigDecimal.ZERO);
-        order.setPaymentMethod("COD");
+        // ===== GHI NHẬN YÊU CẦU LIÊN HỆ (KHÔNG tạo Order 0 đồng trong DB) =====
+        // Form này chưa có sản phẩm/số lượng/giá thật nên KHÔNG đủ dữ liệu để
+        // tạo một Order hợp lệ. Route /cart + /checkout thật (giỏ hàng, giá lấy
+        // từ ProductVariants) sẽ thay thế hoàn toàn form này.
+        String detail = "Tên: " + customerName.trim()
+                + " | SĐT: " + phoneNumber.trim()
+                + " | Địa chỉ: " + shippingAddress.trim()
+                + (orderNote != null && !orderNote.isBlank() ? " | Ghi chú: " + orderNote.trim() : "");
+        AuditLogger.log(request, null, "HOMEPAGE_ORDER_FORM_SUBMIT", phoneNumber.trim(), detail);
 
-        try {
-            int orderId = orderDAO.placeOrder(order, Collections.emptyList());
-            if (orderId > 0) {
-                // Redirect (PRG Pattern) để tránh duplicate submit
-                response.sendRedirect(request.getContextPath() + "/thankyou");
-                return;
-            }
-        } catch (Exception e) {
-            System.err.println("[OrderServlet] Lỗi đặt hàng: " + e.getMessage());
-        }
-        request.setAttribute("errorMessage", "Hệ thống đang bận, vui lòng thử lại sau.");
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        // Redirect (PRG Pattern) để tránh duplicate submit
+        response.sendRedirect(request.getContextPath() + "/thankyou");
     }
 
     @Override

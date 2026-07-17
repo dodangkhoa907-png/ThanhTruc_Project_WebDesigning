@@ -1,5 +1,6 @@
 package com.nhietdoixanh.model;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class UserAddress {
@@ -11,6 +12,15 @@ public class UserAddress {
     private String street;
     private boolean isDefault;
     private Date createdAt;
+
+    // Bổ sung — địa chỉ chi tiết + tọa độ giao hàng (xem migration_ecommerce_account_v3.sql)
+    private String provinceCity;
+    private String district;
+    private String ward;
+    private String houseNumberStreet;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private Date updatedAt;
 
     public UserAddress() {}
 
@@ -37,4 +47,25 @@ public class UserAddress {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public String getProvinceCity() { return provinceCity; }
+    public void setProvinceCity(String provinceCity) { this.provinceCity = provinceCity; }
+
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
+
+    public String getWard() { return ward; }
+    public void setWard(String ward) { this.ward = ward; }
+
+    public String getHouseNumberStreet() { return houseNumberStreet; }
+    public void setHouseNumberStreet(String houseNumberStreet) { this.houseNumberStreet = houseNumberStreet; }
+
+    public BigDecimal getLatitude() { return latitude; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
+
+    public BigDecimal getLongitude() { return longitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
+
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }
