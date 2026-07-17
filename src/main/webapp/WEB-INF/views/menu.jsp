@@ -20,9 +20,9 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/menu.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/menu.css?v=${initParam.assetVer}">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
 </head>
 
 <body class="menu-page-body">
@@ -246,7 +246,7 @@
     </footer>
 
     <div class="toast-stack" id="toastStack" aria-live="polite"></div>
-    <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+    <script src="${pageContext.request.contextPath}/js/cart.js?v=${initParam.assetVer}"></script>
     <script>
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {

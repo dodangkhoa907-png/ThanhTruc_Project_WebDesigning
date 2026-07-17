@@ -2,6 +2,7 @@ package com.nhietdoixanh.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -13,6 +14,12 @@ public class SecurityHeadersFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         if (response instanceof HttpServletResponse res) {
+            // Trang tài khoản chứa dữ liệu nhạy cảm — không cho trình duyệt cache lại để
+            // nút Back không thể "xem lại" sau khi đã đăng xuất.
+            if (request instanceof HttpServletRequest hreq && hreq.getServletPath().startsWith("/account")) {
+                res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+                res.setHeader("Pragma", "no-cache");
+            }
             res.setHeader("X-Content-Type-Options", "nosniff");
             res.setHeader("X-Frame-Options", "SAMEORIGIN");
             res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");

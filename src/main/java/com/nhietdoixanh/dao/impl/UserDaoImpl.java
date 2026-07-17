@@ -103,13 +103,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean updateProfile(int userId, String fullName, String phone) {
-        String sql = "UPDATE Users SET FullName = ?, Phone = ?, UpdatedAt = SYSDATETIME() WHERE UserID = ?";
+    public boolean updateProfile(int userId, String fullName, String phone, String nickname, String email) {
+        String sql = "UPDATE Users SET FullName = ?, Phone = ?, Nickname = ?, Email = ?, UpdatedAt = SYSDATETIME() WHERE UserID = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, fullName);
             ps.setString(2, phone);
-            ps.setInt(3, userId);
+            ps.setNString(3, nickname);
+            ps.setString(4, email);
+            ps.setInt(5, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

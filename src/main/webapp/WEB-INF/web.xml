@@ -7,6 +7,20 @@
 
     <display-name>Nhiệt Đới Xanh - Landing Page</display-name>
 
+    <!-- ===== Asset cache-bust version — MỘT chỗ duy nhất =====
+         CSS/JS dùng chung (/css/*, /js/*) có Cache-Control: immutable, max-age=7 ngày
+         (xem CacheHeaderFilter). Query string ?v=N là cách duy nhất buộc trình duyệt tải
+         lại khi nội dung đổi. TRƯỚC ĐÂY mỗi JSP tự ghi số version riêng — 3 lần liên tiếp
+         (Prompt 6, 7) một trang bị sửa CSS dùng chung nhưng quên bump version, khiến trình
+         duyệt đã cache trang khác tiếp tục phục vụ CSS cũ trong 7 ngày. Từ nay: TẤT CẢ
+         JSP tham chiếu CSS/JS dùng chung qua ${initParam.assetVer} — sửa bất kỳ file CSS/JS
+         dùng chung nào (style.css, product.css, account.css, menu.css, cart.js, checkout.js)
+         → chỉ cần tăng số này lên 1. -->
+    <context-param>
+        <param-name>assetVer</param-name>
+        <param-value>4</param-value>
+    </context-param>
+
     <!-- ===== Welcome File ===== -->
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

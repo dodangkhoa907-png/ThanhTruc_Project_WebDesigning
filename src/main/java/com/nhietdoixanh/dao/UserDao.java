@@ -9,7 +9,8 @@ public interface UserDao {
     Optional<User> findById(int userId);
     boolean existsByEmail(String email);
     boolean updatePassword(int userId, String passwordHash);
-    boolean updateProfile(int userId, String fullName, String phone);
+    /** Cập nhật hồ sơ đầy đủ — dùng cho /account/profile. Không đổi Role/UserID/CreatedAt. */
+    boolean updateProfile(int userId, String fullName, String phone, String nickname, String email);
     boolean updateProfileImage(int userId, String profileImage);
     boolean updateLoginInfo(int userId, String ip);
 

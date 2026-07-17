@@ -15,7 +15,7 @@
             href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=EB+Garamond:wght@400;500;600&display=swap"
             rel="stylesheet">
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
     </head>
 
     <body>

@@ -32,9 +32,25 @@
             </a>
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
-                    <a href="${pageContext.request.contextPath}/account" class="${currentPage == 'account' ? 'active' : ''}">
-                        <c:out value="${sessionScope.user.fullName}"/>
-                    </a>
+                    <div class="nav-user-wrap" id="navUserWrap">
+                        <button type="button" class="nav-user-trigger ${currentPage == 'account' ? 'active' : ''}" id="navUserTrigger" aria-haspopup="true" aria-expanded="false">
+                            <c:out value="${sessionScope.user.fullName}"/>
+                            <i class="fa-solid fa-chevron-down nav-user-caret"></i>
+                        </button>
+                        <div class="nav-user-menu" id="navUserMenu" role="menu">
+                            <a href="${pageContext.request.contextPath}/account" role="menuitem"><i class="fa-solid fa-gauge"></i> Tổng quan tài khoản</a>
+                            <a href="${pageContext.request.contextPath}/account/orders" role="menuitem"><i class="fa-solid fa-box"></i> Đơn hàng của tôi</a>
+                            <a href="${pageContext.request.contextPath}/account/profile" role="menuitem"><i class="fa-solid fa-user"></i> Hồ sơ cá nhân</a>
+                            <a href="${pageContext.request.contextPath}/account/addresses" role="menuitem"><i class="fa-solid fa-location-dot"></i> Sổ địa chỉ</a>
+                            <a href="${pageContext.request.contextPath}/account/preferences" role="menuitem"><i class="fa-solid fa-heart"></i> Sở thích của tôi</a>
+                            <a href="${pageContext.request.contextPath}/account/security" role="menuitem"><i class="fa-solid fa-shield-halved"></i> Bảo mật</a>
+                            <div class="nav-user-menu-divider"></div>
+                            <form method="post" action="${pageContext.request.contextPath}/logout" class="nav-user-logout-form">
+                                <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
+                                <button type="submit" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+                            </form>
+                        </div>
+                    </div>
                 </c:when>
                 <c:otherwise>
                     <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
@@ -50,3 +66,32 @@
         </button>
     </div>
 </nav>
+
+<c:if test="${not empty sessionScope.user}">
+<script>
+    (function () {
+        var wrap = document.getElementById('navUserWrap');
+        var trigger = document.getElementById('navUserTrigger');
+        if (!wrap || !trigger) return;
+
+        function closeMenu() {
+            wrap.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        trigger.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = wrap.classList.toggle('open');
+            trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) closeMenu();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeMenu();
+        });
+    })();
+</script>
+</c:if>

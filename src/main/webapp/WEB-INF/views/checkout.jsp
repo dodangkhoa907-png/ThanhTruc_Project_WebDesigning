@@ -18,8 +18,8 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=3">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=3">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
 </head>
 
 <body class="shop-page-body">
@@ -230,7 +230,7 @@
         </div>
     </section>
 
-    <script src="${pageContext.request.contextPath}/js/checkout.js?v=1"></script>
+    <script src="${pageContext.request.contextPath}/js/checkout.js?v=${initParam.assetVer}"></script>
     <script>
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
