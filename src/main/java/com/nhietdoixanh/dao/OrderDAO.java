@@ -1,49 +1,48 @@
 package com.nhietdoixanh.dao;
 
+import com.nhietdoixanh.model.CartItem;
 import com.nhietdoixanh.model.Order;
-import com.nhietdoixanh.util.DBContext;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * Data Access Object cho bảng Orders.
- * Sử dụng PreparedStatement để chống SQL Injection.
+ * THAY THẾ interface OrderDAO cũ (đơn giản, không giỏ hàng/tài khoản).
+ * Đơn hàng giờ đi qua giỏ hàng + checkout (xem OrderDaoImpl, CheckoutController).
  */
-public class OrderDAO {
-
+public interface OrderDAO {
     /**
-     * Chèn đơn hàng mới vào bảng Orders.
-     *
-     * @param order đối tượng Order chứa thông tin đơn hàng
-     * @return true nếu insert thành công, false nếu thất bại
+     * Đặt hàng theo Transaction: lưu Order + OrderDetails, xóa CartItems (nếu có).
+     * @return OrderID nếu thành công
      */
-    public boolean insertOrder(Order order) {
-        String sql = "INSERT INTO Orders (CustomerName, PhoneNumber, ShippingAddress, OrderNote, OrderDate) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+    int placeOrder(Order order, List<CartItem> cartItems) throws Exception;
 
-        try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+    /** Admin: tất cả đơn hàng (kèm tên người xử lý). */
+    List<Order> findAllOrders();
 
-            ps.setString(1, order.getCustomerName());
-            ps.setString(2, order.getPhoneNumber());
-            ps.setString(3, order.getShippingAddress());
-            ps.setString(4, order.getOrderNote());
-            ps.setTimestamp(5, Timestamp.valueOf(
-                    order.getOrderDate() != null ? order.getOrderDate() : LocalDateTime.now()
-            ));
+    List<Order> findAllOrdersPaged(int offset, int limit);
 
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+    int countOrders();
 
-        } catch (SQLException e) {
-            System.err.println("Lỗi khi chèn đơn hàng: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
+    /** Admin: chi tiết đơn hàng (gồm items). */
+    Order findOrderById(int orderId);
+
+    /** Khách hàng: lịch sử đơn hàng của tài khoản mình. */
+    List<Order> findOrdersByUserId(int userId);
+
+    int updateOrderStatus(int orderId, String status);
+
+    /** Khách hàng: hủy ngay nếu đơn còn PENDING/CONFIRMED. */
+    int cancelOrder(int orderId, int userId, String reason) throws Exception;
+
+    /** Khách hàng chuyển khoản: gửi yêu cầu hủy → PENDING_CANCEL. */
+    int requestCancelOrder(int orderId, int userId, String reason) throws Exception;
+
+    /** Admin duyệt hủy → CANCELLED. */
+    int approveCancelOrder(int orderId) throws Exception;
+
+    /** Admin từ chối hủy → CONFIRMED. */
+    int rejectCancelOrder(int orderId) throws Exception;
+
+    /** Admin: phân công nhân viên xử lý đơn (Staffs.StaffID). */
+    boolean assignHandler(int orderId, int staffId);
 }
-

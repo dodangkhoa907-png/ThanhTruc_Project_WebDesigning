@@ -42,7 +42,7 @@
             <div class="nav-links" id="navLinks">
                 <a href="#story">Câu Chuyện</a>
                 <a href="#values">Giá Trị</a>
-                <a href="#menu">Menu</a>
+                <a href="${pageContext.request.contextPath}/thuc-don">Thực Đơn</a>
                 <a href="#team">Đội Ngũ</a>
                 <a href="#checkout" class="nav-cta">Đặt Hàng</a>
             </div>

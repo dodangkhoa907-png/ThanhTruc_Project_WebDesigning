@@ -2807,36 +2807,22 @@
   }
   
   initDonutTooltips();
-
   // ── Testimonials CRUD Logic ──
-  let testimonials = [
-    {
-      id: 1,
-      name: "Khánh Linh",
-      drink: "Ép Cam Dứa Hấu",
-      rating: 5,
-      text: "Nước ép ngon lắm nha mọi người ơi! Cam rất ngọt thanh, không bị gắt đường hóa học. Giao hàng hỏa tốc trong trường siêu nhanh luôn, 10 điểm!",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: 2,
-      name: "Đăng Khoa",
-      drink: "Ép Mix Cam Cà Rốt",
-      rating: 4,
-      text: "Hương vị thơm ngon tự nhiên từ hoa quả chín mọng. Mình rất thích vị chua nhẹ xen lẫn bùi bùi của cà rốt. Sẽ ủng hộ Nhiệt Đới Xanh dài dài.",
-      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"
-    },
-    {
-      id: 3,
-      name: "Minh Thư",
-      drink: "Nước Ép Thơm",
-      rating: 5,
-      text: "Trái cây siêu tươi, ly nước ép đầy đặn uống đã ghê luôn. Các bạn phục vụ rất nhiệt tình, chu đáo. Cực kỳ recommend vị dứa!",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=120"
-    }
-  ];
-
+  let testimonials = [];
   let testimonialDeleteTargetId = null;
+
+  function loadTestimonialsFromServer() {
+    fetch('${pageContext.request.contextPath}/admin/testimonials')
+      .then(response => response.json())
+      .then(data => {
+        testimonials = data;
+        renderTestimonials();
+      })
+      .catch(err => {
+        console.error("Lỗi khi tải phản hồi:", err);
+        showToast("Lỗi", "Không thể tải danh sách phản hồi từ máy chủ!", "❌");
+      });
+  }
 
   function renderTestimonials() {
     const grid = document.getElementById("t-testimonialsGrid");
@@ -2911,22 +2897,45 @@
       return;
     }
 
+    const params = new URLSearchParams();
     if (editIdVal) {
-      const id = parseInt(editIdVal);
-      const index = testimonials.findIndex(item => item.id === id);
-      if (index !== -1) {
-        testimonials[index] = { id, name, drink, rating, text, avatar };
-        showToast("Thành công", "Đã cập nhật phản hồi!", "📝");
-      }
-      cancelTestimonialEdit();
+      params.append("action", "update");
+      params.append("id", editIdVal);
     } else {
-      const newId = testimonials.length > 0 ? Math.max(...testimonials.map(f => f.id)) + 1 : 1;
-      testimonials.push({ id: newId, name, drink, rating, text, avatar });
-      showToast("Thành công", "Đã thêm phản hồi mới!", "💬");
-      clearTestimonialForm();
+      params.append("action", "create");
     }
+    params.append("name", name);
+    params.append("drink", drink);
+    params.append("rating", rating);
+    params.append("avatar", avatar);
+    params.append("text", text);
 
-    renderTestimonials();
+    fetch('${pageContext.request.contextPath}/admin/testimonials', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      body: params.toString()
+    })
+    .then(response => response.json())
+    .then(res => {
+      if (res.success) {
+        if (editIdVal) {
+          showToast("Thành công", "Đã cập nhật phản hồi!", "📝");
+          cancelTestimonialEdit();
+        } else {
+          showToast("Thành công", "Đã thêm phản hồi mới!", "💬");
+          clearTestimonialForm();
+        }
+        loadTestimonialsFromServer();
+      } else {
+        showToast("Lỗi", res.message || "Không thể thực hiện tác vụ!", "❌");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showToast("Lỗi", "Lỗi kết nối server!", "❌");
+    });
   }
 
   function editTestimonial(id) {
@@ -2988,9 +2997,30 @@
         cancelTestimonialEdit();
       }
 
-      testimonials = testimonials.filter(item => item.id !== testimonialDeleteTargetId);
-      renderTestimonials();
-      showToast("Đã xóa", "Đã xóa phản hồi!", "🗑️");
+      const params = new URLSearchParams();
+      params.append("action", "delete");
+      params.append("id", testimonialDeleteTargetId);
+
+      fetch('${pageContext.request.contextPath}/admin/testimonials', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        body: params.toString()
+      })
+      .then(response => response.json())
+      .then(res => {
+        if (res.success) {
+          showToast("Đã xóa", "Đã xóa phản hồi!", "🗑️");
+          loadTestimonialsFromServer();
+        } else {
+          showToast("Lỗi", res.message || "Không thể xóa phản hồi!", "❌");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        showToast("Lỗi", "Lỗi kết nối server!", "❌");
+      });
     }
     closeTestimonialConfirmModal();
   }
@@ -3014,8 +3044,8 @@
   window.cancelTestimonialEdit = cancelTestimonialEdit;
   window.handleTestimonialSubmit = handleTestimonialSubmit;
 
-  // Initialize testimonials rendering
-  renderTestimonials();
+  // Initialize testimonials rendering by fetching from server
+  loadTestimonialsFromServer();
 })();
 </script>
 
