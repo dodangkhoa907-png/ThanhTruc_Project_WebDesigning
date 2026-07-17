@@ -6,6 +6,7 @@ import com.nhietdoixanh.dao.impl.CategoryDaoImpl;
 import com.nhietdoixanh.dao.impl.ProductDaoImpl;
 import com.nhietdoixanh.model.Category;
 import com.nhietdoixanh.model.Product;
+import com.nhietdoixanh.util.ProductSort;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,12 +16,15 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Trang thực đơn đầy đủ — danh mục + sản phẩm thật từ DB (thay cho menu
- * tĩnh trong index.jsp). Lọc theo danh mục qua query param ?danhmuc=ID.
+ * Khu sản phẩm khách hàng:
+ * - GET /thuc-don            — trang thực đơn cũ (giữ nguyên, không đổi hành vi).
+ * - GET /san-pham            — khu sản phẩm mới (lọc danh mục + tìm kiếm + sắp xếp).
+ * - GET /san-pham/chi-tiet   — chi tiết 1 sản phẩm theo ?id=.
  */
-@WebServlet(name = "ProductController", urlPatterns = {"/thuc-don"})
+@WebServlet(name = "ProductController", urlPatterns = {"/thuc-don", "/san-pham", "/san-pham/chi-tiet"})
 public class ProductController extends HttpServlet {
 
     private CategoryDao categoryDao;
@@ -34,6 +38,20 @@ public class ProductController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        String path = req.getServletPath();
+
+        switch (path) {
+            case "/thuc-don" -> handleThucDon(req, resp);
+            case "/san-pham" -> handleShopList(req, resp);
+            case "/san-pham/chi-tiet" -> handleShopDetail(req, resp);
+            default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    /** Route cũ — KHÔNG đổi hành vi, chỉ lọc theo danh mục qua ?danhmuc=ID. */
+    private void handleThucDon(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         List<Category> categories = categoryDao.findAll();
@@ -56,5 +74,84 @@ public class ProductController extends HttpServlet {
         req.setAttribute("products", products);
         req.setAttribute("activeCategoryId", activeCategoryId);
         req.getRequestDispatcher("/WEB-INF/views/menu.jsp").forward(req, resp);
+    }
+
+    /** Khu sản phẩm mới — lọc danh mục + tìm kiếm + sắp xếp, tất cả xử lý server-side. */
+    private void handleShopList(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        List<Category> categories = categoryDao.findAll();
+
+        Integer categoryId = null;
+        String catParam = req.getParameter("danhmuc");
+        if (catParam != null && !catParam.isBlank()) {
+            try {
+                categoryId = Integer.parseInt(catParam.trim());
+            } catch (NumberFormatException ignored) {
+                categoryId = null;
+            }
+        }
+
+        String keyword = req.getParameter("q");
+        if (keyword != null) {
+            keyword = keyword.trim();
+            if (keyword.length() > 100) keyword = keyword.substring(0, 100);
+            if (keyword.isEmpty()) keyword = null;
+        }
+
+        ProductSort sort = ProductSort.fromParam(req.getParameter("sort"));
+
+        List<Product> products = productDao.findActiveForShop(categoryId, keyword, sort);
+
+        // Query string dùng lại (không đổi danh mục) khi search/sort đổi — build sẵn ở server, JSP không tự ghép URL.
+        String keepQuerySuffix = buildQuerySuffix(keyword, sort);
+
+        req.setAttribute("categories", categories);
+        req.setAttribute("products", products);
+        req.setAttribute("activeCategoryId", categoryId);
+        req.setAttribute("keyword", keyword);
+        req.setAttribute("activeSort", sort.getParam());
+        req.setAttribute("keepQuerySuffix", keepQuerySuffix);
+        req.getRequestDispatcher("/WEB-INF/views/product-list.jsp").forward(req, resp);
+    }
+
+    private String buildQuerySuffix(String keyword, ProductSort sort) {
+        StringBuilder sb = new StringBuilder();
+        if (keyword != null && !keyword.isBlank()) {
+            sb.append("&q=").append(java.net.URLEncoder.encode(keyword, java.nio.charset.StandardCharsets.UTF_8));
+        }
+        if (sort != null && sort != ProductSort.DEFAULT) {
+            sb.append("&sort=").append(java.net.URLEncoder.encode(sort.getParam(), java.nio.charset.StandardCharsets.UTF_8));
+        }
+        return sb.toString();
+    }
+
+    /** Chi tiết sản phẩm — chỉ hiển thị sản phẩm active, chặn id không hợp lệ/không tồn tại. */
+    private void handleShopDetail(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        String idParam = req.getParameter("id");
+        Integer productId = null;
+        if (idParam != null && !idParam.isBlank()) {
+            try {
+                productId = Integer.parseInt(idParam.trim());
+            } catch (NumberFormatException ignored) {
+                productId = null;
+            }
+        }
+
+        Optional<Product> productOpt = (productId != null)
+                ? productDao.findActiveById(productId)
+                : Optional.empty();
+
+        if (productOpt.isEmpty()) {
+            req.setAttribute("errorMessage", "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            req.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(req, resp);
+            return;
+        }
+
+        req.setAttribute("product", productOpt.get());
+        req.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(req, resp);
     }
 }

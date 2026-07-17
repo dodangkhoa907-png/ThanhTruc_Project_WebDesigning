@@ -11,6 +11,7 @@
     <title>Thực Đơn — Nhiệt Đới Xanh | Nước Ép & Thức Uống Tươi</title>
     <meta name="description"
         content="Thực đơn đầy đủ Nhiệt Đới Xanh — nước ép trái cây tươi ép mỗi ngày, giao hỏa tốc trong khuôn viên trường.">
+    <meta name="csrf-token" content="${sessionScope._csrf}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +22,7 @@
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/menu.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css">
 </head>
 
 <body class="menu-page-body">
@@ -43,7 +45,25 @@
                 <a href="${pageContext.request.contextPath}/#story">Câu Chuyện</a>
                 <a href="${pageContext.request.contextPath}/#values">Giá Trị</a>
                 <a href="${pageContext.request.contextPath}/thuc-don" style="color:var(--green);font-weight:700">Thực Đơn</a>
+                <a href="${pageContext.request.contextPath}/san-pham">Sản Phẩm</a>
                 <a href="${pageContext.request.contextPath}/#team">Đội Ngũ</a>
+                <a href="${pageContext.request.contextPath}/cart" class="nav-cart-link" aria-label="Giỏ hàng">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span class="nav-cart-badge" id="navCartBadge"
+                          ${empty sessionScope.cartCount || sessionScope.cartCount == 0 ? 'hidden' : ''}>
+                        ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
+                    </span>
+                </a>
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <a href="${pageContext.request.contextPath}/">
+                            <c:out value="${sessionScope.user.fullName}"/>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                    </c:otherwise>
+                </c:choose>
                 <a href="${pageContext.request.contextPath}/#checkout" class="nav-cta">Đặt Hàng</a>
             </div>
 
@@ -266,6 +286,8 @@
         </div>
     </footer>
 
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <script src="${pageContext.request.contextPath}/js/cart.js"></script>
     <script>
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {

@@ -9,6 +9,7 @@
     <title>Nhiệt Đới Xanh — Trọn Vị Thanh Mát | Nước Ép & Thức Uống Tươi</title>
     <meta name="description"
         content="Nhiệt Đới Xanh - Nước ép trái cây tươi, cà phê, sinh tố nguyên chất. Giao hỏa tốc 15-20 phút trong khuôn viên trường.">
+    <meta name="csrf-token" content="${sessionScope._csrf}">
 
     <!-- Google Fonts: Be Vietnam Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,6 +22,7 @@
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css">
 </head>
 
 <body>
@@ -43,7 +45,25 @@
                 <a href="#story">Câu Chuyện</a>
                 <a href="#values">Giá Trị</a>
                 <a href="${pageContext.request.contextPath}/thuc-don">Thực Đơn</a>
+                <a href="${pageContext.request.contextPath}/san-pham">Sản Phẩm</a>
                 <a href="#team">Đội Ngũ</a>
+                <a href="${pageContext.request.contextPath}/cart" class="nav-cart-link" aria-label="Giỏ hàng">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span class="nav-cart-badge" id="navCartBadge"
+                          ${empty sessionScope.cartCount || sessionScope.cartCount == 0 ? 'hidden' : ''}>
+                        ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
+                    </span>
+                </a>
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <a href="${pageContext.request.contextPath}/">
+                            <c:out value="${sessionScope.user.fullName}"/>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                    </c:otherwise>
+                </c:choose>
                 <a href="#checkout" class="nav-cta">Đặt Hàng</a>
             </div>
 
@@ -497,6 +517,8 @@
     <!-- ================================================================
      JAVASCRIPT
      ================================================================ -->
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <script src="${pageContext.request.contextPath}/js/cart.js"></script>
     <script>
         // ===== Navbar Scroll Effect =====
         const navbar = document.getElementById('navbar');
