@@ -113,6 +113,7 @@ public class ProductController extends HttpServlet {
         req.setAttribute("keyword", keyword);
         req.setAttribute("activeSort", sort.getParam());
         req.setAttribute("keepQuerySuffix", keepQuerySuffix);
+        req.setAttribute("currentPage", "products");
         req.getRequestDispatcher("/WEB-INF/views/product-list.jsp").forward(req, resp);
     }
 
@@ -147,12 +148,14 @@ public class ProductController extends HttpServlet {
 
         if (productOpt.isEmpty()) {
             req.setAttribute("errorMessage", "Sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
+            req.setAttribute("currentPage", "products");
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             req.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(req, resp);
             return;
         }
 
         req.setAttribute("product", productOpt.get());
+        req.setAttribute("currentPage", "products");
         req.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(req, resp);
     }
 }
