@@ -73,6 +73,7 @@ public class ProductController extends HttpServlet {
         req.setAttribute("categories", categories);
         req.setAttribute("products", products);
         req.setAttribute("activeCategoryId", activeCategoryId);
+        req.setAttribute("currentPage", "menu");
         req.getRequestDispatcher("/WEB-INF/views/menu.jsp").forward(req, resp);
     }
 
