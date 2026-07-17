@@ -30,15 +30,6 @@
     <section class="section" style="padding-top:130px;">
         <div class="container">
 
-            <c:set var="flashError" value="${sessionScope.cartFlashError}" />
-            <c:remove var="cartFlashError" scope="session" />
-            <c:if test="${not empty flashError}">
-                <div class="flash-error-banner">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <c:out value="${flashError}"/>
-                </div>
-            </c:if>
-
             <c:choose>
             <c:when test="${not empty cartItems}">
 
