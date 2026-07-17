@@ -126,6 +126,7 @@ public class CartController extends HttpServlet {
 
         List<CartLineItemDto> cartItems = cartItemDao.findLineItemsByUserId(user.getUserId());
         req.setAttribute("cartItems", cartItems);
+        req.setAttribute("currentPage", "cart");
         req.getRequestDispatcher("/WEB-INF/views/cart.jsp").forward(req, resp);
     }
 

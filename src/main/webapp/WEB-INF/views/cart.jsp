@@ -25,35 +25,19 @@
 
     <c:set var="cartCount" value="${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}" />
 
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <a href="${pageContext.request.contextPath}/" class="navbar-brand">
-                <div class="navbar-logo">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
-                    </svg>
-                </div>
-                <div class="navbar-name">Nhiệt Đới <span>Xanh</span></div>
-            </a>
-            <div class="nav-links" id="navLinks">
-                <a href="${pageContext.request.contextPath}/">Trang Chủ</a>
-                <a href="${pageContext.request.contextPath}/san-pham">Sản Phẩm</a>
-                <a href="${pageContext.request.contextPath}/cart" class="nav-cart-link" style="color:var(--green);font-weight:700">
-                    <i class="fa-solid fa-basket-shopping"></i>
-                    <span class="nav-cart-badge" id="navCartBadge" ${cartCount == 0 ? 'hidden' : ''}>${cartCount}</span>
-                </a>
-                <a href="${pageContext.request.contextPath}/">
-                    <c:out value="${sessionScope.user.fullName}"/>
-                </a>
-            </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Menu">
-                <span></span><span></span><span></span>
-            </button>
-        </div>
-    </nav>
+    <%@ include file="/WEB-INF/views/common/customer-header.jsp" %>
 
     <section class="section" style="padding-top:130px;">
         <div class="container">
+
+            <c:set var="flashError" value="${sessionScope.cartFlashError}" />
+            <c:remove var="cartFlashError" scope="session" />
+            <c:if test="${not empty flashError}">
+                <div class="flash-error-banner">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <c:out value="${flashError}"/>
+                </div>
+            </c:if>
 
             <c:choose>
             <c:when test="${not empty cartItems}">
