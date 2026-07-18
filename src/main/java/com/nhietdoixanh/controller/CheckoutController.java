@@ -437,6 +437,13 @@ public class CheckoutController extends HttpServlet {
                     Map.of("_general", "Không thể tạo yêu cầu thanh toán PayOS lúc này. Vui lòng thử lại hoặc chọn Tiền mặt khi nhận hàng (COD)."),
                     recipientName, recipientPhone, addressLabel, provinceCity, district, ward,
                     houseNumberStreet, note, latitudeRaw, longitudeRaw);
+        } catch (Exception e) {
+            System.err.println("[CheckoutController] Lưu payment link PayOS thất bại (OrderID=" + orderId + "): " + e.getMessage());
+            session.setAttribute("checkoutToken", CsrfFilter.generateToken());
+            forwardCheckoutPageWithErrors(req, resp, session, items,
+                    Map.of("_general", "Không thể lưu thông tin thanh toán lúc này. Vui lòng thử lại hoặc chọn Tiền mặt khi nhận hàng (COD)."),
+                    recipientName, recipientPhone, addressLabel, provinceCity, district, ward,
+                    houseNumberStreet, note, latitudeRaw, longitudeRaw);
         }
     }
 
