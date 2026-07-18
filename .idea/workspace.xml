@@ -4,29 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f472a149-c38d-44ee-a687-da9671543d01" name="Changes" comment="kkk">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/AccountSecurityController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/AccountSecurityController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/CheckoutController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/admin/AdminAuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/admin/AdminAuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/filter/CsrfFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/filter/CsrfFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/dashboard.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/dashboard.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/profile.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/profile.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/security.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/account/security.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/admin/layout/header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/admin/layout/header.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/checkout.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/checkout.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/customer-header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/common/customer-header.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/menu.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/account.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/css/account.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/product.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/css/product.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/index.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/js/checkout.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/js/checkout.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/ProductController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/ProductController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/admin/AdminAuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/controller/admin/AdminAuthController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/filter/CsrfFilter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/nhietdoixanh/filter/CsrfFilter.class" afterDir="false" />
-    </list>
+    <list default="true" id="f472a149-c38d-44ee-a687-da9671543d01" name="Changes" comment="kkk" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -114,9 +92,6 @@
       <option name="catalinaBase" value="$USER_HOME$/.SmartTomcat/ThanhTruc_Project_WebDesigning/NhietDoiXanh_Web" />
       <option name="contextPath" value="/NhietDoiXanh_Web" />
       <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
-      <option name="envOptions">
-        <map />
-      </option>
       <option name="extraClassPath" value="" />
       <option name="tomcatInfo">
         <TomcatInfo>
