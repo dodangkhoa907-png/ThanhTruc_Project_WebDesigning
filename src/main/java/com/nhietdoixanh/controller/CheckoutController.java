@@ -171,11 +171,13 @@ public class CheckoutController extends HttpServlet {
         String checkoutToken = CsrfFilter.generateToken();
         session.setAttribute("checkoutToken", checkoutToken);
 
+        List<UserAddress> savedAddresses = userAddressDao.findByUserId(userId);
         UserAddress defaultAddress = userAddressDao.findDefaultByUserId(userId).orElse(null);
 
         req.setAttribute("checkoutItems", items);
         req.setAttribute("subtotal", sumTotal(items));
         req.setAttribute("checkoutToken", checkoutToken);
+        req.setAttribute("savedAddresses", savedAddresses);
         req.setAttribute("defaultAddress", defaultAddress);
         req.setAttribute("payosConfigured", PayOSPaymentService.isConfigured());
         // Checkout là bước tiếp theo của giỏ hàng — giữ icon giỏ hàng active trên header thay vì không active gì.
@@ -236,6 +238,22 @@ public class CheckoutController extends HttpServlet {
             session.removeAttribute("checkoutSelection");
             redirectToCartWithError(session, req, resp, validationError);
             return;
+        }
+
+        // ---- Nếu form gửi kèm addressId (chọn từ sổ địa chỉ đã lưu) — bắt buộc verify
+        // ownership (AddressID + UserID) trước khi tin bất kỳ điều gì liên quan tới nó.
+        // Dữ liệu địa chỉ thật vẫn luôn lấy từ các field text bên dưới (đã prefill từ đúng
+        // địa chỉ này ở phía client) và được validate lại từ đầu — addressId chỉ dùng để
+        // chặn IDOR, không tự ý ghi đè field nào.
+        String addressIdRaw = trimOrNull(req.getParameter("addressId"));
+        if (addressIdRaw != null) {
+            Integer addressId = parsePositiveInt(addressIdRaw);
+            if (addressId == null || userAddressDao.findByIdAndUserId(addressId, userId).isEmpty()) {
+                session.removeAttribute("checkoutToken");
+                redirectToCartWithError(session, req, resp,
+                        "Địa chỉ đã chọn không hợp lệ. Vui lòng chọn lại địa chỉ giao hàng.");
+                return;
+            }
         }
 
         // ---- Validate form thông tin giao hàng ----

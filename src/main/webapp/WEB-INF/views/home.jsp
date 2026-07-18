@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -193,120 +195,74 @@
     </section>
 
     <!-- ================================================================
-     MENU — Magazine + Category Style
+     SẢN PHẨM NỔI BẬT — đọc thật từ DB (ProductDao.findAllActive), mỗi card
+     trỏ đúng /san-pham/chi-tiet?id=<ProductID> theo sản phẩm được click.
      ================================================================ -->
     <section class="menu section" id="menu">
         <div class="container">
             <div class="menu-header reveal">
-                <span class="section-label">Thực Đơn</span>
-                <h2 class="section-title">Menu Thanh Mát</h2>
+                <span class="section-label">Sản Phẩm</span>
+                <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
                 <p class="section-subtitle">
-                    Những ly thức uống tươi nguyên chất, vừa ngon vừa bổ dưỡng cho sức khỏe mỗi ngày.
+                    Cây cảnh và decor phong cách nhiệt đới, chọn size phù hợp với không gian của bạn.
                 </p>
             </div>
 
-            <!-- ── TOP 3 BEST-SELLERS (Zig-Zag with Cream Sweeps) ── -->
-            <div class="bestseller-zone">
-                <div class="bestseller-label reveal">⭐ Best-Sellers</div>
-
-                <!-- Nước Ép Cam -->
-                <div class="zigzag-block reveal">
-                    <div class="zigzag-image">
-                        <img src="${pageContext.request.contextPath}/images/cam.png" alt="Nước Ép Cam" class="zigzag-img">
-                    </div>
-                    <div class="zigzag-content">
-                        <h3 class="zigzag-name">Nước Ép Cam</h3>
-                        <p class="zigzag-desc">Cam tươi Bến Tre, vị ngọt tự nhiên — giàu vitamin C, tăng sức đề kháng mỗi ngày.</p>
-                        <div class="zigzag-prices">
-                            <span class="zigzag-price">Size M — <strong>20K</strong></span>
-                            <span class="zigzag-divider">|</span>
-                            <span class="zigzag-price">Size L — <strong>25K</strong></span>
+            <c:choose>
+            <c:when test="${not empty featuredProducts}">
+            <div class="shop-grid">
+                <c:forEach var="p" items="${featuredProducts}">
+                    <div class="shop-card reveal">
+                        <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}" class="shop-card-media" aria-label="Xem chi tiết ${fn:escapeXml(p.name)}">
+                            <c:choose>
+                                <c:when test="${not empty p.imageUrl}">
+                                    <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${fn:escapeXml(p.name)}" loading="lazy">
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="ph-icon">🌿</span>
+                                </c:otherwise>
+                            </c:choose>
+                            <c:if test="${not empty p.categoryName}">
+                                <span class="shop-card-cat"><c:out value="${p.categoryName}"/></span>
+                            </c:if>
+                        </a>
+                        <div class="shop-card-body">
+                            <div class="shop-card-name">
+                                <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}">
+                                    <c:out value="${p.name}"/>
+                                </a>
+                            </div>
+                            <div class="shop-card-desc">
+                                <c:out value="${not empty p.description ? p.description : 'Sản phẩm chất lượng, phù hợp không gian sống xanh mát.'}"/>
+                            </div>
+                            <div class="shop-card-footer">
+                                <div class="shop-card-price">
+                                    <small>Từ</small>
+                                    <fmt:formatNumber value="${p.fromPrice}" type="number" groupingUsed="true"/>đ
+                                </div>
+                                <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}"
+                                   class="btn-shop btn-shop-outline">
+                                    Xem chi tiết
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Nước Ép Thơm -->
-                <div class="zigzag-block zigzag-reverse reveal">
-                    <div class="zigzag-image">
-                        <img src="${pageContext.request.contextPath}/images/thom.png" alt="Nước Ép Thơm" class="zigzag-img">
-                    </div>
-                    <div class="zigzag-content">
-                        <h3 class="zigzag-name">Nước Ép Thơm</h3>
-                        <p class="zigzag-desc">Dứa thơm lừng, hỗ trợ tiêu hóa tốt — hương vị nhiệt đới đậm đà, sảng khoái.</p>
-                        <div class="zigzag-prices">
-                            <span class="zigzag-price">Size M — <strong>20K</strong></span>
-                            <span class="zigzag-divider">|</span>
-                            <span class="zigzag-price">Size L — <strong>25K</strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Nước Ép Dưa Hấu -->
-                <div class="zigzag-block reveal">
-                    <div class="zigzag-image">
-                        <img src="${pageContext.request.contextPath}/images/duahau.png" alt="Nước Ép Dưa Hấu" class="zigzag-img">
-                    </div>
-                    <div class="zigzag-content">
-                        <h3 class="zigzag-name">Nước Ép Dưa Hấu</h3>
-                        <p class="zigzag-desc">Ngọt mát giải nhiệt mùa hè — bổ sung nước tự nhiên, thanh lọc cơ thể.</p>
-                        <div class="zigzag-prices">
-                            <span class="zigzag-price">Size M — <strong>20K</strong></span>
-                            <span class="zigzag-divider">|</span>
-                            <span class="zigzag-price">Size L — <strong>25K</strong></span>
-                        </div>
-                    </div>
-                </div>
+                </c:forEach>
             </div>
-
-           
-
-            <!-- ── Classic List + Mix ── -->
-            <div class="classic-menu-zone reveal">
-                <div class="classic-menu-header">
-                    <h3 class="classic-menu-title">Các Món Khác</h3>
-                    <div class="classic-menu-size-legend">
-                        <span>Size M</span><span>/</span><span>Size L</span>
-                    </div>
+            </c:when>
+            <c:otherwise>
+                <div class="shop-empty">
+                    <i class="fa-solid fa-seedling"></i>
+                    <h3>Chưa có sản phẩm nào</h3>
+                    <p>Sản phẩm mới sẽ sớm được cập nhật tại đây.</p>
                 </div>
+            </c:otherwise>
+            </c:choose>
 
-                <ul class="classic-menu-list">
-                    <li class="classic-menu-item reveal reveal-delay-1">
-                        <div class="classic-item-left">
-                            <span class="classic-item-name">Nước Ép Bưởi</span>
-                            <span class="classic-item-note">Bưởi da xanh Đồng Nai, thanh mát detox</span>
-                        </div>
-                        <span class="classic-item-dots"></span>
-                        <div class="classic-item-price">20K / 25K</div>
-                    </li>
-                    <li class="classic-menu-item reveal reveal-delay-2">
-                        <div class="classic-item-left">
-                            <span class="classic-item-name">Nước Ép Ổi</span>
-                            <span class="classic-item-note">Giàu vitamin C, giữ dáng đẹp da</span>
-                        </div>
-                        <span class="classic-item-dots"></span>
-                        <div class="classic-item-price">20K / 25K</div>
-                    </li>
-                    <li class="classic-menu-item reveal reveal-delay-3">
-                        <div class="classic-item-left">
-                            <span class="classic-item-name">Nước Ép Cà Rốt</span>
-                            <span class="classic-item-note">Sáng mắt, tốt cho sức khỏe</span>
-                        </div>
-                        <span class="classic-item-dots"></span>
-                        <div class="classic-item-price">20K / 25K</div>
-                    </li>
-                </ul>
-
-                <div class="classic-menu-mix reveal">
-                    <div class="classic-mix-badge">🧃 Mix</div>
-                    <div class="classic-mix-content">
-                        <div class="classic-mix-left">
-                            <span class="classic-item-name">Mix Theo Yêu Cầu</span>
-                            <span class="classic-item-note">Ghi chú loại trái cây. Đồ uống có sử dụng đường, vui lòng báo nếu muốn giảm/không đường.</span>
-                        </div>
-                        <span class="classic-item-dots"></span>
-                        <div class="classic-item-price">27K / 30K</div>
-                    </div>
-                </div>
+            <div class="menu-view-all reveal" style="text-align:center;margin-top:32px;">
+                <a href="${pageContext.request.contextPath}/san-pham" class="btn btn-secondary">
+                    Xem Tất Cả Sản Phẩm
+                </a>
             </div>
         </div>
     </section>

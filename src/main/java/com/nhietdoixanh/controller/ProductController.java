@@ -20,8 +20,9 @@ import java.util.Optional;
 
 /**
  * Khu sản phẩm khách hàng:
- * - GET /thuc-don            — trang thực đơn cũ (giữ nguyên, không đổi hành vi).
- * - GET /san-pham            — khu sản phẩm mới (lọc danh mục + tìm kiếm + sắp xếp).
+ * - GET /thuc-don            — route cũ, đã gộp vào /san-pham. Redirect 301 giữ nguyên ?danhmuc=
+ *                              để không phá link cũ (bookmark, kết quả tìm kiếm...).
+ * - GET /san-pham            — khu sản phẩm (lọc danh mục + tìm kiếm + sắp xếp).
  * - GET /san-pham/chi-tiet   — chi tiết 1 sản phẩm theo ?id=.
  */
 @WebServlet(name = "ProductController", urlPatterns = {"/thuc-don", "/san-pham", "/san-pham/chi-tiet"})
@@ -43,38 +44,30 @@ public class ProductController extends HttpServlet {
         String path = req.getServletPath();
 
         switch (path) {
-            case "/thuc-don" -> handleThucDon(req, resp);
+            case "/thuc-don" -> handleThucDonRedirect(req, resp);
             case "/san-pham" -> handleShopList(req, resp);
             case "/san-pham/chi-tiet" -> handleShopDetail(req, resp);
             default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 
-    /** Route cũ — KHÔNG đổi hành vi, chỉ lọc theo danh mục qua ?danhmuc=ID. */
-    private void handleThucDon(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-
-        List<Category> categories = categoryDao.findAll();
-
+    /**
+     * "Thực Đơn" đã gộp vào "Sản Phẩm" (dự án bán cây/decor, không phải F&amp;B).
+     * Redirect an toàn sang /san-pham, giữ lại ?danhmuc= nếu có để không phá link cũ.
+     */
+    private void handleThucDonRedirect(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String catParam = req.getParameter("danhmuc");
-        List<Product> products;
-        Integer activeCategoryId = null;
+        String target = req.getContextPath() + "/san-pham";
         if (catParam != null && !catParam.isBlank()) {
             try {
-                activeCategoryId = Integer.parseInt(catParam.trim());
-                products = productDao.findByCategoryId(activeCategoryId);
-            } catch (NumberFormatException e) {
-                products = productDao.findAllActive();
+                int categoryId = Integer.parseInt(catParam.trim());
+                target += "?danhmuc=" + categoryId;
+            } catch (NumberFormatException ignored) {
+                // Tham số không hợp lệ — bỏ qua, redirect về /san-pham không lọc.
             }
-        } else {
-            products = productDao.findAllActive();
         }
-
-        req.setAttribute("categories", categories);
-        req.setAttribute("products", products);
-        req.setAttribute("activeCategoryId", activeCategoryId);
-        req.setAttribute("currentPage", "menu");
-        req.getRequestDispatcher("/WEB-INF/views/menu.jsp").forward(req, resp);
+        resp.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+        resp.setHeader("Location", target);
     }
 
     /** Khu sản phẩm mới — lọc danh mục + tìm kiếm + sắp xếp, tất cả xử lý server-side. */

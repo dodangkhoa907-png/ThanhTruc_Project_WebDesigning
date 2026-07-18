@@ -38,6 +38,15 @@ public class CsrfFilter implements Filter {
         if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
                 || "DELETE".equalsIgnoreCase(method)) {
 
+            // Webhook PayOS là POST server-to-server (không có session/_csrf token). Bỏ qua CSRF
+            // DUY NHẤT cho đúng path này — bảo mật của webhook do chữ ký HMAC-SHA256 đảm nhiệm
+            // (xem PaymentController#handleWebhook → PayOSPaymentService.verifyWebhook). Không nới
+            // lỏng CSRF cho bất kỳ endpoint nào khác.
+            if ("/payment/payos/webhook".equals(request.getServletPath())) {
+                chain.doFilter(req, res);
+                return;
+            }
+
             if ("XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
                 String origin = request.getHeader("Origin");
                 if (origin == null) {

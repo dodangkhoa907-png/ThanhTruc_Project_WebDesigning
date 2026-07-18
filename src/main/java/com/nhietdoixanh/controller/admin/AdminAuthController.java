@@ -38,8 +38,9 @@ public class AdminAuthController extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if ("/admin/logout".equals(path)) {
-            if (session != null) session.invalidate();
-            response.sendRedirect(request.getContextPath() + "/admin/login");
+            // GET không thực hiện đăng xuất (tránh CSRF/logout qua link/prefetch) — chỉ chuyển
+            // hướng an toàn. Đăng xuất thật chỉ qua POST /admin/logout (có CSRF) bên dưới.
+            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             return;
         }
 
@@ -56,6 +57,14 @@ public class AdminAuthController extends HttpServlet {
             throws ServletException, IOException {
 
         request.setCharacterEncoding("UTF-8");
+
+        if ("/admin/logout".equals(request.getServletPath())) {
+            HttpSession session = request.getSession(false);
+            if (session != null) session.invalidate();
+            response.sendRedirect(request.getContextPath() + "/admin/login");
+            return;
+        }
+
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
