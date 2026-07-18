@@ -186,6 +186,17 @@ ul { list-style: none; }
     background: rgba(42,92,56,0.06);
 }
 
+.nav-links a.active {
+    color: var(--green);
+    background: var(--cream-warm);
+    font-weight: 600;
+}
+
+.nav-cart-link.active {
+    background: var(--cream-warm);
+    border-radius: 50px;
+}
+
 .nav-cta {
     font-weight: 600 !important;
     color: var(--white) !important;
@@ -216,6 +227,95 @@ ul { list-style: none; }
     border-radius: 2px;
     transition: var(--transition);
 }
+
+/* ================================================================
+   USER DROPDOWN (header — khách đã đăng nhập)
+   ================================================================ */
+.nav-user-wrap { position: relative; }
+
+.nav-user-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-body);
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.nav-user-trigger:hover,
+.nav-user-trigger.active,
+.nav-user-wrap.open .nav-user-trigger {
+    color: var(--green);
+    background: var(--cream-warm);
+}
+
+.nav-user-caret { font-size: 0.68rem; transition: transform 0.25s var(--ease); }
+.nav-user-wrap.open .nav-user-caret { transform: rotate(180deg); }
+
+.nav-user-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    min-width: 240px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(30,63,39,0.16);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+    z-index: 1100;
+}
+
+.nav-user-wrap.open .nav-user-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-user-menu a,
+.nav-user-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-body);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.nav-user-menu a i,
+.nav-user-menu button i { width: 16px; color: var(--green-light); }
+
+.nav-user-menu a:hover,
+.nav-user-menu button:hover {
+    background: var(--cream-dark);
+    color: var(--green-dark);
+}
+
+.nav-user-menu-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+.nav-user-logout-form { margin: 0; }
+.nav-user-logout-form button { color: #b44242; }
+.nav-user-logout-form button:hover { background: rgba(180,66,66,0.08); color: #b44242; }
 
 /* ================================================================
    HERO SECTION
@@ -1694,6 +1794,35 @@ textarea.form-control {
     }
 
     .nav-toggle { display: flex; }
+
+    /* Dropdown user trở thành accordion inline trong drawer mobile — không floating,
+       tránh bị drawer 280px cắt cụt panel absolute-positioned. */
+    .nav-user-wrap { width: 100%; }
+
+    .nav-user-trigger {
+        width: 100%;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+
+    .nav-user-menu {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        margin-top: 4px;
+        padding: 4px 0 4px 10px;
+        border-left: 2px solid var(--cream-warm);
+        display: none;
+        min-width: 0;
+    }
+
+    .nav-user-wrap.open .nav-user-menu { display: flex; }
 
     .hero .container {
         grid-template-columns: 1fr;

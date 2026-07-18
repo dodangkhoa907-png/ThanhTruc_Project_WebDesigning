@@ -1,5 +1,8 @@
 package com.nhietdoixanh.model;
 
+import com.nhietdoixanh.util.OrderStatuses;
+import com.nhietdoixanh.util.PaymentStatuses;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +29,24 @@ public class Order {
     private Date cancelledAt;
     private String couponCode;
 
+    // Bổ sung — thanh toán / PayOS (xem migration_ecommerce_account_v3.sql)
+    private String paymentStatus;   // xem util.PaymentStatuses
+    private Date statusUpdatedAt;
+    private Long payOSOrderCode;
+    private String payOSPaymentLinkId;
+    private String payOSCheckoutUrl;
+    private Date paidAt;
+
+    // Bổ sung — giao hàng chi tiết
+    private String recipientName;
+    private String recipientPhone;
+    private BigDecimal shippingLatitude;
+    private BigDecimal shippingLongitude;
+
     // Bổ sung cho UI
     private String handledByName;
+    private String userEmail;
+    private String productSummary;
     private List<OrderDetail> items;
 
     public Order() {}
@@ -83,6 +102,47 @@ public class Order {
     public String getHandledByName() { return handledByName; }
     public void setHandledByName(String handledByName) { this.handledByName = handledByName; }
 
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getProductSummary() { return productSummary; }
+    public void setProductSummary(String productSummary) { this.productSummary = productSummary; }
+
+    /** Nhãn tiếng Việt tính sẵn — dùng trực tiếp trong JSP (${order.orderStatusLabel}) để không hiện mã trạng thái tiếng Anh trần. */
+    public String getOrderStatusLabel() { return OrderStatuses.getLabel(orderStatus); }
+
+    public String getPaymentStatusLabel() { return PaymentStatuses.getLabel(paymentStatus); }
+
     public List<OrderDetail> getItems() { return items; }
     public void setItems(List<OrderDetail> items) { this.items = items; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public Date getStatusUpdatedAt() { return statusUpdatedAt; }
+    public void setStatusUpdatedAt(Date statusUpdatedAt) { this.statusUpdatedAt = statusUpdatedAt; }
+
+    public Long getPayOSOrderCode() { return payOSOrderCode; }
+    public void setPayOSOrderCode(Long payOSOrderCode) { this.payOSOrderCode = payOSOrderCode; }
+
+    public String getPayOSPaymentLinkId() { return payOSPaymentLinkId; }
+    public void setPayOSPaymentLinkId(String payOSPaymentLinkId) { this.payOSPaymentLinkId = payOSPaymentLinkId; }
+
+    public String getPayOSCheckoutUrl() { return payOSCheckoutUrl; }
+    public void setPayOSCheckoutUrl(String payOSCheckoutUrl) { this.payOSCheckoutUrl = payOSCheckoutUrl; }
+
+    public Date getPaidAt() { return paidAt; }
+    public void setPaidAt(Date paidAt) { this.paidAt = paidAt; }
+
+    public String getRecipientName() { return recipientName; }
+    public void setRecipientName(String recipientName) { this.recipientName = recipientName; }
+
+    public String getRecipientPhone() { return recipientPhone; }
+    public void setRecipientPhone(String recipientPhone) { this.recipientPhone = recipientPhone; }
+
+    public BigDecimal getShippingLatitude() { return shippingLatitude; }
+    public void setShippingLatitude(BigDecimal shippingLatitude) { this.shippingLatitude = shippingLatitude; }
+
+    public BigDecimal getShippingLongitude() { return shippingLongitude; }
+    public void setShippingLongitude(BigDecimal shippingLongitude) { this.shippingLongitude = shippingLongitude; }
 }

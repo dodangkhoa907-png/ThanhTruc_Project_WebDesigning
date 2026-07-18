@@ -40,7 +40,7 @@
                 <td>#${o.orderId}</td>
                 <td><c:out value="${o.customerName}"/></td>
                 <td><fmt:formatNumber value="${o.finalAmount}" type="number" groupingUsed="true"/> đ</td>
-                <td><span class="badge badge-${o.orderStatus}"><c:out value="${o.orderStatus}"/></span></td>
+                <td><span class="badge badge-${o.orderStatus}"><c:out value="${o.orderStatusLabel}"/></span></td>
                 <td><fmt:formatDate value="${o.createdAt}" pattern="HH:mm dd/MM/yyyy"/></td>
               </tr>
             </c:forEach>

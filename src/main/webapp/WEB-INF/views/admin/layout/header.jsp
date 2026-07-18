@@ -82,7 +82,12 @@
         .badge-SHIPPING{background:rgba(122,90,248,.12);color:var(--status-shipping)}
         .badge-DONE{background:rgba(42,92,56,.12);color:var(--status-done)}
         .badge-CANCELLED{background:rgba(217,83,79,.12);color:var(--status-cancelled)}
+        .badge-PENDING_CANCEL{background:rgba(217,83,79,.1);color:#B9432E}
         .badge-NEW{background:rgba(244,162,97,.15);color:#B96A2E}
+        .badge-UNPAID{background:rgba(138,154,138,.15);color:var(--admin-text-light)}
+        .badge-PAID{background:rgba(42,92,56,.12);color:var(--status-done)}
+        .badge-FAILED{background:rgba(217,83,79,.12);color:var(--status-cancelled)}
+        .badge-REFUND_PENDING{background:rgba(244,162,97,.15);color:#B96A2E}
         .form-group{margin-bottom:20px}
         .form-group label{display:block;margin-bottom:8px;font-weight:700;font-size:13.5px}
         .form-control{width:100%;padding:12px 16px;border:1.5px solid var(--admin-border);border-radius:11px;font-size:15px;color:var(--admin-text);transition:.2s}

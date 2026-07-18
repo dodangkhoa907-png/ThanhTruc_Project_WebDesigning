@@ -14,6 +14,8 @@ public class User {
     private Date lastLoginAt;
     private Date agreedTermsAt;
     private String profileImage;
+    private String nickname;
+    private Date updatedAt;
 
     public User() {}
 
@@ -57,4 +59,10 @@ public class User {
 
     public String getProfileImage() { return profileImage; }
     public void setProfileImage(String profileImage) { this.profileImage = profileImage; }
+
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
+
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }

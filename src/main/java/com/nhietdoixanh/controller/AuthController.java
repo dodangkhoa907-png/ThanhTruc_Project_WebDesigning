@@ -44,8 +44,9 @@ public class AuthController extends HttpServlet {
         HttpSession session = request.getSession(false);
 
         if ("/logout".equals(path)) {
-            if (session != null) session.invalidate();
-            response.sendRedirect(request.getContextPath() + "/");
+            // GET không được phép thực hiện hành động có trạng thái (state-changing) — chỉ điều
+            // hướng an toàn. Đăng xuất thật sự chỉ thực hiện qua POST /logout (có CSRF) bên dưới.
+            response.sendRedirect(request.getContextPath() + (session != null && session.getAttribute("user") != null ? "/account" : "/login"));
             return;
         }
 
@@ -72,7 +73,39 @@ public class AuthController extends HttpServlet {
             handleLogin(request, response);
         } else if ("/register".equals(path)) {
             handleRegister(request, response);
+        } else if ("/logout".equals(path)) {
+            handleLogout(request, response);
         }
+    }
+
+    /**
+     * Đăng xuất thật — chỉ qua POST (đã được {@link com.nhietdoixanh.filter.CsrfFilter} kiểm tra
+     * token "_csrf" trước khi vào đây). Invalidate toàn bộ session (xóa cả "user" lẫn "adminUser"
+     * nếu có, giỏ hàng, CSRF token cũ...) rồi redirect về trang chủ.
+     */
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object user = session.getAttribute("user");
+            if (user instanceof User u) {
+                AuditLogger.log(request, null, "CUSTOMER_LOGOUT", u.getEmail(), "Đăng xuất tài khoản khách hàng");
+            }
+            session.invalidate();
+        }
+        response.sendRedirect(request.getContextPath() + "/");
+    }
+
+    /**
+     * Lấy returnUrl đã lưu bởi AuthFilter (khi khách chưa đăng nhập cố truy cập /cart, /checkout, /account)
+     * và xóa khỏi session (chỉ dùng 1 lần). Chỉ chấp nhận path nội bộ bắt đầu bằng "/" — chặn open redirect.
+     */
+    private String resolveReturnUrl(HttpSession session) {
+        Object raw = session.getAttribute("returnUrl");
+        session.removeAttribute("returnUrl");
+        if (raw instanceof String url && url.startsWith("/") && !url.startsWith("//")) {
+            return url;
+        }
+        return "/";
     }
 
     private void handleLogin(HttpServletRequest request, HttpServletResponse response)
@@ -97,7 +130,7 @@ public class AuthController extends HttpServlet {
             session.setAttribute("cartItems", cartItems);
             session.setAttribute("cartCount", cartCount);
 
-            response.sendRedirect(request.getContextPath() + "/");
+            response.sendRedirect(request.getContextPath() + resolveReturnUrl(session));
         } else {
             request.setAttribute("errorMessage", "Email hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("/WEB-INF/views/login.jsp").forward(request, response);
@@ -144,7 +177,7 @@ public class AuthController extends HttpServlet {
             session.setAttribute("cartItems", java.util.Collections.emptyList());
             session.setAttribute("cartCount", 0);
 
-            response.sendRedirect(request.getContextPath() + "/");
+            response.sendRedirect(request.getContextPath() + resolveReturnUrl(session));
         } catch (IllegalArgumentException e) {
             request.setAttribute("errorMessage", e.getMessage());
             request.getRequestDispatcher("/WEB-INF/views/register.jsp").forward(request, response);

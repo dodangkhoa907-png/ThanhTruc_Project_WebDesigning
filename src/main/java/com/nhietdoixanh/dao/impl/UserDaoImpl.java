@@ -103,13 +103,15 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public boolean updateProfile(int userId, String fullName, String phone) {
-        String sql = "UPDATE Users SET FullName = ?, Phone = ? WHERE UserID = ?";
+    public boolean updateProfile(int userId, String fullName, String phone, String nickname, String email) {
+        String sql = "UPDATE Users SET FullName = ?, Phone = ?, Nickname = ?, Email = ?, UpdatedAt = SYSDATETIME() WHERE UserID = ?";
         try (Connection conn = Database.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setNString(1, fullName);
             ps.setString(2, phone);
-            ps.setInt(3, userId);
+            ps.setNString(3, nickname);
+            ps.setString(4, email);
+            ps.setInt(5, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -125,6 +127,22 @@ public class UserDaoImpl implements UserDao {
             ps.setNString(1, profileImage);
             ps.setInt(2, userId);
             return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean emailExistsForOtherUser(String email, int userId) {
+        String sql = "SELECT 1 FROM Users WHERE Email = ? AND UserID <> ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -158,6 +176,8 @@ public class UserDaoImpl implements UserDao {
         user.setLastLoginAt(rs.getTimestamp("LastLoginAt"));
         user.setAgreedTermsAt(rs.getTimestamp("AgreedTermsAt"));
         user.setProfileImage(rs.getNString("ProfileImage"));
+        user.setNickname(rs.getNString("Nickname"));
+        user.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
         return user;
     }
 }
