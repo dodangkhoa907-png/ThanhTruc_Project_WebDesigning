@@ -15,6 +15,7 @@ import com.nhietdoixanh.model.Order;
 import com.nhietdoixanh.model.OrderDetail;
 import com.nhietdoixanh.model.User;
 import com.nhietdoixanh.model.UserAddress;
+import com.nhietdoixanh.service.PayOSPaymentService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -176,6 +177,7 @@ public class CheckoutController extends HttpServlet {
         req.setAttribute("subtotal", sumTotal(items));
         req.setAttribute("checkoutToken", checkoutToken);
         req.setAttribute("defaultAddress", defaultAddress);
+        req.setAttribute("payosConfigured", PayOSPaymentService.isConfigured());
         // Checkout là bước tiếp theo của giỏ hàng — giữ icon giỏ hàng active trên header thay vì không active gì.
         req.setAttribute("currentPage", "cart");
         req.getRequestDispatcher("/WEB-INF/views/checkout.jsp").forward(req, resp);
@@ -306,8 +308,11 @@ public class CheckoutController extends HttpServlet {
         if (errors.containsKey("latitude")) latitude = null;
         if (errors.containsKey("longitude")) longitude = null;
 
-        if (!"COD".equals(paymentMethod)) {
-            errors.put("paymentMethod", "Phương thức thanh toán không hợp lệ. Hiện chỉ hỗ trợ Tiền mặt khi nhận hàng.");
+        boolean isPayOS = "PAYOS".equals(paymentMethod);
+        if (!"COD".equals(paymentMethod) && !isPayOS) {
+            errors.put("paymentMethod", "Phương thức thanh toán không hợp lệ.");
+        } else if (isPayOS && !PayOSPaymentService.isConfigured()) {
+            errors.put("paymentMethod", "PayOS chưa được cấu hình, vui lòng dùng COD.");
         }
 
         if (!errors.isEmpty()) {
@@ -335,11 +340,18 @@ public class CheckoutController extends HttpServlet {
         order.setTotalAmount(totalAmount);
         order.setShippingFee(shippingFee);
         order.setFinalAmount(finalAmount);
-        order.setPaymentMethod("COD");
+        order.setPaymentMethod(paymentMethod);
         order.setRecipientName(recipientName);
         order.setRecipientPhone(recipientPhone);
         order.setShippingLatitude(latitude);
         order.setShippingLongitude(longitude);
+
+        if (isPayOS) {
+            handlePlaceOrderPayOS(req, resp, session, userId, order, items,
+                    recipientName, recipientPhone, addressLabel, provinceCity, district, ward,
+                    houseNumberStreet, note, latitudeRaw, longitudeRaw);
+            return;
+        }
 
         int orderId;
         try {
@@ -366,6 +378,78 @@ public class CheckoutController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/checkout/success?orderId=" + orderId);
     }
 
+    // =========================================================================================
+    // POST /checkout/place-order — nhánh PayOS: tạo Order (PaymentStatus=PENDING, KHÔNG xóa
+    // CartItems) rồi gọi PayOS tạo payment link và redirect user sang checkoutUrl. PAID chỉ
+    // được xác nhận qua webhook đã verify chữ ký (xem PaymentController).
+    // =========================================================================================
+
+    private void handlePlaceOrderPayOS(HttpServletRequest req, HttpServletResponse resp, HttpSession session,
+            int userId, Order order, List<CartItem> items,
+            String recipientName, String recipientPhone, String addressLabel, String provinceCity,
+            String district, String ward, String houseNumberStreet, String note,
+            String latitudeRaw, String longitudeRaw) throws ServletException, IOException {
+
+        int orderId;
+        try {
+            orderId = orderDao.placeOrderPayOS(order, items);
+        } catch (Exception e) {
+            session.setAttribute("checkoutToken", CsrfFilter.generateToken());
+            System.err.println("[CheckoutController] placeOrderPayOS thất bại: " + e.getMessage());
+            forwardCheckoutPageWithErrors(req, resp, session, items,
+                    Map.of("_general", "Không thể tạo đơn hàng lúc này. Vui lòng thử lại sau."),
+                    recipientName, recipientPhone, addressLabel, provinceCity, district, ward,
+                    houseNumberStreet, note, latitudeRaw, longitudeRaw);
+            return;
+        }
+
+        String returnUrl = com.nhietdoixanh.config.PayOSConfig.getReturnUrl();
+        if (returnUrl == null) returnUrl = buildAbsoluteUrl(req, "/payment/payos/return");
+        String cancelUrl = com.nhietdoixanh.config.PayOSConfig.getCancelUrl();
+        if (cancelUrl == null) cancelUrl = buildAbsoluteUrl(req, "/payment/payos/cancel");
+
+        PayOSPaymentService.CreatePaymentLinkRequest linkReq = new PayOSPaymentService.CreatePaymentLinkRequest(
+                order.getPayOSOrderCode(),
+                order.getFinalAmount().setScale(0, java.math.RoundingMode.HALF_UP).longValueExact(),
+                "Thanh toan DH" + orderId,
+                returnUrl, cancelUrl, recipientName, recipientPhone);
+
+        try {
+            PayOSPaymentService.CreatePaymentLinkResult result = PayOSPaymentService.createPaymentLink(linkReq);
+            orderDao.attachPayOSPaymentLink(orderId, result.paymentLinkId, result.checkoutUrl);
+
+            // ---- Thành công: dọn selection (đơn đã tạo), CartItems vẫn còn cho tới khi PAID ----
+            session.removeAttribute("checkoutSelection");
+            session.setAttribute("lastOrderId", orderId);
+            int cartCount = cartItemDao.countQuantityByUserId(userId);
+            session.setAttribute("cartCount", cartCount);
+
+            resp.sendRedirect(result.checkoutUrl);
+        } catch (PayOSPaymentService.PayOSApiException e) {
+            try {
+                orderDao.markPayOSLinkFailed(orderId);
+            } catch (Exception ex) {
+                System.err.println("[CheckoutController] markPayOSLinkFailed thất bại: " + ex.getMessage());
+            }
+            System.err.println("[CheckoutController] Tạo payment link PayOS thất bại (OrderID=" + orderId + "): " + e.getMessage());
+            session.setAttribute("checkoutToken", CsrfFilter.generateToken());
+            forwardCheckoutPageWithErrors(req, resp, session, items,
+                    Map.of("_general", "Không thể tạo yêu cầu thanh toán PayOS lúc này. Vui lòng thử lại hoặc chọn Tiền mặt khi nhận hàng (COD)."),
+                    recipientName, recipientPhone, addressLabel, provinceCity, district, ward,
+                    houseNumberStreet, note, latitudeRaw, longitudeRaw);
+        }
+    }
+
+    private String buildAbsoluteUrl(HttpServletRequest req, String path) {
+        String scheme = req.getScheme();
+        int port = req.getServerPort();
+        StringBuilder sb = new StringBuilder(scheme).append("://").append(req.getServerName());
+        boolean isDefaultPort = ("http".equals(scheme) && port == 80) || ("https".equals(scheme) && port == 443);
+        if (!isDefaultPort) sb.append(':').append(port);
+        sb.append(req.getContextPath()).append(path);
+        return sb.toString();
+    }
+
     private void forwardCheckoutPageWithErrors(HttpServletRequest req, HttpServletResponse resp, HttpSession session,
             List<CartItem> items, Map<String, String> errors,
             String recipientName, String recipientPhone, String addressLabel, String provinceCity,
@@ -379,6 +463,8 @@ public class CheckoutController extends HttpServlet {
         req.setAttribute("checkoutItems", items);
         req.setAttribute("subtotal", sumTotal(items));
         req.setAttribute("checkoutToken", newToken);
+        req.setAttribute("payosConfigured", PayOSPaymentService.isConfigured());
+        req.setAttribute("oldPaymentMethod", trimOrNull(req.getParameter("paymentMethod")));
         req.setAttribute("formErrors", errors);
         req.setAttribute("oldRecipientName", recipientName);
         req.setAttribute("oldRecipientPhone", recipientPhone);

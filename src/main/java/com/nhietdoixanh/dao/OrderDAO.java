@@ -92,4 +92,49 @@ public interface OrderDAO {
      * @return số dòng bị ảnh hưởng (0 nếu đơn không còn ở trạng thái cho phép hủy)
      */
     int adminCancelOrder(int orderId, String reason) throws Exception;
+
+    // =========================================================================================
+    // PayOS — xem OrderDaoImpl để biết chi tiết transaction/idempotency.
+    // =========================================================================================
+
+    /**
+     * Đặt hàng PayOS: lưu Order (PaymentMethod=PAYOS, PaymentStatus=PENDING, PayOSOrderCode
+     * unique tự sinh) + OrderDetails + mapping OrderCartItems — KHÔNG xóa CartItems (chỉ xóa
+     * sau khi webhook xác nhận PAID, xem {@link #markPaidByPayOSOrderCode}).
+     * @return OrderID nếu thành công
+     */
+    int placeOrderPayOS(Order order, List<CartItem> cartItems) throws Exception;
+
+    /** Gắn kết quả tạo payment link (paymentLinkId/checkoutUrl) sau khi gọi PayOS API thành công. */
+    void attachPayOSPaymentLink(int orderId, String paymentLinkId, String checkoutUrl) throws Exception;
+
+    /** Đánh dấu PaymentStatus=FAILED khi gọi PayOS API tạo payment link thất bại (order đã commit trước đó). */
+    void markPayOSLinkFailed(int orderId) throws Exception;
+
+    /** Tra đơn theo PayOSOrderCode — dùng cho webhook/return/cancel. */
+    Optional<Order> findByPayOSOrderCode(long payOSOrderCode);
+
+    /**
+     * Webhook xác nhận thanh toán thành công: UPDATE có điều kiện (chỉ khi chưa PAID) để
+     * idempotent — gọi lại nhiều lần không gây lỗi. Nếu đây là lần đầu chuyển sang PAID,
+     * đồng thời xóa các CartItems thuộc đúng mapping OrderCartItems của đơn này (KHÔNG xóa
+     * toàn bộ giỏ hàng) trong cùng transaction.
+     * @return true nếu lần gọi này thực sự chuyển trạng thái (lần đầu PAID), false nếu đã
+     *         PAID từ trước hoặc không tìm thấy đơn.
+     */
+    boolean markPaidByPayOSOrderCode(long payOSOrderCode) throws Exception;
+
+    /**
+     * Webhook báo thất bại/hết hạn: UPDATE có điều kiện, CHỈ khi đơn còn PENDING (không bao
+     * giờ ghi đè lên PAID/CANCELLED đã có trước đó). Không đụng tới CartItems.
+     * @return true nếu có cập nhật
+     */
+    boolean markNonSuccessByPayOSOrderCode(long payOSOrderCode, String newPaymentStatus) throws Exception;
+
+    /**
+     * User bấm hủy trên trang Cancel URL: chỉ hủy nếu đơn thuộc đúng user và còn PENDING.
+     * Không đụng tới CartItems (CartItems chưa từng bị xóa ở luồng PayOS cho tới khi PAID).
+     * @return true nếu có cập nhật
+     */
+    boolean cancelPayOSPendingByOrderIdAndUserId(int orderId, int userId) throws Exception;
 }

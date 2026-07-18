@@ -8,6 +8,7 @@ import com.nhietdoixanh.model.OrderAdminFilter;
 import com.nhietdoixanh.model.OrderDetail;
 
 import java.math.BigDecimal;
+import java.security.SecureRandom;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -693,5 +694,228 @@ public class OrderDaoImpl implements OrderDAO {
             else ps.setNString(idx++, String.valueOf(p));
         }
         return idx;
+    }
+
+    // =========================================================================================
+    // PayOS
+    // =========================================================================================
+
+    private static final SecureRandom PAYOS_RANDOM = new SecureRandom();
+
+    @Override
+    public int placeOrderPayOS(Order order, List<CartItem> cartItems) throws Exception {
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalArgumentException("Đơn hàng phải có ít nhất một sản phẩm");
+        }
+        if (order.getFinalAmount() == null || order.getFinalAmount().signum() <= 0) {
+            throw new IllegalArgumentException("Giá trị đơn hàng không hợp lệ");
+        }
+        if (order.getUserId() == null) {
+            throw new IllegalArgumentException("Đơn PayOS bắt buộc phải gắn với tài khoản đã đăng nhập");
+        }
+
+        Connection conn = null;
+        int orderId = 0;
+        try {
+            conn = Database.getConnection();
+            conn.setAutoCommit(false);
+
+            long payOSOrderCode = generateUniquePayOSOrderCode(conn);
+
+            String sqlOrder = "INSERT INTO Orders (UserID, CustomerName, PhoneNumber, ShippingAddress, OrderNote, " +
+                    "TotalAmount, ShippingFee, FinalAmount, PaymentMethod, OrderStatus, PaymentStatus, CouponCode, " +
+                    "RecipientName, RecipientPhone, ShippingLatitude, ShippingLongitude, PayOSOrderCode, StatusUpdatedAt) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'PAYOS', 'PENDING', 'PENDING', ?, ?, ?, ?, ?, ?, SYSDATETIME())";
+            try (PreparedStatement psOrder = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS)) {
+                psOrder.setInt(1, order.getUserId());
+                psOrder.setNString(2, order.getCustomerName());
+                psOrder.setString(3, order.getPhoneNumber());
+                psOrder.setNString(4, order.getShippingAddress());
+                psOrder.setNString(5, order.getOrderNote());
+                psOrder.setBigDecimal(6, order.getTotalAmount());
+                psOrder.setBigDecimal(7, order.getShippingFee());
+                psOrder.setBigDecimal(8, order.getFinalAmount());
+                psOrder.setString(9, order.getCouponCode());
+                psOrder.setNString(10, order.getRecipientName());
+                psOrder.setString(11, order.getRecipientPhone());
+                psOrder.setBigDecimal(12, order.getShippingLatitude());
+                psOrder.setBigDecimal(13, order.getShippingLongitude());
+                psOrder.setLong(14, payOSOrderCode);
+                psOrder.executeUpdate();
+                try (ResultSet rsKeys = psOrder.getGeneratedKeys()) {
+                    if (rsKeys.next()) orderId = rsKeys.getInt(1);
+                    else throw new SQLException("Không thể lấy OrderID");
+                }
+            }
+
+            String sqlDetail = "INSERT INTO OrderDetails (OrderID, VariantID, Quantity, UnitPrice, SubTotal) VALUES (?,?,?,?,?)";
+            try (PreparedStatement psDetail = conn.prepareStatement(sqlDetail)) {
+                for (CartItem item : cartItems) {
+                    psDetail.setInt(1, orderId);
+                    psDetail.setInt(2, item.getVariantId());
+                    psDetail.setInt(3, item.getQuantity());
+                    psDetail.setBigDecimal(4, item.getPrice());
+                    psDetail.setBigDecimal(5, item.getTotalPrice());
+                    psDetail.addBatch();
+                }
+                psDetail.executeBatch();
+            }
+
+            // Ghi mapping CartItemID -> OrderID để webhook PAID biết cần xóa đúng dòng nào —
+            // KHÔNG xóa CartItems ở đây, chỉ xóa sau khi PayOS xác nhận thanh toán thành công.
+            String sqlMapping = "INSERT INTO OrderCartItems (OrderID, UserID, CartItemID) VALUES (?, ?, ?)";
+            try (PreparedStatement psMapping = conn.prepareStatement(sqlMapping)) {
+                for (CartItem item : cartItems) {
+                    psMapping.setInt(1, orderId);
+                    psMapping.setInt(2, order.getUserId());
+                    psMapping.setInt(3, item.getCartItemId());
+                    psMapping.addBatch();
+                }
+                psMapping.executeBatch();
+            }
+
+            order.setOrderId(orderId);
+            order.setPayOSOrderCode(payOSOrderCode);
+            order.setPaymentStatus(com.nhietdoixanh.util.PaymentStatuses.PENDING);
+
+            conn.commit();
+            return orderId;
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            throw e;
+        } finally {
+            if (conn != null) { conn.setAutoCommit(true); conn.close(); }
+        }
+    }
+
+    /** Sinh PayOSOrderCode duy nhất: mốc mili-giây + random 0-999, kiểm tra tồn tại trước khi dùng. */
+    private long generateUniquePayOSOrderCode(Connection conn) throws SQLException {
+        for (int attempt = 0; attempt < 10; attempt++) {
+            long candidate = System.currentTimeMillis() * 1000L + PAYOS_RANDOM.nextInt(1000);
+            try (PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM Orders WHERE PayOSOrderCode = ?")) {
+                ps.setLong(1, candidate);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) return candidate;
+                }
+            }
+        }
+        throw new SQLException("Không thể sinh PayOSOrderCode duy nhất sau nhiều lần thử");
+    }
+
+    @Override
+    public void attachPayOSPaymentLink(int orderId, String paymentLinkId, String checkoutUrl) throws Exception {
+        String sql = "UPDATE Orders SET PayOSPaymentLinkId = ?, PayOSCheckoutUrl = ? WHERE OrderID = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, paymentLinkId);
+            ps.setString(2, checkoutUrl);
+            ps.setInt(3, orderId);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public void markPayOSLinkFailed(int orderId) throws Exception {
+        // Điều kiện WHERE PaymentStatus = 'PENDING' — không ghi đè nếu webhook đã chạy trước
+        // (race hiếm: webhook PAID tới trước khi request tạo link kịp nhận response lỗi).
+        String sql = "UPDATE Orders SET PaymentStatus = ?, StatusUpdatedAt = SYSDATETIME() " +
+                "WHERE OrderID = ? AND PaymentStatus = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, com.nhietdoixanh.util.PaymentStatuses.FAILED);
+            ps.setInt(2, orderId);
+            ps.setString(3, com.nhietdoixanh.util.PaymentStatuses.PENDING);
+            ps.executeUpdate();
+        }
+    }
+
+    @Override
+    public Optional<Order> findByPayOSOrderCode(long payOSOrderCode) {
+        String sql = LIST_SELECT + "WHERE o.PayOSOrderCode = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, payOSOrderCode);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return Optional.of(mapRow(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean markPaidByPayOSOrderCode(long payOSOrderCode) throws Exception {
+        Connection conn = null;
+        try {
+            conn = Database.getConnection();
+            conn.setAutoCommit(false);
+
+            int orderId = 0;
+            int userId = 0;
+            // UPDATE có điều kiện WHERE PaymentStatus <> 'PAID' — atomic, idempotent: nếu webhook
+            // được gọi lại (retry của PayOS), lần thứ 2 trở đi sẽ không khớp điều kiện và no-op.
+            String sqlUpdate = "UPDATE Orders SET PaymentStatus = 'PAID', PaidAt = SYSDATETIME(), " +
+                    "StatusUpdatedAt = SYSDATETIME() " +
+                    "OUTPUT INSERTED.OrderID, INSERTED.UserID " +
+                    "WHERE PayOSOrderCode = ? AND PaymentStatus <> 'PAID'";
+            try (PreparedStatement ps = conn.prepareStatement(sqlUpdate)) {
+                ps.setLong(1, payOSOrderCode);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        orderId = rs.getInt("OrderID");
+                        userId = rs.getInt("UserID");
+                    } else {
+                        conn.rollback();
+                        return false; // Không tìm thấy đơn, hoặc đã PAID từ trước — idempotent no-op.
+                    }
+                }
+            }
+
+            // Xóa ĐÚNG các CartItems thuộc mapping của đơn này — không đụng tới các dòng khác
+            // trong giỏ hàng của cùng user (checkout một phần vẫn giữ lại phần chưa chọn).
+            String sqlDeleteCart = "DELETE ci FROM CartItems ci " +
+                    "JOIN OrderCartItems oci ON oci.CartItemID = ci.CartItemID AND oci.UserID = ci.UserID " +
+                    "WHERE oci.OrderID = ? AND oci.UserID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlDeleteCart)) {
+                ps.setInt(1, orderId);
+                ps.setInt(2, userId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            throw e;
+        } finally {
+            if (conn != null) { conn.setAutoCommit(true); conn.close(); }
+        }
+    }
+
+    @Override
+    public boolean markNonSuccessByPayOSOrderCode(long payOSOrderCode, String newPaymentStatus) throws Exception {
+        // Điều kiện WHERE PaymentStatus = 'PENDING' — không bao giờ ghi đè PAID/CANCELLED đã có.
+        String sql = "UPDATE Orders SET PaymentStatus = ?, StatusUpdatedAt = SYSDATETIME() " +
+                "WHERE PayOSOrderCode = ? AND PaymentStatus = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, newPaymentStatus);
+            ps.setLong(2, payOSOrderCode);
+            ps.setString(3, com.nhietdoixanh.util.PaymentStatuses.PENDING);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    @Override
+    public boolean cancelPayOSPendingByOrderIdAndUserId(int orderId, int userId) throws Exception {
+        String sql = "UPDATE Orders SET PaymentStatus = 'CANCELLED', StatusUpdatedAt = SYSDATETIME() " +
+                "WHERE OrderID = ? AND UserID = ? AND PaymentMethod = 'PAYOS' AND PaymentStatus = 'PENDING'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
     }
 }
