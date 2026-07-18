@@ -9,6 +9,7 @@
     <title>Nhiệt Đới Xanh — Trọn Vị Thanh Mát | Nước Ép & Thức Uống Tươi</title>
     <meta name="description"
         content="Nhiệt Đới Xanh - Nước ép trái cây tươi, cà phê, sinh tố nguyên chất. Giao hỏa tốc 15-20 phút trong khuôn viên trường.">
+    <meta name="csrf-token" content="${sessionScope._csrf}">
 
     <!-- Google Fonts: Be Vietnam Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +21,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
 </head>
 
 <body>
@@ -28,32 +30,7 @@
     <!-- ================================================================
      NAVBAR — Glassmorphism
      ================================================================ -->
-    <nav class="navbar" id="navbar">
-        <div class="container">
-            <a href="#hero" class="navbar-brand">
-                <div class="navbar-logo">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/>
-                    </svg>
-                </div>
-                <div class="navbar-name">Nhiệt Đới <span>Xanh</span></div>
-            </a>
-
-            <div class="nav-links" id="navLinks">
-                <a href="#story">Câu Chuyện</a>
-                <a href="#values">Giá Trị</a>
-                <a href="#menu">Menu</a>
-                <a href="#team">Đội Ngũ</a>
-                <a href="#checkout" class="nav-cta">Đặt Hàng</a>
-            </div>
-
-            <button class="nav-toggle" id="navToggle" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    <%@ include file="/WEB-INF/views/common/customer-header.jsp" %>
 
     <!-- Parallax Leaves (decorative) -->
     <div class="parallax-leaf" style="top:20%;left:3%;" data-speed="0.3">🍃</div>
@@ -108,8 +85,14 @@
     <section class="story section" id="story">
         <div class="container">
             <div class="story-visual reveal">
+                <div class="story-ambient-glow"></div>
                 <div class="story-image-wrapper">
-                    <span class="story-emoji-large">🌿🍊🥤</span>
+                    <div class="story-glow-container">
+                        <div class="story-glow-blob blob-1"></div>
+                        <div class="story-glow-blob blob-2"></div>
+                        <div class="story-glow-blob blob-3"></div>
+                    </div>
+                    <img src="${pageContext.request.contextPath}/images/story.png" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img">
                 </div>
                 <div class="story-stat">
                     <div class="story-stat-number">100%</div>
@@ -343,31 +326,31 @@
 
             <div class="team-grid">
                 <div class="team-card reveal reveal-delay-1">
-                    <img src="https://randomuser.me/api/portraits/women/12.jpg" alt="Oanh" class="team-avatar avatar-oanh">
+                    <img src="${pageContext.request.contextPath}/images/oanh.png" alt="Oanh" class="team-avatar avatar-oanh">
                     <div class="team-name">Oanh</div>
                     <div class="team-role">Founder / Quản lý</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-2">
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Tiên" class="team-avatar avatar-tien">
+                    <img src="${pageContext.request.contextPath}/images/tien.png" alt="Tiên" class="team-avatar avatar-tien">
                     <div class="team-name">Tiên</div>
                     <div class="team-role">Marketing</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-3">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Kỳ" class="team-avatar avatar-ky">
+                    <img src="${pageContext.request.contextPath}/images/ky.png" alt="Kỳ" class="team-avatar avatar-ky">
                     <div class="team-name">Kỳ</div>
                     <div class="team-role">Vận hành</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-4">
-                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Thư" class="team-avatar avatar-thu">
+                    <img src="${pageContext.request.contextPath}/images/thu.png" alt="Thư" class="team-avatar avatar-thu">
                     <div class="team-name">Thư</div>
                     <div class="team-role">Chăm sóc khách hàng</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-5">
-                    <img src="https://randomuser.me/api/portraits/women/90.jpg" alt="Trúc" class="team-avatar avatar-truc">
+                    <img src="${pageContext.request.contextPath}/images/truc.png" alt="Trúc" class="team-avatar avatar-truc">
                     <div class="team-name">Trúc</div>
                     <div class="team-role">Tài chính</div>
                 </div>
@@ -491,6 +474,8 @@
     <!-- ================================================================
      JAVASCRIPT
      ================================================================ -->
+    <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+    <script src="${pageContext.request.contextPath}/js/cart.js?v=${initParam.assetVer}"></script>
     <script>
         // ===== Navbar Scroll Effect =====
         const navbar = document.getElementById('navbar');

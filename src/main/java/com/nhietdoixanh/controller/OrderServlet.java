@@ -1,26 +1,37 @@
 package com.nhietdoixanh.controller;
 
-import com.nhietdoixanh.dao.OrderDAO;
-import com.nhietdoixanh.model.Order;
+import com.nhietdoixanh.model.CheckoutSelection;
+import com.nhietdoixanh.model.User;
+import com.nhietdoixanh.util.AuditLogger;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
 /**
- * Servlet xử lý đơn đặt hàng (POST).
+ * Servlet xử lý form "Đặt hàng nhanh" trên trang chủ (POST) — CHỈ thu thập
+ * thông tin liên hệ (tên/SĐT/địa chỉ), KHÔNG có sản phẩm/số lượng/giá thật.
+ *
+ * ĐÃ VÔ HIỆU HÓA việc tạo Order 0 đồng / không có OrderDetails: trước đây route
+ * này gọi placeOrder() với TotalAmount=FinalAmount=0 và danh sách sản phẩm rỗng,
+ * tạo ra các đơn hàng "ma" trong bảng Orders. OrderDaoImpl.placeOrder() giờ từ
+ * chối đơn không có item / có FinalAmount <= 0 (xem OrderDaoImpl.java).
+ *
+ * Hành vi mới: lưu yêu cầu liên hệ này lại (audit log) và chuyển hướng người
+ * dùng sang trang cảm ơn với thông báo sẽ được liên hệ lại — KHÔNG tạo Order
+ * giả trong DB. Route /cart, /checkout thật sẽ thay thế hoàn toàn form này ở
+ * prompt sau (giỏ hàng + chọn sản phẩm + giá thật).
+ *
  * - Validation: Kiểm tra dữ liệu đầu vào
  * - Chống XSS: Escape HTML entities khi trả lỗi về JSP
- * - Thành công: Redirect về trang cảm ơn
  */
 @WebServlet(name = "OrderServlet", urlPatterns = "/order")
 public class OrderServlet extends HttpServlet {
-
-    private final OrderDAO orderDAO = new OrderDAO();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -28,6 +39,19 @@ public class OrderServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
+
+        // Nếu user đã đăng nhập và đang có một checkoutSelection hợp lệ (từ /cart), đây rõ ràng
+        // là ý định thanh toán giỏ hàng thật — chuyển hướng sang /checkout thay vì xử lý như
+        // form liên hệ nhanh của trang chủ (form này KHÔNG có sản phẩm/giá thật).
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
+        if (user != null) {
+            CheckoutSelection selection = (CheckoutSelection) session.getAttribute("checkoutSelection");
+            if (selection != null && selection.isUsableBy(user.getUserId())) {
+                response.sendRedirect(request.getContextPath() + "/checkout");
+                return;
+            }
+        }
 
         // Lấy dữ liệu từ form
         String customerName = request.getParameter("customerName");
@@ -62,30 +86,25 @@ public class OrderServlet extends HttpServlet {
             return;
         }
 
-        // ===== XỬ LÝ ĐẶT HÀNG =====
-        Order order = new Order(
-                customerName.trim(),
-                phoneNumber.trim(),
-                shippingAddress.trim(),
-                orderNote != null ? orderNote.trim() : ""
-        );
+        // ===== GHI NHẬN YÊU CẦU LIÊN HỆ (KHÔNG tạo Order 0 đồng trong DB) =====
+        // Form này chưa có sản phẩm/số lượng/giá thật nên KHÔNG đủ dữ liệu để
+        // tạo một Order hợp lệ. Route /cart + /checkout thật (giỏ hàng, giá lấy
+        // từ ProductVariants) sẽ thay thế hoàn toàn form này.
+        String detail = "Tên: " + customerName.trim()
+                + " | SĐT: " + phoneNumber.trim()
+                + " | Địa chỉ: " + shippingAddress.trim()
+                + (orderNote != null && !orderNote.isBlank() ? " | Ghi chú: " + orderNote.trim() : "");
+        AuditLogger.log(request, null, "HOMEPAGE_ORDER_FORM_SUBMIT", phoneNumber.trim(), detail);
 
-        boolean success = orderDAO.insertOrder(order);
-
-        if (success) {
-            // Redirect (PRG Pattern) để tránh duplicate submit
-            response.sendRedirect(request.getContextPath() + "/thankyou");
-        } else {
-            request.setAttribute("errorMessage", "Hệ thống đang bận, vui lòng thử lại sau.");
-            request.getRequestDispatcher("/index.jsp").forward(request, response);
-        }
+        // Redirect (PRG Pattern) để tránh duplicate submit
+        response.sendRedirect(request.getContextPath() + "/thankyou");
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Không cho phép GET → redirect về trang chủ
-        response.sendRedirect(request.getContextPath() + "/");
+        // Không cho phép GET — route /order chỉ nhận POST từ form liên hệ nhanh trang chủ.
+        response.sendRedirect(request.getContextPath() + "/san-pham");
     }
 
     /**

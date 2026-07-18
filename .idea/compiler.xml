@@ -6,7 +6,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ThanhTruc_Project_WebDesigning" />
         <module name="NhietDoiXanh_Web" />
       </profile>
     </annotationProcessing>

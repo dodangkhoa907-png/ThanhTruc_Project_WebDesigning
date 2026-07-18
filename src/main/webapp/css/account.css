@@ -1,0 +1,373 @@
+/* ================================================================
+   ACCOUNT — /account, /account/orders, /account/orders/detail,
+   /account/profile, /account/addresses, /account/preferences, /account/security
+   (Modern Tropical — dùng chung biến từ style.css)
+   ================================================================ */
+
+/* ===== Form field (dùng chung cho profile/address/preferences/security) ===== */
+.account-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.account-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.account-field-full { grid-column: 1 / -1; }
+.account-field label { font-size: 0.84rem; font-weight: 700; color: var(--green-dark); }
+.account-field label .required { color: #b44242; margin-left: 2px; }
+
+.account-field input[type="text"],
+.account-field input[type="tel"],
+.account-field input[type="email"],
+.account-field input[type="password"],
+.account-field input[type="number"],
+.account-field select,
+.account-field textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 0.92rem;
+    color: var(--text-body);
+    background: var(--cream);
+    transition: var(--transition);
+    outline: none;
+}
+
+.account-field textarea { resize: vertical; min-height: 84px; }
+
+.account-field input:focus,
+.account-field select:focus,
+.account-field textarea:focus {
+    border-color: var(--green);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(42,92,56,0.08);
+}
+
+.account-field.has-error input,
+.account-field.has-error select,
+.account-field.has-error textarea { border-color: #b44242; background: rgba(180,66,66,0.04); }
+
+.account-field-error { font-size: 0.78rem; color: #b44242; font-weight: 600; margin-top: 2px; }
+.account-field-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
+
+/* ===== Avatar upload ===== */
+.account-avatar-upload { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
+.account-avatar-preview {
+    width: 88px; height: 88px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--cream-warm); flex-shrink: 0;
+}
+.account-avatar-upload input[type="file"] { display: none; }
+.account-avatar-upload-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 6px; }
+
+/* ===== Radio/checkbox option cards (payment-method-style — dùng cho preferences/space type) ===== */
+.account-option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.account-option-card {
+    display: flex; align-items: center; gap: 10px;
+    border: 1.5px solid var(--border); border-radius: 14px; padding: 13px 16px;
+    cursor: pointer; transition: var(--transition); font-size: 0.86rem; font-weight: 600; color: var(--text-body);
+}
+.account-option-card:has(input:checked) { border-color: var(--green); background: rgba(42,92,56,0.05); color: var(--green-dark); }
+.account-option-card input { accent-color: var(--green); }
+
+/* ===== Address cards ===== */
+.account-address-card {
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 14px;
+    position: relative;
+}
+.account-address-card.is-default { border-color: var(--green); background: rgba(42,92,56,0.03); }
+.account-address-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.account-address-label { font-weight: 800; color: var(--green-dark); font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+.account-default-badge {
+    font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em;
+    background: rgba(42,92,56,0.12); color: var(--green-dark); padding: 3px 10px; border-radius: 50px;
+}
+.account-address-body { font-size: 0.86rem; color: var(--text-body); line-height: 1.7; margin-bottom: 14px; }
+.account-address-body b { color: var(--green-dark); }
+.account-address-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.account-address-actions form { display: inline; }
+.account-address-actions .btn-shop { padding: 8px 16px; font-size: 0.78rem; }
+
+/* ===== GPS button (dùng lại pattern checkout) ===== */
+.account-gps-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: -4px 0 18px; }
+.account-gps-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 50px; border: 1.5px solid var(--green);
+    background: var(--white); color: var(--green); font-size: 0.82rem; font-weight: 700;
+    cursor: pointer; transition: var(--transition); white-space: nowrap;
+}
+.account-gps-btn:hover { background: var(--green); color: var(--white); }
+.account-gps-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.account-gps-status { font-size: 0.8rem; color: var(--text-muted); }
+.account-gps-status.is-success { color: var(--green); font-weight: 700; }
+.account-gps-status.is-error { color: #b45f24; font-weight: 600; }
+
+/* ===== Toast (success/error, dùng cho các action AJAX-free — flash message dạng nổi) ===== */
+.account-toast-stack { position: fixed; top: 100px; right: 24px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+
+.account-page-header { margin-bottom: 22px; }
+.account-page-title { font-size: clamp(1.5rem, 3vw, 1.9rem); font-weight: 900; color: var(--green-dark); }
+.account-page-subtitle { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+
+.account-shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 26px;
+    align-items: start;
+}
+
+/* ===== Sidebar ===== */
+.account-sidebar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 18px;
+    position: sticky;
+    top: 100px;
+}
+
+.account-nav { display: flex; flex-direction: column; gap: 4px; }
+
+.account-nav a,
+.account-nav button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    font-family: var(--font);
+    color: var(--text-body);
+    transition: var(--transition);
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.account-nav a i,
+.account-nav button i { width: 18px; text-align: center; color: var(--green-light); }
+.account-nav a:hover,
+.account-nav button:hover { background: var(--cream-dark); color: var(--green-dark); }
+.account-nav a.active { background: var(--green); color: var(--white); }
+.account-nav a.active i { color: var(--white); }
+.account-nav a.is-disabled { color: var(--text-muted); cursor: default; opacity: 0.65; }
+.account-nav a.is-disabled:hover { background: none; }
+.account-nav form { margin: 0; }
+.account-nav-soon { margin-left: auto; font-size: 0.66rem; font-weight: 800; text-transform: uppercase; background: var(--cream-warm); color: #b45f24; padding: 2px 8px; border-radius: 50px; }
+.account-nav-divider { height: 1px; background: var(--border); margin: 10px 4px; }
+
+/* ===== Profile summary card ===== */
+.account-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 18px rgba(42,92,56,0.05);
+    flex-wrap: wrap;
+}
+
+.account-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 3px solid var(--cream-warm);
+}
+
+.account-profile-info { flex: 1; min-width: 220px; }
+.account-profile-name { font-size: 1.25rem; font-weight: 900; color: var(--green-dark); }
+.account-profile-nickname { font-size: 0.86rem; color: var(--text-muted); margin-top: 2px; }
+
+.account-tier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    background: linear-gradient(120deg, var(--gold), var(--gold-light));
+    color: var(--green-dark);
+}
+
+.account-profile-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-top: 14px;
+    font-size: 0.84rem;
+    color: var(--text-body);
+}
+
+.account-profile-meta span { display: flex; align-items: center; gap: 7px; }
+.account-profile-meta i { color: var(--green-light); }
+
+.account-tier-progress { width: 100%; margin-top: 6px; }
+.account-tier-progress-track { height: 8px; background: var(--cream-dark); border-radius: 50px; overflow: hidden; margin-top: 6px; }
+.account-tier-progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-light), var(--green)); border-radius: 50px; }
+.account-tier-progress-text { font-size: 0.76rem; color: var(--text-muted); margin-top: 6px; }
+
+/* ===== Stat cards ===== */
+.account-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.account-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 4px 18px rgba(42,92,56,0.05);
+}
+
+.account-stat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    background: rgba(42,92,56,0.1);
+    color: var(--green);
+}
+
+.account-stat-icon.gold { background: rgba(244,162,97,0.15); color: #B96A2E; }
+.account-stat-icon.coral { background: rgba(180,66,66,0.1); color: #b44242; }
+
+.account-stat-value { font-family: var(--font); font-size: 1.4rem; font-weight: 900; color: var(--green-dark); line-height: 1.1; }
+.account-stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+
+/* ===== Generic content card ===== */
+.account-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 26px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 18px rgba(42,92,56,0.05);
+}
+
+.account-card-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 1.02rem; font-weight: 800; color: var(--green-dark); margin-bottom: 18px; }
+.account-card-title i { color: var(--gold); margin-right: 8px; }
+.account-card-title a { font-size: 0.82rem; font-weight: 700; color: var(--green); }
+
+/* ===== Order list ===== */
+.account-filter-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
+.account-filter-bar .f-group { display: flex; flex-direction: column; gap: 6px; }
+.account-filter-bar label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
+.account-filter-bar input, .account-filter-bar select {
+    padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 11px;
+    font-family: var(--font); font-size: 0.88rem; color: var(--text-body); background: var(--cream);
+}
+.account-filter-bar input:focus, .account-filter-bar select:focus { outline: none; border-color: var(--green); background: var(--white); }
+.account-filter-bar .f-search { flex: 1; min-width: 200px; }
+
+.account-order-list { display: flex; flex-direction: column; gap: 14px; }
+
+.account-order-card {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    transition: var(--transition);
+}
+
+.account-order-card:hover { border-color: var(--green-light); box-shadow: 0 8px 26px rgba(42,92,56,0.08); }
+
+.account-order-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.account-order-id { font-weight: 900; color: var(--green-dark); font-size: 1rem; }
+.account-order-date { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+.account-order-badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.account-order-products { font-size: 0.86rem; color: var(--text-body); margin-bottom: 12px; line-height: 1.6; }
+
+.account-order-card-bottom { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; padding-top: 12px; border-top: 1px dashed var(--border); }
+.account-order-total { font-weight: 900; color: var(--green-dark); font-size: 1.05rem; }
+.account-order-total small { display: block; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+.account-order-actions { display: flex; gap: 10px; }
+
+/* ===== Status badges (dùng chung tên lớp cho order + payment) ===== */
+.acc-badge { padding: 5px 13px; border-radius: 50px; font-size: 0.72rem; font-weight: 800; display: inline-block; white-space: nowrap; }
+.acc-badge-PENDING { background: rgba(244,162,97,0.15); color: #B96A2E; }
+.acc-badge-CONFIRMED { background: rgba(57,101,255,0.12); color: #3965FF; }
+.acc-badge-SHIPPING { background: rgba(122,90,248,0.12); color: #7A5AF8; }
+.acc-badge-DONE { background: rgba(42,92,56,0.12); color: var(--green-dark); }
+.acc-badge-CANCELLED { background: rgba(180,66,66,0.1); color: #b44242; }
+.acc-badge-PENDING_CANCEL { background: rgba(180,66,66,0.08); color: #b45f24; }
+.acc-badge-UNPAID { background: var(--cream-dark); color: var(--text-muted); }
+.acc-badge-PAID { background: rgba(42,92,56,0.12); color: var(--green-dark); }
+.acc-badge-FAILED { background: rgba(180,66,66,0.1); color: #b44242; }
+.acc-badge-REFUND_PENDING { background: rgba(244,162,97,0.15); color: #B96A2E; }
+
+/* ===== Pagination ===== */
+.account-pager { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 22px; }
+.account-pager a, .account-pager span { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; font-weight: 700; font-size: 0.82rem; color: var(--text-body); }
+.account-pager a { background: var(--cream-dark); }
+.account-pager a:hover { background: var(--cream-warm); }
+.account-pager span.current { background: var(--green); color: var(--white); }
+
+/* ===== Order detail ===== */
+.account-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; align-items: start; }
+.account-kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px 14px; font-size: 0.9rem; }
+.account-kv dt { color: var(--text-muted); font-weight: 600; }
+.account-kv dd { font-weight: 600; color: var(--text-body); }
+
+.account-detail-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+.account-detail-item:last-child { border-bottom: none; }
+.account-detail-item .name { font-weight: 700; color: var(--green-dark); }
+.account-detail-item .meta { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; }
+.account-detail-total { display: flex; justify-content: space-between; font-weight: 900; font-size: 1.05rem; padding-top: 14px; color: var(--green-dark); }
+
+.account-cancel-note { background: rgba(180,66,66,0.08); border-radius: 12px; padding: 14px 16px; font-size: 0.84rem; color: #8a3030; margin-bottom: 18px; }
+
+.account-timeline { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+.account-timeline li { display: flex; gap: 12px; }
+.account-timeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; }
+.account-timeline .tl-body b { display: block; font-size: 0.88rem; color: var(--text-body); font-weight: 700; }
+.account-timeline .tl-body span { font-size: 0.76rem; color: var(--text-muted); }
+
+.account-cancel-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.account-cancel-form textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px;
+    font-family: var(--font); font-size: 0.88rem; resize: vertical; min-height: 80px; background: var(--cream);
+}
+.account-cancel-form textarea:focus { outline: none; border-color: var(--green); background: var(--white); }
+
+.account-flash { padding: 14px 18px; border-radius: 14px; margin-bottom: 20px; font-size: 0.88rem; font-weight: 600; }
+.account-flash.success { background: rgba(42,92,56,0.1); color: var(--green-dark); }
+.account-flash.error { background: rgba(180,66,66,0.08); color: #8a3030; }
+
+@media (max-width: 980px) {
+    .account-shell { grid-template-columns: 1fr; }
+    .account-sidebar { position: static; }
+    .account-nav { flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; }
+    .account-nav a { white-space: nowrap; flex-shrink: 0; }
+    .account-nav-divider { display: none; }
+    .account-stats { grid-template-columns: 1fr 1fr; }
+    .account-detail-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+    .account-profile-card { flex-direction: column; text-align: center; }
+    .account-profile-meta { justify-content: center; }
+    .account-stats { grid-template-columns: 1fr; }
+    .account-card { padding: 18px; }
+    .account-order-card-bottom { flex-direction: column; align-items: stretch; }
+    .account-order-actions { flex-direction: column; }
+    .account-order-actions .btn-shop { width: 100%; justify-content: center; }
+}
