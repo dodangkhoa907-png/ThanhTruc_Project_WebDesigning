@@ -2,7 +2,9 @@
 <%-- Shared customer navbar. Included via <%@ include %> so it shares the
      caller's pageContext/taglibs. Requires request attribute "currentPage"
      to be set by the caller's servlet for active-state highlighting
-     ("menu" | "products" | "cart" | "account"); Home sets nothing and highlights nothing. --%>
+     ("products" | "cart" | "account"); Home sets nothing and highlights nothing.
+     "menu" vẫn được chấp nhận cho tương thích ngược (route /thuc-don cũ đã redirect
+     sang /san-pham nên currentPage="menu" không còn servlet nào set nữa). --%>
 <nav class="navbar" id="navbar">
     <div class="container">
         <a href="${pageContext.request.contextPath}/" class="navbar-brand">
@@ -17,10 +19,8 @@
         <div class="nav-links" id="navLinks">
             <a href="${pageContext.request.contextPath}/#story">Câu Chuyện</a>
             <a href="${pageContext.request.contextPath}/#values">Giá Trị</a>
-            <a href="${pageContext.request.contextPath}/thuc-don"
-               class="${currentPage == 'menu' ? 'active' : ''}">Thực Đơn</a>
             <a href="${pageContext.request.contextPath}/san-pham"
-               class="${currentPage == 'products' ? 'active' : ''}">Sản Phẩm</a>
+               class="${(currentPage == 'products' || currentPage == 'menu') ? 'active' : ''}">Sản Phẩm</a>
             <a href="${pageContext.request.contextPath}/#team">Đội Ngũ</a>
             <a href="${pageContext.request.contextPath}/cart"
                class="nav-cart-link ${currentPage == 'cart' ? 'active' : ''}" aria-label="Giỏ hàng">

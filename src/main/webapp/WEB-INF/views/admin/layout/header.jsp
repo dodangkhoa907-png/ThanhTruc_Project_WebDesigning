@@ -49,9 +49,11 @@
         .sidebar-menu a.soon:hover{background:none;color:rgba(255,255,255,.72)}
         .soon-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;background:rgba(244,162,97,.2);color:var(--admin-gold);padding:3px 8px;border-radius:20px}
         .side-foot{padding:16px 20px;border-top:1px solid rgba(255,255,255,.1)}
-        .side-foot a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-weight:600;font-size:14px;transition:background .2s}
+        .side-foot a,.side-foot .logout{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;font-weight:600;font-size:14px;transition:background .2s}
         .side-foot a.store{color:var(--admin-gold)}.side-foot a.store:hover{background:rgba(244,162,97,.14)}
-        .side-foot a.logout{color:#FF9B93}.side-foot a.logout:hover{background:rgba(217,83,79,.16)}
+        .side-foot .logout-form{margin:0}
+        .side-foot button.logout{width:100%;border:none;background:none;cursor:pointer;color:#FF9B93;text-align:left;font-family:inherit}
+        .side-foot button.logout:hover{background:rgba(217,83,79,.16)}
 
         .main-content{flex:1;margin-left:264px;padding:26px 30px 40px;display:flex;flex-direction:column;width:calc(100% - 264px);min-width:0}
         .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;background:var(--admin-surface);padding:16px 26px;border-radius:18px;box-shadow:0 8px 22px -14px rgba(30,63,39,.18)}
@@ -64,6 +66,7 @@
         .admin-user .u-name{font-weight:700;font-size:14px;line-height:1.2}
         .admin-user .u-role{font-size:12px;color:var(--admin-text-light);font-weight:600;text-transform:capitalize}
         .admin-user img{width:40px;height:40px;border-radius:11px;object-fit:cover}
+        .admin-user .u-avatar{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2A5C38,#1E3F27);color:#fff;font-weight:800;font-size:16px;text-transform:uppercase;flex-shrink:0}
 
         .card{background:var(--admin-surface);border-radius:18px;padding:24px;box-shadow:0 8px 22px -16px rgba(30,63,39,.2);margin-bottom:24px}
         .btn{padding:11px 20px;border-radius:11px;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
@@ -151,7 +154,10 @@
         </div>
         <div class="side-foot">
             <a href="${ctx}/" class="store"><i class="fa-solid fa-store"></i> Xem cửa hàng</a>
-            <a href="${ctx}/admin/logout" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+            <form method="post" action="${ctx}/admin/logout" class="logout-form">
+                <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
+                <button type="submit" class="logout"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+            </form>
         </div>
     </aside>
 
@@ -167,7 +173,7 @@
                         <div class="u-name"><c:out value="${sessionScope.adminUser.fullName}"/></div>
                         <div class="u-role"><c:out value="${fn:toLowerCase(sessionScope.adminUser.role)}"/></div>
                     </div>
-                    <img src="https://ui-avatars.com/api/?name=${fn:escapeXml(sessionScope.adminUser.fullName)}&background=2A5C38&color=fff&bold=true" alt="Avatar">
+                    <div class="u-avatar" aria-hidden="true"><c:out value="${not empty sessionScope.adminUser.fullName ? fn:substring(sessionScope.adminUser.fullName, 0, 1) : 'A'}"/></div>
                 </div>
             </div>
         </header>

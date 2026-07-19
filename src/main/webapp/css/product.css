@@ -1210,6 +1210,107 @@
 .checkout-gps-status.is-success { color: var(--green); font-weight: 700; }
 .checkout-gps-status.is-error { color: #b45f24; font-weight: 600; }
 
+.checkout-gps-state { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+.checkout-gps-state.is-success { color: var(--green); }
+
+.checkout-gps-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 18px;
+    background: var(--cream-warm);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin: -6px 0 18px;
+}
+
+.checkout-gps-card.is-hidden { display: none; }
+
+.checkout-gps-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--green-dark);
+    font-size: 0.85rem;
+    flex-basis: 100%;
+}
+
+.checkout-gps-card-head i { color: var(--green); }
+
+.checkout-gps-card-coords {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text-body);
+}
+
+.checkout-gps-clear-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: #b45f24;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.checkout-gps-clear-btn:hover { text-decoration: underline; }
+
+.checkout-gps-error {
+    font-size: 0.82rem;
+    color: #b45f24;
+    background: rgba(180,95,36,0.08);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: -6px 0 18px;
+}
+
+.checkout-gps-error[hidden] { display: none; }
+
+.checkout-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.checkout-card-title-row .checkout-card-title { margin-bottom: 0; }
+
+.checkout-manage-address-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.checkout-manage-address-link:hover { color: var(--green-dark); text-decoration: underline; }
+
+.checkout-address-hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--cream-warm);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: var(--text-body);
+    margin-bottom: 16px;
+}
+
+.checkout-address-hint i { color: var(--gold); font-size: 1rem; }
+
 .checkout-payment-options { display: flex; flex-direction: column; gap: 12px; }
 
 .checkout-payment-option {

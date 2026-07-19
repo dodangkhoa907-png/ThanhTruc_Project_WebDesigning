@@ -83,23 +83,23 @@
   }
 }</component>
   <component name="RunManager">
-    <configuration name="Khoa" type="com.poratu.idea.plugins.tomcat">
+    <configuration name="Unnamed" type="com.poratu.idea.plugins.tomcat" nameIsGenerated="true">
       <predefined_log_file enabled="true" id="Tomcat Localhost Log" />
       <predefined_log_file enabled="true" id="Tomcat Access Log" />
       <predefined_log_file id="Tomcat Catalina Log" />
       <predefined_log_file id="Tomcat Manager Log" />
       <predefined_log_file id="Tomcat Host Manager Log" />
       <option name="adminPort" value="8001" />
-      <option name="catalinaBase" value="C:\Users\KHOA\.SmartTomcat\ThanhTruc_Project_WebDesigning\ThanhTruc_Project_WebDesigning" />
+      <option name="catalinaBase" value="$USER_HOME$/.SmartTomcat/ThanhTruc_Project_WebDesigning/NhietDoiXanh_Web" />
       <option name="contextPath" value="/NhietDoiXanh_Web" />
       <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
       <option name="extraClassPath" value="" />
       <option name="port" value="8083" />
       <option name="tomcatInfo">
         <TomcatInfo>
-          <option name="name" value="Apache Tomcat/10.1.54" />
-          <option name="path" value="$PROJECT_DIR$/../../../SAVE_KHOA/apache-tomcat-10.1.54-windows-x64/apache-tomcat-10.1.54" />
-          <option name="version" value="10.1.54.0" />
+          <option name="name" value="Apache Tomcat/10.1.55 (2)" />
+          <option name="path" value="$PROJECT_DIR$/../apache-tomcat-10.1.55" />
+          <option name="version" value="10.1.55.0" />
         </TomcatInfo>
       </option>
       <option name="vmOptions" value="" />
