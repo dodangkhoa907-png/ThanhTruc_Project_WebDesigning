@@ -6,6 +6,8 @@ import com.nhietdoixanh.model.CartItem;
 import com.nhietdoixanh.model.Order;
 import com.nhietdoixanh.model.OrderAdminFilter;
 import com.nhietdoixanh.model.OrderDetail;
+import com.nhietdoixanh.model.OrderTabCounts;
+import com.nhietdoixanh.model.ProductRevenueRow;
 
 import java.math.BigDecimal;
 import java.security.SecureRandom;
@@ -305,6 +307,18 @@ public class OrderDaoImpl implements OrderDAO {
         }
     }
 
+    @Override
+    public boolean shipOrderWithHandler(int orderId, int handlerStaffId) throws Exception {
+        String sql = "UPDATE Orders SET OrderStatus = 'SHIPPING', StatusUpdatedAt = SYSDATETIME(), HandledBy = ? " +
+                "WHERE OrderID = ? AND OrderStatus = 'CONFIRMED'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, handlerStaffId);
+            ps.setInt(2, orderId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     private Order mapRow(ResultSet rs) throws SQLException {
         Order o = new Order();
         o.setOrderId(rs.getInt("OrderID"));
@@ -337,6 +351,7 @@ public class OrderDaoImpl implements OrderDAO {
         o.setRecipientPhone(rs.getString("RecipientPhone"));
         o.setShippingLatitude(rs.getBigDecimal("ShippingLatitude"));
         o.setShippingLongitude(rs.getBigDecimal("ShippingLongitude"));
+        o.setReceivedConfirmedAt(rs.getTimestamp("ReceivedConfirmedAt"));
         return o;
     }
 
@@ -681,6 +696,12 @@ public class OrderDaoImpl implements OrderDAO {
                 clauses.add("o.CreatedAt < ?");
                 params.add(Timestamp.valueOf(filter.getToDate().plusDays(1).atStartOfDay()));
             }
+            // Điều kiện tĩnh, không cần bind tham số — chỉ có ý nghĩa thực khi kết hợp orderStatus=DONE.
+            if (filter.getReceivedConfirmed() != null) {
+                clauses.add(filter.getReceivedConfirmed()
+                        ? "o.ReceivedConfirmedAt IS NOT NULL"
+                        : "o.ReceivedConfirmedAt IS NULL");
+            }
         }
 
         String where = clauses.isEmpty() ? "" : "WHERE " + String.join(" AND ", clauses) + " ";
@@ -915,6 +936,76 @@ public class OrderDaoImpl implements OrderDAO {
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, orderId);
             ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    @Override
+    public List<ProductRevenueRow> findProductRevenueRowsForAdmin() {
+        List<ProductRevenueRow> list = new ArrayList<>();
+        String sql = "SELECT c.CategoryName, p.ProductName, od.Quantity, od.SubTotal " +
+                "FROM OrderDetails od " +
+                "JOIN Orders o ON od.OrderID = o.OrderID " +
+                "JOIN ProductVariants v ON od.VariantID = v.VariantID " +
+                "JOIN Products p ON v.ProductID = p.ProductID " +
+                "LEFT JOIN Categories c ON p.CategoryID = c.CategoryID " +
+                "WHERE o.OrderStatus <> 'CANCELLED'";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ProductRevenueRow row = new ProductRevenueRow();
+                row.setCategoryName(rs.getNString("CategoryName"));
+                row.setProductName(rs.getNString("ProductName"));
+                row.setQuantity(rs.getInt("Quantity"));
+                row.setSubTotal(rs.getBigDecimal("SubTotal"));
+                list.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public OrderTabCounts countOrdersByTab() {
+        OrderTabCounts c = new OrderTabCounts();
+        String sql = "SELECT COUNT(*) AS AllCount, " +
+                "SUM(CASE WHEN OrderStatus='PENDING' THEN 1 ELSE 0 END) AS PendingCount, " +
+                "SUM(CASE WHEN OrderStatus='CONFIRMED' THEN 1 ELSE 0 END) AS ConfirmedCount, " +
+                "SUM(CASE WHEN OrderStatus='SHIPPING' THEN 1 ELSE 0 END) AS ShippingCount, " +
+                "SUM(CASE WHEN OrderStatus='DONE' AND ReceivedConfirmedAt IS NULL THEN 1 ELSE 0 END) AS AwaitingConfirmCount, " +
+                "SUM(CASE WHEN OrderStatus='DONE' AND ReceivedConfirmedAt IS NOT NULL THEN 1 ELSE 0 END) AS CompletedCount " +
+                "FROM Orders";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                c.setAll(rs.getInt("AllCount"));
+                c.setPending(rs.getInt("PendingCount"));
+                c.setConfirmed(rs.getInt("ConfirmedCount"));
+                c.setShipping(rs.getInt("ShippingCount"));
+                c.setAwaitingConfirm(rs.getInt("AwaitingConfirmCount"));
+                c.setCompleted(rs.getInt("CompletedCount"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return c;
+    }
+
+    @Override
+    public boolean confirmDeliveryByAdmin(int orderId) throws Exception {
+        // Đối soát chéo COD: admin chốt hoàn thành nghĩa là đã xác nhận thu tiền tận nơi —
+        // chuyển luôn PaymentStatus UNPAID -> PAID tại đây (PayOS đã PAID từ trước qua webhook,
+        // điều kiện PaymentStatus='UNPAID' đảm bảo không ghi đè PAID/FAILED/REFUND_PENDING đã có).
+        String sql = "UPDATE Orders SET ReceivedConfirmedAt = SYSDATETIME(), " +
+                "PaymentStatus = CASE WHEN PaymentMethod = 'COD' AND PaymentStatus = 'UNPAID' THEN 'PAID' ELSE PaymentStatus END, " +
+                "PaidAt = CASE WHEN PaymentMethod = 'COD' AND PaymentStatus = 'UNPAID' THEN SYSDATETIME() ELSE PaidAt END " +
+                "WHERE OrderID = ? AND OrderStatus = 'DONE' AND ReceivedConfirmedAt IS NULL";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, orderId);
             return ps.executeUpdate() > 0;
         }
     }

@@ -37,7 +37,7 @@ public class AuthFilter implements Filter {
 
         if (isAdminArea) {
             Staff admin = (session != null) ? (Staff) session.getAttribute("adminUser") : null;
-            if (admin != null && admin.isActive()) {
+            if (admin != null && admin.isActive() && "ADMIN".equals(admin.getRole())) {
                 chain.doFilter(request, response);
             } else {
                 res.sendRedirect(loginUri);

@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Phản Hồi Khách Hàng — Nhiệt Đới Xanh</title>
+
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ================================================================
+           DESIGN SYSTEM & VARIABLES
+           ================================================================ */
+        :root {
+            --font-family: 'Be Vietnam Pro', sans-serif;
+            --primary: #10ac84;        /* Green */
+            --primary-light: #1dd1a1;
+            --secondary: #ff9f43;      /* Orange for Editing */
+            --secondary-dark: #ee5253; /* Warm Red/Orange */
+            --dark: #222f3e;
+            --text-muted: #576574;
+            --bg-gradient: linear-gradient(135deg, #fffcf5 0%, #f4fdf8 50%, #effaf5 100%);
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.35);
+            --glass-shadow: 0 8px 32px 0 rgba(16, 172, 132, 0.08);
+            --glass-shadow-hover: 0 12px 40px 0 rgba(16, 172, 132, 0.15);
+            --border-radius-lg: 24px;
+            --border-radius-md: 16px;
+            --border-radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-gradient);
+            color: var(--dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ================================================================
+           HEADER
+           ================================================================ */
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1e3f27;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .dashboard-header h1 span {
+            color: var(--primary);
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* ================================================================
+           GRID LAYOUT
+           ================================================================ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ================================================================
+           GLASSMORPHISM CARDS (FORM & CONTENT)
+           ================================================================ */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--glass-shadow);
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            box-shadow: var(--glass-shadow-hover);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e3f27;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+        }
+
+        /* ================================================================
+           FORM STYLING
+           ================================================================ */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            font-family: var(--font-family);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(16, 172, 132, 0.2);
+            border-radius: var(--border-radius-md);
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: var(--dark);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16, 172, 132, 0.1);
+        }
+
+        textarea.form-input {
+            resize: none;
+            height: 100px;
+        }
+
+        /* Character Counter */
+        .char-counter {
+            position: absolute;
+            bottom: -18px;
+            right: 4px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Star Rating Custom Selector */
+        .star-rating-select {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(16, 172, 132, 0.2);
+            border-radius: var(--border-radius-md);
+            padding: 10px 16px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .star-rating-select select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            color: var(--dark);
+            font-family: var(--font-family);
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            z-index: 2;
+        }
+
+        .star-rating-select::after {
+            content: '\f0d7';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 16px;
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        .star-rating-select:focus-within {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16, 172, 132, 0.1);
+        }
+
+        /* Action Buttons */
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            font-family: var(--font-family);
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 14px 28px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(16, 172, 132, 0.25);
+            background: var(--primary);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            background: var(--primary-light);
+            box-shadow: 0 10px 24px rgba(16, 172, 132, 0.35);
+        }
+
+        .btn-submit.editing-mode {
+            background: var(--secondary);
+            box-shadow: 0 6px 20px rgba(255, 159, 67, 0.25);
+        }
+
+        .btn-submit.editing-mode:hover {
+            background: #ffb061;
+            box-shadow: 0 10px 24px rgba(255, 159, 67, 0.35);
+        }
+
+        .btn-cancel {
+            display: none;
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--text-muted);
+            color: var(--text-muted);
+            font-family: var(--font-family);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 12px;
+            border-radius: 50px;
+            margin-top: 10px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-cancel:hover {
+            background: var(--text-muted);
+            color: #ffffff;
+        }
+
+        /* ================================================================
+           LISTING (CARDS GRID)
+           ================================================================ */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-height: 700px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        /* Custom Scrollbar for listing */
+        .testimonials-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .testimonials-grid::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .testimonials-grid::-webkit-scrollbar-thumb {
+            background: rgba(16, 172, 132, 0.15);
+            border-radius: 10px;
+        }
+        .testimonials-grid::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 172, 132, 0.3);
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: rgba(16, 172, 132, 0.2);
+            margin-bottom: 16px;
+        }
+
+        /* Feedback Card */
+        .feedback-card {
+            background: #ffffff;
+            border-radius: var(--border-radius-md);
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(16, 172, 132, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .feedback-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(16, 172, 132, 0.08);
+            border-color: rgba(16, 172, 132, 0.15);
+        }
+
+        .feedback-card.being-edited {
+            border: 2px dashed var(--secondary);
+            background: rgba(255, 159, 67, 0.02);
+        }
+
+        /* Feedback Header (Avatar & Info) */
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .feedback-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+            box-shadow: 0 4px 10px rgba(16, 172, 132, 0.15);
+        }
+
+        .feedback-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .feedback-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feedback-drink {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(16, 172, 132, 0.08);
+            padding: 2px 8px;
+            border-radius: 50px;
+            display: inline-block;
+        }
+
+        /* Rating Stars */
+        .feedback-stars {
+            color: #feca57;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+        }
+
+        /* Feedback Body */
+        .feedback-body {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+            word-wrap: break-word;
+        }
+
+        /* Feedback Actions */
+        .feedback-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.04);
+            padding-top: 14px;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .btn-action-edit {
+            background: rgba(255, 159, 67, 0.1);
+            color: var(--secondary);
+        }
+
+        .btn-action-edit:hover {
+            background: var(--secondary);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .btn-action-delete {
+            background: rgba(238, 82, 53, 0.1);
+            color: var(--secondary-dark);
+        }
+
+        .btn-action-delete:hover {
+            background: var(--secondary-dark);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        /* ================================================================
+           CUSTOM DIALOG (CONFIRMATION POPUP)
+           ================================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(34, 47, 62, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .confirm-modal {
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .confirm-modal {
+            transform: scale(1);
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            color: var(--secondary-dark);
+            margin-bottom: 16px;
+        }
+
+        .confirm-modal h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .confirm-modal p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: none;
+            font-family: var(--font-family);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 100px;
+        }
+
+        .btn-confirm {
+            background: var(--secondary-dark);
+            color: #ffffff;
+        }
+
+        .btn-confirm:hover {
+            background: #d44243;
+            transform: translateY(-2px);
+        }
+
+        .btn-close-modal {
+            background: #f1f2f6;
+            color: var(--dark);
+        }
+
+        .btn-close-modal:hover {
+            background: #dfe4ea;
+            transform: translateY(-2px);
+        }
+
+        /* ================================================================
+           TOAST NOTIFICATIONS
+           ================================================================ */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: #ffffff;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            pointer-events: none;
+        }
+
+        .toast.toast-error {
+            border-left-color: var(--secondary-dark);
+        }
+
+        .toast.toast-warning {
+            border-left-color: var(--secondary);
+        }
+
+        .toast i {
+            font-size: 1.1rem;
+        }
+
+        .toast-success i { color: var(--primary); }
+        .toast-error i { color: var(--secondary-dark); }
+        .toast-warning i { color: var(--secondary); }
+
+        @keyframes toastIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes toastOut {
+            to {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <h1>Quản Lý <span>Phản Hồi Khách Hàng</span></h1>
+            <p>Module CRUD Testimonials cho trang Marketing của bạn</p>
+        </header>
+
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
+
+            <!-- LEFT: FORM INPUT -->
+            <section class="glass-card">
+                <h2 class="card-title" id="formTitle">
+                    <i class="fa-solid fa-circle-plus"></i> Thêm Phản Hồi Mới
+                </h2>
+
+                <form id="feedbackForm" onsubmit="handleFormSubmit(event)">
+                    <!-- Hidden field to keep track of edited feedback ID -->
+                    <input type="hidden" id="editFeedbackId" value="">
+
+                    <!-- Customer Name -->
+                    <div class="form-group">
+                        <label class="form-label" for="customerName">Tên Khách Hàng</label>
+                        <input type="text" id="customerName" class="form-input" placeholder="VD: Nguyễn Văn A" required>
+                    </div>
+
+                    <!-- Drink Name -->
+                    <div class="form-group">
+                        <label class="form-label" for="drinkName">Đồ Uống Đã Thử</label>
+                        <input type="text" id="drinkName" class="form-input" placeholder="VD: Cam Vắt Nguyên Chất" required>
+                    </div>
+
+                    <!-- Star Rating Select -->
+                    <div class="form-group">
+                        <label class="form-label" for="starRating">Đánh Giá Sao</label>
+                        <div class="star-rating-select">
+                            <select id="starRating" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (5 Sao)</option>
+                                <option value="4">⭐⭐⭐⭐ (4 Sao)</option>
+                                <option value="3">⭐⭐⭐ (3 Sao)</option>
+                                <option value="2">⭐⭐ (2 Sao)</option>
+                                <option value="1">⭐ (1 Sao)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Avatar URL -->
+                    <div class="form-group">
+                        <label class="form-label" for="avatarUrl">URL Ảnh Đại Diện</label>
+                        <input type="url" id="avatarUrl" class="form-input" placeholder="https://domain.com/avatar.jpg">
+                    </div>
+
+                    <!-- Feedback Content -->
+                    <div class="form-group">
+                        <label class="form-label" for="feedbackText">Nội Dung Phản Hồi</label>
+                        <textarea id="feedbackText" class="form-input" maxlength="150" oninput="updateCharCount()" placeholder="Khách hàng nói gì về đồ uống..." required></textarea>
+                        <span class="char-counter"><span id="charCount">0</span>/150 ký tự</span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <button type="submit" id="btnSubmit" class="btn-submit">
+                        <i class="fa-solid fa-paper-plane"></i> <span id="btnSubmitText">Thêm Phản Hồi</span>
+                    </button>
+
+                    <button type="button" id="btnCancel" class="btn-cancel" onclick="cancelEditState()">
+                        <i class="fa-solid fa-xmark"></i> Hủy Cập Nhật
+                    </button>
+                </form>
+            </section>
+
+            <!-- RIGHT: TESTIMONIALS LIST -->
+            <section class="glass-card">
+                <h2 class="card-title">
+                    <i class="fa-solid fa-comments"></i> Danh Sách Phản Hồi
+                </h2>
+
+                <div class="testimonials-grid" id="testimonialsGrid">
+                    <!-- Cards will be dynamically rendered here by JavaScript -->
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMATION DIALOG -->
+    <div class="modal-overlay" id="confirmModalOverlay">
+        <div class="confirm-modal">
+            <div class="modal-icon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3>Xác Nhận Xóa</h3>
+            <p>Bạn có chắc chắn muốn xóa phản hồi này ra khỏi danh sách?</p>
+            <div class="modal-actions">
+                <button class="btn-modal btn-confirm" onclick="executeDelete()">Đồng Ý</button>
+                <button class="btn-modal btn-close-modal" onclick="closeConfirmModal()">Hủy Bỏ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ================================================================
+       JAVASCRIPT BUSINESS LOGIC
+       ================================================================ */ -->
+    <script>
+        // 1. DỮ LIỆU GIẢ LẬP BAN ĐẦU (Array of Objects)
+        let feedbacks = [
+            {
+                id: 1,
+                name: "Khánh Linh",
+                drink: "Ép Cam Dứa Hấu",
+                rating: 5,
+                text: "Nước ép ngon lắm nha mọi người ơi! Cam rất ngọt thanh, không bị gắt đường hóa học. Giao hàng hỏa tốc trong trường siêu nhanh luôn, 10 điểm!",
+                avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120"
+            },
+            {
+                id: 2,
+                name: "Đăng Khoa",
+                drink: "Ép Mix Cam Cà Rốt",
+                rating: 4,
+                text: "Hương vị thơm ngon tự nhiên từ hoa quả chín mọng. Mình rất thích vị chua nhẹ xen lẫn bùi bùi của cà rốt. Sẽ ủng hộ Nhiệt Đới Xanh dài dài.",
+                avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"
+            },
+            {
+                id: 3,
+                name: "Minh Thư",
+                drink: "Nước Ép Thơm",
+                rating: 5,
+                text: "Trái cây siêu tươi, ly nước ép đầy đặn uống đã ghê luôn. Các bạn phục vụ rất nhiệt tình, chu đáo. Cực kỳ recommend vị dứa!",
+                avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=120"
+            }
+        ];
+
+        // Biến toàn cục lưu trữ trạng thái xóa tạm thời
+        let deleteTargetId = null;
+
+        // 2. PHƯƠNG THỨC RENDER DANH SÁCH (READ)
+        function renderFeedbacks() {
+            const grid = document.getElementById("testimonialsGrid");
+            grid.innerHTML = "";
+
+            if (feedbacks.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <p>Chưa có phản hồi nào được ghi nhận. Hãy thêm phản hồi mới!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            feedbacks.forEach(item => {
+                // Tạo icon sao vàng ⭐ dựa theo rating
+                let starsHtml = "";
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= item.rating) {
+                        starsHtml += '<i class="fa-solid fa-star"></i> ';
+                    } else {
+                        starsHtml += '<i class="fa-regular fa-star"></i> ';
+                    }
+                }
+
+                // Kiểm tra avatar mặc định nếu không nhập URL
+                const avatarImg = item.avatar && item.avatar.trim() !== "" 
+                    ? item.avatar 
+                    : "https://api.dicebear.com/7.x/adventurer/svg?seed=" + encodeURIComponent(item.name);
+
+                // Tạo DOM Card
+                const card = document.createElement("div");
+                card.className = "feedback-card";
+                card.setAttribute("data-id", item.id);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="feedback-header">
+                            <img src="${avatarImg}" alt="${item.name}" class="feedback-avatar" onerror="this.src='https://api.dicebear.com/7.x/adventurer/svg?seed=fallback'">
+                            <div class="feedback-info">
+                                <h3 class="feedback-name" title="${item.name}">${item.name}</h3>
+                                <span class="feedback-drink">${item.drink}</span>
+                            </div>
+                        </div>
+                        <div class="feedback-stars">${starsHtml}</div>
+                        <p class="feedback-body">"${item.text}"</p>
+                    </div>
+                    <div class="feedback-actions">
+                        <button type="button" class="btn-action btn-action-edit" onclick="editFeedback(${item.id})" title="Chỉnh sửa">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button type="button" class="btn-action btn-action-delete" onclick="confirmDelete(${item.id})" title="Xóa phản hồi">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 3. XỬ LÝ SUBMIT FORM (CREATE & UPDATE)
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            const editIdVal = document.getElementById("editFeedbackId").value;
+            const name = document.getElementById("customerName").value.trim();
+            const drink = document.getElementById("drinkName").value.trim();
+            const rating = parseInt(document.getElementById("starRating").value);
+            const avatar = document.getElementById("avatarUrl").value.trim();
+            const text = document.getElementById("feedbackText").value.trim();
+
+            if (!name || !drink || !text) {
+                showToast("Vui lòng điền đầy đủ các thông tin bắt buộc!", "error");
+                return;
+            }
+
+            if (editIdVal) {
+                // UPDATE: Đang ở chế độ sửa
+                const id = parseInt(editIdVal);
+                const index = feedbacks.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    feedbacks[index] = { id, name, drink, rating, text, avatar };
+                    showToast("Đã lưu cập nhật phản hồi thành công!", "warning");
+                }
+                cancelEditState();
+            } else {
+                // CREATE: Thêm mới phản hồi
+                const newId = feedbacks.length > 0 ? Math.max(...feedbacks.map(f => f.id)) + 1 : 1;
+                const newFeedback = {
+                    id: newId,
+                    name,
+                    drink,
+                    rating,
+                    text,
+                    avatar
+                };
+                feedbacks.push(newFeedback);
+                showToast("Đã thêm phản hồi khách hàng mới thành công!", "success");
+                clearForm();
+            }
+
+            renderFeedbacks();
+        }
+
+        // 4. ĐƯA DỮ LIỆU LÊN FORM ĐỂ CHỈNH SỬA (UPDATE STATE)
+        function editFeedback(id) {
+            const item = feedbacks.find(f => f.id === id);
+            if (!item) return;
+
+            // Xóa highlight cũ của thẻ đang sửa
+            document.querySelectorAll(".feedback-card").forEach(el => el.classList.remove("being-edited"));
+            
+            // Highlight card đang sửa đổi
+            const targetCard = document.querySelector(`.feedback-card[data-id="${id}"]`);
+            if (targetCard) targetCard.classList.add("being-edited");
+
+            // Fill dữ liệu lên form
+            document.getElementById("editFeedbackId").value = item.id;
+            document.getElementById("customerName").value = item.name;
+            document.getElementById("drinkName").value = item.drink;
+            document.getElementById("starRating").value = item.rating;
+            document.getElementById("avatarUrl").value = item.avatar || "";
+            document.getElementById("feedbackText").value = item.text;
+
+            // Cập nhật số ký tự đếm ngược
+            updateCharCount();
+
+            // Chuyển UI form sang trạng thái Edit
+            document.getElementById("formTitle").innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Cập Nhật Phản Hồi';
+            document.getElementById("btnSubmit").classList.add("editing-mode");
+            document.getElementById("btnSubmitText").textContent = "Lưu Cập Nhật";
+            document.getElementById("btnCancel").style.display = "inline-flex";
+
+            // Cuộn mượt màn hình lên đầu (trên thiết bị di động)
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Hủy bỏ chế độ cập nhật
+        function cancelEditState() {
+            clearForm();
+            document.querySelectorAll(".feedback-card").forEach(el => el.classList.remove("being-edited"));
+            
+            document.getElementById("formTitle").innerHTML = '<i class="fa-solid fa-circle-plus"></i> Thêm Phản Hồi Mới';
+            document.getElementById("btnSubmit").classList.remove("editing-mode");
+            document.getElementById("btnSubmitText").textContent = "Thêm Phản Hồi";
+            document.getElementById("btnCancel").style.display = "none";
+        }
+
+        // 5. XÓA PHẢN HỒI (DELETE)
+        function confirmDelete(id) {
+            deleteTargetId = id;
+            document.getElementById("confirmModalOverlay").classList.add("active");
+        }
+
+        // Hủy việc xóa
+        function closeConfirmModal() {
+            deleteTargetId = null;
+            document.getElementById("confirmModalOverlay").classList.remove("active");
+        }
+
+        // Thực thi việc xóa khỏi danh sách
+        function executeDelete() {
+            if (deleteTargetId !== null) {
+                // Kiểm tra xem item đó có đang hiển thị trên form edit hay không
+                const currentEditId = document.getElementById("editFeedbackId").value;
+                if (currentEditId && parseInt(currentEditId) === deleteTargetId) {
+                    cancelEditState();
+                }
+
+                feedbacks = feedbacks.filter(item => item.id !== deleteTargetId);
+                renderFeedbacks();
+                showToast("Đã xóa phản hồi thành công!", "error");
+            }
+            closeConfirmModal();
+        }
+
+        // ================================================================
+        // UTILITY FUNCTIONS (CLEAR FORM, CHAR COUNTER, TOASTS)
+        // ================================================================
+        
+        // Reset form nhập liệu về trống
+        function clearForm() {
+            document.getElementById("feedbackForm").reset();
+            document.getElementById("editFeedbackId").value = "";
+            document.getElementById("charCount").textContent = "0";
+        }
+
+        // Cập nhật đếm ký tự của textarea
+        function updateCharCount() {
+            const text = document.getElementById("feedbackText").value;
+            document.getElementById("charCount").textContent = text.length;
+        }
+
+        // Tạo & hiển thị Toast Notification
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toastContainer");
+            
+            const toast = document.createElement("div");
+            toast.className = `toast toast-${type}`;
+            
+            let icon = "fa-circle-check";
+            if (type === "error") icon = "fa-circle-xmark";
+            if (type === "warning") icon = "fa-triangle-exclamation";
+
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Tự động xóa toast sau 3.5s
+            setTimeout(() => {
+                toast.style.animation = "toastOut 0.3s ease-in-out forwards";
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3200);
+        }
+
+        // 6. KHỞI CHẠY (INITIALIZE)
+        window.addEventListener("DOMContentLoaded", () => {
+            renderFeedbacks();
+        });
+    </script>
+</body>
+
+</html>

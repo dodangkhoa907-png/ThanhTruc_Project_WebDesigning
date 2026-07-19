@@ -2,14 +2,18 @@ package com.nhietdoixanh.controller.admin;
 
 import com.nhietdoixanh.dao.AuditLogDao;
 import com.nhietdoixanh.dao.OrderDAO;
+import com.nhietdoixanh.dao.StaffDao;
 import com.nhietdoixanh.dao.impl.AuditLogDaoImpl;
 import com.nhietdoixanh.dao.impl.OrderDaoImpl;
+import com.nhietdoixanh.dao.impl.StaffDaoImpl;
 import com.nhietdoixanh.model.Order;
 import com.nhietdoixanh.model.OrderAdminFilter;
+import com.nhietdoixanh.model.OrderTabCounts;
 import com.nhietdoixanh.model.Staff;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.OrderStatuses;
 import com.nhietdoixanh.util.PaymentStatuses;
+import com.nhietdoixanh.util.StaffRoles;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,6 +25,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Admin quản lý đơn hàng — danh sách/tìm kiếm/phân trang, chi tiết, cập nhật
@@ -36,19 +43,25 @@ import java.time.format.DateTimeParseException;
         "/admin/don-hang/chi-tiet",
         "/admin/don-hang/cap-nhat-trang-thai",
         "/admin/don-hang/duyet-huy",
-        "/admin/don-hang/tu-choi-huy"
+        "/admin/don-hang/tu-choi-huy",
+        "/admin/don-hang/chot-hoan-thanh",
+        "/admin/don-hang/giao-van-chuyen"
 })
 public class AdminOrderController extends HttpServlet {
 
     private static final int PAGE_SIZE = 10;
+    /** Số thẻ tối đa render trong hàng đợi khẩn cấp; nếu còn nhiều hơn, JSP hiển thị chú thích. */
+    private static final int QUEUE_LIMIT = 24;
 
     private OrderDAO orderDao;
     private AuditLogDao auditLogDao;
+    private StaffDao staffDao;
 
     @Override
     public void init() {
         orderDao = new OrderDaoImpl();
         auditLogDao = new AuditLogDaoImpl();
+        staffDao = new StaffDaoImpl();
     }
 
     @Override
@@ -70,6 +83,8 @@ public class AdminOrderController extends HttpServlet {
             case "/admin/don-hang/cap-nhat-trang-thai" -> handleUpdateStatus(req, resp);
             case "/admin/don-hang/duyet-huy" -> handleApproveCancel(req, resp);
             case "/admin/don-hang/tu-choi-huy" -> handleRejectCancel(req, resp);
+            case "/admin/don-hang/chot-hoan-thanh" -> handleConfirmDelivery(req, resp);
+            case "/admin/don-hang/giao-van-chuyen" -> handleShipOrder(req, resp);
             default -> resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
@@ -87,6 +102,9 @@ public class AdminOrderController extends HttpServlet {
         String paymentMethod = trimOrNull(req.getParameter("paymentMethod"));
         String fromDateRaw = trimOrNull(req.getParameter("fromDate"));
         String toDateRaw = trimOrNull(req.getParameter("toDate"));
+        // "PENDING" | "CONFIRMED" | null — chỉ có ý nghĩa khi orderStatus=DONE, tách đôi tab
+        // "Chờ xác nhận" / "Thành công" mà không cần thêm giá trị mới vào state machine OrderStatuses.
+        String confirmStateRaw = trimOrNull(req.getParameter("confirmState"));
 
         // Chỉ chấp nhận giá trị filter hợp lệ đã biết — không đẩy thẳng input thô vào SQL param
         // nếu nó không khớp danh sách trạng thái/phương thức hợp lệ (phòng lỗi âm thầm, không phải SQLi
@@ -95,6 +113,12 @@ public class AdminOrderController extends HttpServlet {
         if (paymentStatus != null && !PaymentStatuses.isValid(paymentStatus)) paymentStatus = null;
         if (paymentMethod != null && !paymentMethod.equals("COD") && !paymentMethod.equals("PAYOS")) paymentMethod = null;
 
+        Boolean receivedConfirmed = null;
+        if (OrderStatuses.DONE.equals(orderStatus)) {
+            if ("CONFIRMED".equals(confirmStateRaw)) receivedConfirmed = Boolean.TRUE;
+            else if ("PENDING".equals(confirmStateRaw)) receivedConfirmed = Boolean.FALSE;
+        }
+
         OrderAdminFilter filter = new OrderAdminFilter();
         filter.setKeyword(keyword);
         filter.setOrderStatus(orderStatus);
@@ -102,6 +126,19 @@ public class AdminOrderController extends HttpServlet {
         filter.setPaymentMethod(paymentMethod);
         filter.setFromDate(parseDate(fromDateRaw));
         filter.setToDate(parseDate(toDateRaw));
+        filter.setReceivedConfirmed(receivedConfirmed);
+
+        // Tab đang chọn — JSP chỉ so sánh 1 chuỗi này để bôi active, không tự suy luận lại.
+        String activeTab;
+        if (orderStatus == null) activeTab = "ALL";
+        else if (OrderStatuses.PENDING.equals(orderStatus)) activeTab = "PENDING";
+        else if (OrderStatuses.CONFIRMED.equals(orderStatus)) activeTab = "CONFIRMED";
+        else if (OrderStatuses.SHIPPING.equals(orderStatus)) activeTab = "SHIPPING";
+        else if (OrderStatuses.DONE.equals(orderStatus)) {
+            activeTab = Boolean.TRUE.equals(receivedConfirmed) ? "COMPLETED" : "AWAITING_CONFIRM";
+        } else activeTab = "OTHER"; // CANCELLED/PENDING_CANCEL — lọc qua dropdown, không có tab riêng
+        req.setAttribute("activeTab", activeTab);
+        req.setAttribute("tabCounts", orderDao.countOrdersByTab());
 
         int page = parsePositiveIntOrDefault(req.getParameter("page"), 1);
         int totalOrders = orderDao.countAdminSearchOrders(filter);
@@ -122,8 +159,35 @@ public class AdminOrderController extends HttpServlet {
         req.setAttribute("paymentMethod", paymentMethod);
         req.setAttribute("fromDate", fromDateRaw);
         req.setAttribute("toDate", toDateRaw);
-        req.setAttribute("pageTitle", "Đơn hàng");
+
         consumeFlash(req);
+
+        // Đội giao hàng (Staffs.Role=DELIVERY, active) cho dropdown "Giao vận chuyển" — nằm
+        // TRONG fragment _history-section.jsp (không phải shell list.jsp) nên phải tính cả ở
+        // nhánh AJAX, không chỉ nhánh tải trang đầy đủ như pendingQueue bên dưới.
+        List<Staff> activeShippers = staffDao.findAll().stream()
+                .filter(s -> StaffRoles.DELIVERY.equals(s.getRole()) && s.isActive())
+                .collect(Collectors.toList());
+        req.setAttribute("activeShippers", activeShippers);
+
+        // Điều hướng AJAX (tab/phân trang/lọc, xem JS trong list.jsp) chỉ cần fragment bảng —
+        // bỏ qua truy vấn hàng đợi khẩn cấp (Phân vùng 1 nằm ngoài fragment, không dùng tới).
+        if (isAjax(req)) {
+            req.getRequestDispatcher("/WEB-INF/views/admin/orders/_history-section.jsp").forward(req, resp);
+            return;
+        }
+
+        // Hàng đợi khẩn cấp — đơn PENDING, LẤY ĐỘC LẬP với bộ lọc/phân trang của bảng lịch sử
+        // để admin không bao giờ bỏ sót đơn mới dù đang lọc/xem trang khác.
+        OrderAdminFilter pendingFilter = new OrderAdminFilter();
+        pendingFilter.setOrderStatus(OrderStatuses.PENDING);
+        var pendingQueue = orderDao.adminSearchOrders(pendingFilter, 0, QUEUE_LIMIT);
+        int pendingTotal = orderDao.countAdminSearchOrders(pendingFilter);
+        req.setAttribute("pendingQueue", pendingQueue);
+        req.setAttribute("pendingTotal", pendingTotal);
+        req.setAttribute("queueLimit", QUEUE_LIMIT);
+
+        req.setAttribute("pageTitle", "Đơn hàng");
         req.getRequestDispatcher("/WEB-INF/views/admin/orders/list.jsp").forward(req, resp);
     }
 
@@ -173,18 +237,17 @@ public class AdminOrderController extends HttpServlet {
         Integer orderId = parsePositiveInt(req.getParameter("orderId"));
         String newStatusRaw = trimOrNull(req.getParameter("newStatus"));
         String reason = trimOrNull(req.getParameter("reason"));
+        boolean ajax = isAjax(req);
         String returnTo = returnUrl(req, orderId);
 
         if (orderId == null || newStatusRaw == null) {
-            flashError(req, "Yêu cầu không hợp lệ.");
-            resp.sendRedirect(returnTo);
+            respond(req, resp, ajax, false, "Yêu cầu không hợp lệ.", returnTo);
             return;
         }
 
         String newStatus = OrderStatuses.normalize(newStatusRaw);
         if (!OrderStatuses.isValid(newStatus)) {
-            flashError(req, "Trạng thái không hợp lệ.");
-            resp.sendRedirect(returnTo);
+            respond(req, resp, ajax, false, "Trạng thái không hợp lệ.", returnTo);
             return;
         }
 
@@ -192,8 +255,7 @@ public class AdminOrderController extends HttpServlet {
             boolean updated;
             if (OrderStatuses.CANCELLED.equals(newStatus)) {
                 if (reason == null) {
-                    flashError(req, "Vui lòng nhập lý do hủy đơn.");
-                    resp.sendRedirect(returnTo);
+                    respond(req, resp, ajax, false, "Vui lòng nhập lý do hủy đơn.", returnTo);
                     return;
                 }
                 updated = orderDao.adminCancelOrder(orderId, reason) > 0;
@@ -206,19 +268,18 @@ public class AdminOrderController extends HttpServlet {
                         "Order#" + orderId,
                         "Chuyển trạng thái đơn #" + orderId + " sang " + OrderStatuses.getLabel(newStatus)
                                 + (reason != null ? " | Lý do: " + reason : ""));
-                flashSuccess(req, "Đã cập nhật trạng thái đơn #" + orderId + " thành \""
-                        + OrderStatuses.getLabel(newStatus) + "\".");
+                respond(req, resp, ajax, true, "Đã cập nhật đơn #" + orderId + " thành \""
+                        + OrderStatuses.getLabel(newStatus) + "\".", returnTo);
             } else {
-                flashError(req, "Không thể cập nhật — đơn hàng đã đổi trạng thái ở nơi khác. Vui lòng tải lại.");
+                respond(req, resp, ajax, false,
+                        "Không thể cập nhật — đơn hàng đã đổi trạng thái ở nơi khác. Vui lòng tải lại.", returnTo);
             }
         } catch (IllegalStateException | IllegalArgumentException e) {
-            flashError(req, e.getMessage());
+            respond(req, resp, ajax, false, e.getMessage(), returnTo);
         } catch (Exception e) {
             System.err.println("[AdminOrderController] cap-nhat-trang-thai lỗi: " + e.getMessage());
-            flashError(req, "Có lỗi xảy ra, vui lòng thử lại.");
+            respond(req, resp, ajax, false, "Có lỗi xảy ra, vui lòng thử lại.", returnTo);
         }
-
-        resp.sendRedirect(returnTo);
     }
 
     // =========================================================================================
@@ -284,6 +345,83 @@ public class AdminOrderController extends HttpServlet {
     }
 
     // =========================================================================================
+    // POST /admin/don-hang/chot-hoan-thanh — DONE (chưa xác nhận) -> đã đối soát, "Thành công"
+    // =========================================================================================
+
+    private void handleConfirmDelivery(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Staff admin = currentAdmin(req);
+        Integer orderId = parsePositiveInt(req.getParameter("orderId"));
+        String returnTo = returnUrl(req, orderId);
+
+        if (orderId == null) {
+            flashError(req, "Yêu cầu không hợp lệ.");
+            resp.sendRedirect(returnTo);
+            return;
+        }
+
+        try {
+            if (orderDao.confirmDeliveryByAdmin(orderId)) {
+                AuditLogger.log(req, admin.getStaffId(), "ORDER_DELIVERY_CONFIRMED", "Order#" + orderId,
+                        "Đối soát, chốt hoàn thành đơn #" + orderId);
+                flashSuccess(req, "Đã chốt hoàn thành đơn #" + orderId + ".");
+            } else {
+                flashError(req, "Không thể chốt — đơn không còn ở trạng thái chờ xác nhận.");
+            }
+        } catch (Exception e) {
+            System.err.println("[AdminOrderController] chot-hoan-thanh lỗi: " + e.getMessage());
+            flashError(req, "Có lỗi xảy ra, vui lòng thử lại.");
+        }
+
+        resp.sendRedirect(returnTo);
+    }
+
+    // =========================================================================================
+    // POST /admin/don-hang/giao-van-chuyen — CONFIRMED -> SHIPPING, gán người giao (đội DELIVERY)
+    // =========================================================================================
+
+    private void handleShipOrder(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        Staff admin = currentAdmin(req);
+        Integer orderId = parsePositiveInt(req.getParameter("orderId"));
+        Integer handlerId = parsePositiveInt(req.getParameter("handlerId"));
+        String returnTo = returnUrl(req, orderId);
+
+        if (orderId == null) {
+            flashError(req, "Yêu cầu không hợp lệ.");
+            resp.sendRedirect(returnTo);
+            return;
+        }
+        if (handlerId == null) {
+            flashError(req, "Vui lòng chọn người phụ trách giao hàng.");
+            resp.sendRedirect(returnTo);
+            return;
+        }
+
+        // Không tin id client gửi lên — phải thật sự là nhân viên đội DELIVERY đang active,
+        // tránh gán nhầm/gán ác ý một StaffID bất kỳ (VD: một ADMIN khác) làm người giao hàng.
+        Optional<Staff> handler = staffDao.findById(handlerId);
+        if (handler.isEmpty() || !handler.get().isActive() || !StaffRoles.DELIVERY.equals(handler.get().getRole())) {
+            flashError(req, "Người phụ trách không hợp lệ hoặc đã bị khóa/đổi vai trò.");
+            resp.sendRedirect(returnTo);
+            return;
+        }
+
+        try {
+            if (orderDao.shipOrderWithHandler(orderId, handlerId)) {
+                AuditLogger.log(req, admin.getStaffId(), "ORDER_SHIPPED", "Order#" + orderId,
+                        "Giao đơn #" + orderId + " cho " + handler.get().getFullName() + " vận chuyển");
+                flashSuccess(req, "Đã giao đơn #" + orderId + " cho " + handler.get().getFullName() + " vận chuyển.");
+            } else {
+                flashError(req, "Không thể giao — đơn không còn ở trạng thái chờ giao (đã đổi ở nơi khác).");
+            }
+        } catch (Exception e) {
+            System.err.println("[AdminOrderController] giao-van-chuyen lỗi: " + e.getMessage());
+            flashError(req, "Có lỗi xảy ra, vui lòng thử lại.");
+        }
+
+        resp.sendRedirect(returnTo);
+    }
+
+    // =========================================================================================
     // Helpers
     // =========================================================================================
 
@@ -291,6 +429,47 @@ public class AdminOrderController extends HttpServlet {
     private Staff currentAdmin(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
         return (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+    }
+
+    /** Hàng đợi khẩn cấp gọi bằng fetch() với header này — phân biệt để trả JSON thay vì redirect. */
+    private boolean isAjax(HttpServletRequest req) {
+        return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
+    }
+
+    /**
+     * Trả kết quả một hành động: AJAX → JSON (200 thành công / 422 lỗi nghiệp vụ),
+     * request thường (form trang chi tiết) → flash message + redirect như cũ.
+     */
+    private void respond(HttpServletRequest req, HttpServletResponse resp, boolean ajax,
+                         boolean success, String message, String returnTo) throws IOException {
+        if (ajax) {
+            resp.setStatus(success ? HttpServletResponse.SC_OK : 422); // 422 Unprocessable — lỗi nghiệp vụ
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().write("{\"success\":" + success + ",\"message\":\"" + escapeJson(message) + "\"}");
+        } else {
+            if (success) flashSuccess(req, message); else flashError(req, message);
+            resp.sendRedirect(returnTo);
+        }
+    }
+
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        StringBuilder sb = new StringBuilder(s.length() + 8);
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> {
+                    if (c < 0x20) sb.append(String.format("\\u%04x", (int) c));
+                    else sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /** Quay lại trang chi tiết nếu request đến từ đó, ngược lại về danh sách. */

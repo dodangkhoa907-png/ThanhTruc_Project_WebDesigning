@@ -125,6 +125,78 @@ public class FeedbackDaoImpl implements FeedbackDao {
         return 0;
     }
 
+    @Override
+    public List<Feedback> findFiltered(String status, String keyword, int offset, int limit) {
+        List<Feedback> list = new ArrayList<>();
+        FilterSql f = buildFilterSql(status, keyword);
+        String sql = "SELECT * FROM Feedback " + f.whereClause
+                + "ORDER BY CreatedAt DESC OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = bindFilterParams(ps, f.params);
+            ps.setInt(idx++, offset);
+            ps.setInt(idx, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(map(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public int countFiltered(String status, String keyword) {
+        FilterSql f = buildFilterSql(status, keyword);
+        String sql = "SELECT COUNT(*) FROM Feedback " + f.whereClause;
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            bindFilterParams(ps, f.params);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /** Kết quả build WHERE cho lọc admin: mệnh đề SQL (rỗng nếu không lọc) + tham số theo đúng thứ tự. */
+    private static final class FilterSql {
+        final String whereClause;
+        final List<Object> params;
+        FilterSql(String whereClause, List<Object> params) {
+            this.whereClause = whereClause;
+            this.params = params;
+        }
+    }
+
+    private FilterSql buildFilterSql(String status, String keyword) {
+        List<String> clauses = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        if (status != null && !status.isBlank()) {
+            clauses.add("Status = ?");
+            params.add(status.trim());
+        }
+        if (keyword != null && !keyword.isBlank()) {
+            clauses.add("(Name LIKE ? OR Phone LIKE ? OR Email LIKE ? OR Message LIKE ?)");
+            String kw = "%" + keyword.trim() + "%";
+            for (int i = 0; i < 4; i++) params.add(kw);
+        }
+
+        String where = clauses.isEmpty() ? "" : "WHERE " + String.join(" AND ", clauses) + " ";
+        return new FilterSql(where, params);
+    }
+
+    private int bindFilterParams(PreparedStatement ps, List<Object> params) throws SQLException {
+        int idx = 1;
+        for (Object p : params) {
+            ps.setNString(idx++, String.valueOf(p));
+        }
+        return idx;
+    }
+
     private Feedback map(ResultSet rs) throws SQLException {
         Feedback f = new Feedback();
         f.setFeedbackId(rs.getInt("FeedbackID"));

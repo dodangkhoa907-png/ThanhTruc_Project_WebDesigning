@@ -69,6 +69,67 @@ public class StaffDaoImpl implements StaffDao {
         }
     }
 
+    @Override
+    public boolean existsByUsername(String username) {
+        String sql = "SELECT 1 FROM Staffs WHERE Username = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, username);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("StaffDao.existsByUsername thất bại", e);
+        }
+    }
+
+    @Override
+    public int insert(Staff s) {
+        String sql = "INSERT INTO Staffs (Username, PasswordHash, FullName, Role, IsActive) VALUES (?,?,?,?,?)";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, s.getUsername());
+            ps.setString(2, s.getPasswordHash());
+            ps.setNString(3, s.getFullName());
+            ps.setString(4, s.getRole());
+            ps.setBoolean(5, s.isActive());
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("StaffDao.insert thất bại", e);
+        }
+        return -1;
+    }
+
+    @Override
+    public boolean update(Staff s) {
+        String sql = "UPDATE Staffs SET FullName = ?, Role = ? WHERE StaffID = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setNString(1, s.getFullName());
+            ps.setString(2, s.getRole());
+            ps.setInt(3, s.getStaffId());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("StaffDao.update thất bại", e);
+        }
+    }
+
+    @Override
+    public boolean setActive(int staffId, boolean active) {
+        String sql = "UPDATE Staffs SET IsActive = ? WHERE StaffID = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setBoolean(1, active);
+            ps.setInt(2, staffId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("StaffDao.setActive thất bại", e);
+        }
+    }
+
     private Staff map(ResultSet rs) throws SQLException {
         Staff s = new Staff();
         s.setStaffId(rs.getInt("StaffID"));
