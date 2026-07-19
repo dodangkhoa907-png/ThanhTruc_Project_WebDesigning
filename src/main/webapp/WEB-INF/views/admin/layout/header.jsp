@@ -76,11 +76,35 @@
         .admin-table th{color:var(--admin-text-light);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.04em}
         .admin-table td{font-weight:500;font-size:14.5px}
         .admin-table tbody tr{transition:background .15s}.admin-table tbody tr:hover{background:#FaFbF8}
+
+        /* -------- Tab điều hướng (underline style) — dùng chung cho đơn hàng, nhân viên... -------- */
+        .admin-tabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:2px solid var(--admin-border);margin-bottom:20px}
+        .admin-tab{
+            position:relative;display:inline-flex;align-items:center;gap:9px;padding:13px 16px;
+            font-family:var(--fb);font-size:14.5px;font-weight:700;color:#5B6B63;
+            text-decoration:none;border-radius:10px 10px 0 0;
+            transition:color .18s ease,background .18s ease;
+        }
+        .admin-tab::after{
+            content:"";position:absolute;left:10px;right:10px;bottom:-2px;height:3.5px;border-radius:4px 4px 0 0;
+            background:transparent;transition:background .18s ease,transform .18s ease;transform:scaleX(.6);
+        }
+        .admin-tab:hover{color:var(--admin-text);background:var(--admin-bg)}
+        .admin-tab.active{color:var(--admin-primary);font-weight:800;background:rgba(42,92,56,.08)}
+        .admin-tab.active::after{background:#10B981;transform:scaleX(1)}
+        .admin-tab-count{
+            min-width:22px;padding:2px 8px;border-radius:20px;background:var(--admin-bg);
+            color:var(--admin-text-light);font-size:12.5px;font-weight:800;text-align:center;
+            transition:background .18s ease,color .18s ease;
+        }
+        .admin-tab.active .admin-tab-count{background:var(--admin-primary);color:#fff}
+
         .badge{padding:6px 13px;border-radius:30px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;display:inline-block}
         .badge-PENDING{background:rgba(244,162,97,.15);color:#B96A2E}
         .badge-CONFIRMED{background:rgba(57,101,255,.12);color:var(--status-confirmed)}
         .badge-SHIPPING{background:rgba(122,90,248,.12);color:var(--status-shipping)}
         .badge-DONE{background:rgba(42,92,56,.12);color:var(--status-done)}
+        .badge-AWAITING_CONFIRM{background:rgba(15,148,140,.12);color:#0F8F87}
         .badge-CANCELLED{background:rgba(217,83,79,.12);color:var(--status-cancelled)}
         .badge-PENDING_CANCEL{background:rgba(217,83,79,.1);color:#B9432E}
         .badge-NEW{background:rgba(244,162,97,.15);color:#B96A2E}
@@ -115,13 +139,14 @@
             </ul>
             <div class="menu-label">Vận hành</div>
             <ul class="sidebar-menu">
-                <li><a href="${ctx}/admin/don-hang" class="${uri.contains('/don-hang') ? 'active' : 'soon'}"><span class="lbl"><i class="fa-solid fa-cart-shopping"></i> Đơn hàng</span> <c:if test="${!uri.contains('/don-hang')}"><span class="soon-tag">Sắp có</span></c:if></a></li>
-                <li><a href="${ctx}/admin/san-pham" class="${uri.contains('/san-pham') ? 'active' : 'soon'}"><span class="lbl"><i class="fa-solid fa-box"></i> Sản phẩm</span> <c:if test="${!uri.contains('/san-pham')}"><span class="soon-tag">Sắp có</span></c:if></a></li>
-                <li><a href="${ctx}/admin/phan-hoi" class="${uri.contains('/phan-hoi') ? 'active' : 'soon'}"><span class="lbl"><i class="fa-solid fa-comment-dots"></i> Phản hồi</span> <c:if test="${!uri.contains('/phan-hoi')}"><span class="soon-tag">Sắp có</span></c:if></a></li>
+                <li><a href="${ctx}/admin/don-hang" class="${uri.contains('/don-hang') ? 'active' : ''}"><span class="lbl"><i class="fa-solid fa-cart-shopping"></i> Đơn hàng</span></a></li>
+                <li><a href="${ctx}/admin/san-pham" class="${uri.contains('/san-pham') ? 'active' : ''}"><span class="lbl"><i class="fa-solid fa-box"></i> Sản phẩm</span></a></li>
+                <li><a href="${ctx}/admin/phan-hoi" class="${uri.contains('/phan-hoi') ? 'active' : ''}"><span class="lbl"><i class="fa-solid fa-comment-dots"></i> Phản hồi</span></a></li>
             </ul>
             <div class="menu-label">Hệ thống</div>
             <ul class="sidebar-menu">
-                <li><a href="${ctx}/admin/nhat-ky" class="${uri.contains('/nhat-ky') ? 'active' : 'soon'}"><span class="lbl"><i class="fa-solid fa-clock-rotate-left"></i> Nhật ký</span> <c:if test="${!uri.contains('/nhat-ky')}"><span class="soon-tag">Sắp có</span></c:if></a></li>
+                <li><a href="${ctx}/admin/nhan-vien" class="${uri.contains('/nhan-vien') ? 'active' : ''}"><span class="lbl"><i class="fa-solid fa-users-gear"></i> Nhân viên</span></a></li>
+                <li><a href="${ctx}/admin/nhat-ky" class="${uri.contains('/nhat-ky') ? 'active' : ''}"><span class="lbl"><i class="fa-solid fa-clock-rotate-left"></i> Nhật ký</span></a></li>
             </ul>
         </div>
         <div class="side-foot">

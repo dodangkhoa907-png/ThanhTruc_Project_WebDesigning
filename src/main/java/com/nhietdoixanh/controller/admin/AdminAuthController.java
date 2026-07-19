@@ -19,6 +19,8 @@ import java.util.Optional;
 /**
  * Đăng nhập/đăng xuất khu vực quản trị — dùng bảng Staffs có sẵn (Username,
  * KHÔNG phải Email). Session riêng "adminUser", tách biệt session "user".
+ * Chỉ tài khoản Role = ADMIN mới được vào /admin (nhân viên MANAGER/DELIVERY/
+ * PROCESSOR/SALES bị chặn ở đây, giống logic bên PureNut).
  */
 @WebServlet(name = "AdminAuthController", urlPatterns = {"/admin/login", "/admin/logout"})
 public class AdminAuthController extends HttpServlet {
@@ -43,7 +45,8 @@ public class AdminAuthController extends HttpServlet {
             return;
         }
 
-        if (session != null && session.getAttribute("adminUser") instanceof Staff) {
+        if (session != null && session.getAttribute("adminUser") instanceof Staff s
+                && "ADMIN".equals(s.getRole())) {
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             return;
         }
@@ -60,15 +63,20 @@ public class AdminAuthController extends HttpServlet {
         String password = request.getParameter("password");
 
         Optional<Staff> staffOpt = staffDao.findByUsername(username);
+        boolean credentialsOk = staffOpt.isPresent() && staffOpt.get().isActive()
+                && Passwords.matches(password, staffOpt.get().getPasswordHash());
 
-        if (staffOpt.isPresent() && staffOpt.get().isActive()
-                && Passwords.matches(password, staffOpt.get().getPasswordHash())) {
+        if (credentialsOk && "ADMIN".equals(staffOpt.get().getRole())) {
             Staff staff = staffOpt.get();
             HttpSession session = request.getSession();
             request.changeSessionId(); // chống session fixation
             session.setAttribute("adminUser", staff);
             AuditLogger.log(request, staff.getStaffId(), "ADMIN_LOGIN", staff.getUsername(), "Đăng nhập khu vực quản trị");
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+        } else if (credentialsOk) {
+            // Đúng tài khoản nhưng không phải ADMIN (MANAGER/DELIVERY/PROCESSOR/SALES) → chặn
+            request.setAttribute("errorMessage", "Tài khoản này không có quyền quản trị.");
+            request.getRequestDispatcher("/WEB-INF/views/admin/login.jsp").forward(request, response);
         } else {
             request.setAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không đúng.");
             request.getRequestDispatcher("/WEB-INF/views/admin/login.jsp").forward(request, response);

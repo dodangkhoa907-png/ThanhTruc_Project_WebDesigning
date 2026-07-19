@@ -13,6 +13,8 @@ public class OrderAdminFilter {
     private String paymentMethod;
     private LocalDate fromDate;
     private LocalDate toDate;
+    /** Chỉ có ý nghĩa khi orderStatus=DONE: null = không lọc, TRUE = đã đối soát, FALSE = chờ xác nhận. */
+    private Boolean receivedConfirmed;
 
     public String getKeyword() { return keyword; }
     public void setKeyword(String keyword) { this.keyword = keyword; }
@@ -31,4 +33,7 @@ public class OrderAdminFilter {
 
     public LocalDate getToDate() { return toDate; }
     public void setToDate(LocalDate toDate) { this.toDate = toDate; }
+
+    public Boolean getReceivedConfirmed() { return receivedConfirmed; }
+    public void setReceivedConfirmed(Boolean receivedConfirmed) { this.receivedConfirmed = receivedConfirmed; }
 }

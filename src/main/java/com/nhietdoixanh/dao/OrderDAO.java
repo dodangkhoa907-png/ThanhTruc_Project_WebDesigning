@@ -3,6 +3,8 @@ package com.nhietdoixanh.dao;
 import com.nhietdoixanh.model.CartItem;
 import com.nhietdoixanh.model.Order;
 import com.nhietdoixanh.model.OrderAdminFilter;
+import com.nhietdoixanh.model.OrderTabCounts;
+import com.nhietdoixanh.model.ProductRevenueRow;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -48,6 +50,14 @@ public interface OrderDAO {
 
     /** Admin: phân công nhân viên xử lý đơn (Staffs.StaffID). */
     boolean assignHandler(int orderId, int staffId);
+
+    /**
+     * Admin xác nhận "Giao vận chuyển": chuyển CONFIRMED -&gt; SHIPPING VÀ gán luôn người trong
+     * đội giao hàng (Staffs.Role=DELIVERY) phụ trách đơn, trong một UPDATE nguyên tử (WHERE
+     * OrderStatus='CONFIRMED' tránh race condition, giống {@link #adminCancelOrder}).
+     * @return true nếu có cập nhật (false nếu đơn không còn ở CONFIRMED — đã bị đổi nơi khác)
+     */
+    boolean shipOrderWithHandler(int orderId, int handlerStaffId) throws Exception;
 
     /** Khách hàng: xem chi tiết đơn của chính mình — kiểm tra ownership trong SQL. */
     Optional<Order> findByIdAndUserId(int orderId, int userId);
@@ -137,4 +147,20 @@ public interface OrderDAO {
      * @return true nếu có cập nhật
      */
     boolean cancelPayOSPendingByOrderIdAndUserId(int orderId, int userId) throws Exception;
+
+    /**
+     * Admin dashboard: từng dòng sản phẩm đã bán (loại trừ đơn CANCELLED) kèm tên danh mục —
+     * dùng tính "Cơ cấu doanh thu" theo danh mục và "Top sản phẩm bán chạy".
+     */
+    List<ProductRevenueRow> findProductRevenueRowsForAdmin();
+
+    /** Admin: đếm số đơn theo từng tab vòng đời (Tất cả/Chờ duyệt/Đã duyệt/Đang vận chuyển/Chờ xác nhận/Thành công). */
+    OrderTabCounts countOrdersByTab();
+
+    /**
+     * Admin đối soát chéo, chốt đơn DONE đã thực sự tới tay khách. UPDATE có điều kiện
+     * (chỉ khi OrderStatus=DONE và chưa từng xác nhận) để tránh ghi đè thời điểm đã chốt trước đó.
+     * @return true nếu có cập nhật
+     */
+    boolean confirmDeliveryByAdmin(int orderId) throws Exception;
 }

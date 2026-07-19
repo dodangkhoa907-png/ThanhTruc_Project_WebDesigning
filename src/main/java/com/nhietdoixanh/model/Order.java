@@ -49,6 +49,9 @@ public class Order {
     private String productSummary;
     private List<OrderDetail> items;
 
+    /** NULL = đơn DONE nhưng chưa được xác nhận đã tới tay khách; có giá trị = admin đã đối soát chốt hoàn thành. */
+    private Date receivedConfirmedAt;
+
     public Order() {}
 
     public int getOrderId() { return orderId; }
@@ -145,4 +148,7 @@ public class Order {
 
     public BigDecimal getShippingLongitude() { return shippingLongitude; }
     public void setShippingLongitude(BigDecimal shippingLongitude) { this.shippingLongitude = shippingLongitude; }
+
+    public Date getReceivedConfirmedAt() { return receivedConfirmedAt; }
+    public void setReceivedConfirmedAt(Date receivedConfirmedAt) { this.receivedConfirmedAt = receivedConfirmedAt; }
 }
