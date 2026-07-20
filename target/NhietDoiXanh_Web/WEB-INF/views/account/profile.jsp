@@ -47,18 +47,47 @@
                         <div class="account-avatar-upload">
                             <c:choose>
                                 <c:when test="${not empty profileUser.profileImage}">
-                                    <img class="account-avatar-preview" id="avatarPreview" src="${pageContext.request.contextPath}${profileUser.profileImage}" alt="Avatar">
+                                    <img class="account-avatar-preview" id="avatarPreview" src="${pageContext.request.contextPath}${profileUser.profileImage}" alt="Ảnh đại diện">
                                 </c:when>
                                 <c:otherwise>
-                                    <img class="account-avatar-preview" id="avatarPreview" src="https://ui-avatars.com/api/?name=${fn:escapeXml(profileUser.fullName)}&background=2A5C38&color=fff&bold=true" alt="Avatar">
+                                    <div class="account-avatar-preview account-avatar-fallback" id="avatarPreviewFallback" aria-hidden="true">
+                                        <c:out value="${not empty profileUser.fullName ? fn:substring(profileUser.fullName, 0, 1) : 'N'}"/>
+                                    </div>
+                                    <img class="account-avatar-preview" id="avatarPreview" src="#" alt="Ảnh đại diện" hidden>
                                 </c:otherwise>
                             </c:choose>
                             <div>
                                 <label for="avatarInput" class="btn-shop btn-shop-outline" style="cursor:pointer;">
                                     <i class="fa-solid fa-camera"></i> Đổi ảnh đại diện
                                 </label>
-                                <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/webp">
-                                <div class="account-avatar-upload-hint">JPG, PNG hoặc WEBP, tối đa 1MB.</div>
+                                <input type="file" id="avatarInput" name="avatar" accept="image/jpeg,image/png,image/webp" style="display:none;">
+                                <div class="account-avatar-upload-hint">JPG, PNG hoặc WEBP, tối đa 1MB. Bạn có thể cắt và căn chỉnh trước khi lưu.</div>
+                                <div class="account-field-error" id="avatarCropError" hidden></div>
+                            </div>
+                        </div>
+
+                        <%-- Modal cắt/căn chỉnh ảnh đại diện (canvas thuần, không thư viện ngoài) --%>
+                        <div class="avatar-crop-modal" id="avatarCropModal" role="dialog" aria-modal="true" aria-label="Cắt ảnh đại diện">
+                            <div class="avatar-crop-dialog">
+                                <div class="avatar-crop-header">
+                                    <i class="fa-solid fa-crop-simple"></i> Cắt &amp; căn chỉnh ảnh
+                                </div>
+                                <div class="avatar-crop-stage">
+                                    <canvas id="avatarCropCanvas" width="320" height="320"></canvas>
+                                    <div class="avatar-crop-overlay" aria-hidden="true"></div>
+                                </div>
+                                <div class="avatar-crop-controls">
+                                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                                    <input type="range" id="avatarCropZoom" min="1" max="3" step="0.01" value="1" aria-label="Phóng to">
+                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                </div>
+                                <div class="avatar-crop-hint">Kéo để di chuyển, dùng thanh trượt để phóng to/thu nhỏ.</div>
+                                <div class="avatar-crop-actions">
+                                    <button type="button" class="btn-shop btn-shop-outline" id="avatarCropCancel">Hủy</button>
+                                    <button type="button" class="btn-shop btn-shop-primary" id="avatarCropSave">
+                                        <i class="fa-solid fa-check"></i> Lưu ảnh đại diện
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -105,14 +134,7 @@
         const navToggle = document.getElementById('navToggle');
         const navLinks = document.getElementById('navLinks');
         navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
-
-        const avatarInput = document.getElementById('avatarInput');
-        const avatarPreview = document.getElementById('avatarPreview');
-        avatarInput.addEventListener('change', () => {
-            const file = avatarInput.files[0];
-            if (!file) return;
-            avatarPreview.src = URL.createObjectURL(file);
-        });
     </script>
+    <script src="${pageContext.request.contextPath}/js/avatar-crop.js?v=${initParam.assetVer}"></script>
 </body>
 </html>

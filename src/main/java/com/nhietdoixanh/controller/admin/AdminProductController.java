@@ -1,5 +1,6 @@
 package com.nhietdoixanh.controller.admin;
 
+import com.google.gson.Gson;
 import com.nhietdoixanh.dao.CategoryDao;
 import com.nhietdoixanh.dao.ProductDao;
 import com.nhietdoixanh.dao.ProductVariantDao;
@@ -28,9 +29,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Admin quản lý sản phẩm — danh sách/tìm kiếm, thêm/sửa (kèm biến thể size M/L), ẩn/hiện.
+ *
+ * Thêm/sửa KHÔNG có trang riêng — chỉ 1 modal dùng chung trên chính /admin/san-pham (xem
+ * products/list.jsp). "/admin/san-pham/them" và "/admin/san-pham/sua" giờ chỉ nhận POST (submit
+ * từ modal); lỗi validate redirect NGƯỢC về /admin/san-pham kèm query param để JS tự mở lại đúng
+ * modal (dữ liệu sửa lấy lại từ productsJson, KHÔNG cố khôi phục input vừa gõ qua URL — biến thể
+ * là mảng độ dài thay đổi và file ảnh vốn dĩ không thể khôi phục qua URL, nên không đáng công).
  *
  * Quyền hạn: nằm dưới urlPattern "/admin/*" nên đã được {@link com.nhietdoixanh.filter.AuthFilter}
  * chặn — chỉ Staff đã đăng nhập (session "adminUser") mới tới được. Mọi POST đã được
@@ -71,8 +79,7 @@ public class AdminProductController extends HttpServlet {
         String path = req.getServletPath();
         switch (path) {
             case "/admin/san-pham" -> handleList(req, resp);
-            case "/admin/san-pham/them" -> handleNewForm(req, resp);
-            case "/admin/san-pham/sua" -> handleEditForm(req, resp);
+            // "/them" và "/sua" giờ chỉ là action POST của modal — không còn trang GET riêng.
             default -> resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
     }
@@ -115,39 +122,17 @@ public class AdminProductController extends HttpServlet {
         req.setAttribute("q", keyword);
         req.setAttribute("categoryId", categoryId);
         req.setAttribute("status", status);
+
+        // Dữ liệu để JS tự đổ vào modal "Sửa" (tên/danh mục/mô tả/biến thể) không cần round-trip
+        // server — chỉ cho các sản phẩm ĐANG hiển thị trong bảng (đã lọc), đủ dùng vì nút "Sửa"
+        // chỉ bấm được trên dòng đang thấy. Gson mặc định tự HTML-escape (<,>,&,=,') nên nhúng an
+        // toàn vào <script type="application/json">, không rủi ro chèn "</script>" phá trang.
+        List<ProductJson> editData = filtered.stream().map(this::toProductJson).collect(Collectors.toList());
+        req.setAttribute("productsJson", new Gson().toJson(editData));
+
         req.setAttribute("pageTitle", "Sản phẩm");
         consumeFlash(req);
         req.getRequestDispatcher("/WEB-INF/views/admin/products/list.jsp").forward(req, resp);
-    }
-
-    // =========================================================================================
-    // GET /admin/san-pham/them — form thêm mới
-    // =========================================================================================
-
-    private void handleNewForm(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        req.setAttribute("categories", categoryDao.findAll());
-        req.setAttribute("pageTitle", "Thêm sản phẩm");
-        req.getRequestDispatcher("/WEB-INF/views/admin/products/form.jsp").forward(req, resp);
-    }
-
-    // =========================================================================================
-    // GET /admin/san-pham/sua?id=... — form sửa
-    // =========================================================================================
-
-    private void handleEditForm(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        Integer id = parsePositiveInt(req.getParameter("id"));
-        Optional<Product> pOpt = id != null ? productDao.findById(id) : Optional.empty();
-        if (pOpt.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/admin/san-pham");
-            return;
-        }
-
-        req.setAttribute("product", pOpt.get());
-        req.setAttribute("categories", categoryDao.findAll());
-        req.setAttribute("pageTitle", "Sửa sản phẩm");
-        req.getRequestDispatcher("/WEB-INF/views/admin/products/form.jsp").forward(req, resp);
     }
 
     // =========================================================================================
@@ -167,9 +152,11 @@ public class AdminProductController extends HttpServlet {
         String name = trimOrNull(req.getParameter("name"));
         Integer categoryId = parsePositiveInt(req.getParameter("categoryId"));
         String description = req.getParameter("description");
+        // Lỗi -> quay về danh sách kèm cờ để JS tự mở lại đúng modal (dữ liệu sửa lấy lại từ
+        // productsJson đã có trên trang, không cố khôi phục input vừa gõ — xem javadoc lớp).
         String returnTo = isEdit
-                ? req.getContextPath() + "/admin/san-pham/sua?id=" + productId
-                : req.getContextPath() + "/admin/san-pham/them";
+                ? req.getContextPath() + "/admin/san-pham?formOpen=sua&editId=" + productId
+                : req.getContextPath() + "/admin/san-pham?formOpen=them";
 
         if (Validators.isBlank(name) || categoryId == null) {
             flashError(req, "Vui lòng nhập tên và chọn danh mục sản phẩm.");
@@ -206,11 +193,9 @@ public class AdminProductController extends HttpServlet {
             return;
         }
 
-        if (!isEdit && imageUrl == null) {
-            flashError(req, "Vui lòng chọn ảnh sản phẩm.");
-            resp.sendRedirect(returnTo);
-            return;
-        }
+        // Ảnh KHÔNG bắt buộc: nếu để trống, trang chủ (home.jsp) tự đoán ảnh trái cây có sẵn
+        // trong /images theo tên sản phẩm (cam/dưa hấu/thơm...), sản phẩm nào không khớp thì
+        // hiện icon chung — trước đây bắt buộc upload, chặn mất cách dùng ảnh có sẵn theo tên.
 
         Product p = new Product();
         p.setName(name);
@@ -274,6 +259,24 @@ public class AdminProductController extends HttpServlet {
         }
 
         resp.sendRedirect(req.getContextPath() + "/admin/san-pham");
+    }
+
+    // =========================================================================================
+    // Dữ liệu cho modal "Sửa" (JSON nhúng vào trang, xem handleList)
+    // =========================================================================================
+
+    private record VariantJson(int variantId, String size, BigDecimal price) {}
+
+    private record ProductJson(int productId, String name, int categoryId, String description,
+                                String imageUrl, List<VariantJson> variants) {}
+
+    private ProductJson toProductJson(Product p) {
+        List<ProductVariant> src = p.getVariants();
+        List<VariantJson> variants = (src == null ? List.<ProductVariant>of() : src).stream()
+                .map(v -> new VariantJson(v.getVariantId(), v.getSize(), v.getPrice()))
+                .collect(Collectors.toList());
+        return new ProductJson(p.getProductId(), p.getName(), p.getCategoryId(), p.getDescription(),
+                p.getImageUrl(), variants);
     }
 
     // =========================================================================================

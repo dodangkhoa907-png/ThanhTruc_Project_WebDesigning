@@ -216,6 +216,14 @@ public class AdminOrderController extends HttpServlet {
         // Nút hành động hiển thị dựa đúng theo state machine OrderStatuses — không suy luận lại ở JSP.
         req.setAttribute("canConfirm", OrderStatuses.canTransition(status, OrderStatuses.CONFIRMED));
         req.setAttribute("canShip", OrderStatuses.canTransition(status, OrderStatuses.SHIPPING));
+        // Đội giao hàng cho dropdown "Chuyển đang giao" — bắt buộc chọn người phụ trách, KHÔNG được
+        // tự động chuyển SHIPPING mà không gán ai (đồng bộ với nút cùng chức năng ở trang danh sách,
+        // xem handleShipOrder/shipOrderWithHandler — trước đây trang chi tiết bỏ sót bước này, cho
+        // phép né việc gán người bằng cách thao tác qua đây thay vì danh sách).
+        List<Staff> activeShippers = staffDao.findAll().stream()
+                .filter(s -> StaffRoles.DELIVERY.equals(s.getRole()) && s.isActive())
+                .collect(Collectors.toList());
+        req.setAttribute("activeShippers", activeShippers);
         req.setAttribute("canDone", OrderStatuses.canTransition(status, OrderStatuses.DONE));
         boolean isPendingCancel = OrderStatuses.PENDING_CANCEL.equals(OrderStatuses.normalize(status));
         // adminCancelOrder() chỉ hủy trực tiếp đơn PENDING/CONFIRMED (SQL WHERE OrderStatus IN (...)).
@@ -248,6 +256,14 @@ public class AdminOrderController extends HttpServlet {
         String newStatus = OrderStatuses.normalize(newStatusRaw);
         if (!OrderStatuses.isValid(newStatus)) {
             respond(req, resp, ajax, false, "Trạng thái không hợp lệ.", returnTo);
+            return;
+        }
+        // CONFIRMED -> SHIPPING BẮT BUỘC gán người giao (đội DELIVERY) — chỉ được thực hiện qua
+        // /admin/don-hang/giao-van-chuyen (xem handleShipOrder). Chặn ở đây để không có đường nào
+        // (kể cả gọi thẳng endpoint này) chuyển sang SHIPPING mà bỏ qua bước gán người.
+        if (OrderStatuses.SHIPPING.equals(newStatus)) {
+            respond(req, resp, ajax, false,
+                    "Chuyển sang \"Đang giao\" phải chọn người phụ trách — dùng nút \"Chuyển đang giao\".", returnTo);
             return;
         }
 
@@ -432,8 +448,20 @@ public class AdminOrderController extends HttpServlet {
     }
 
     /** Hàng đợi khẩn cấp gọi bằng fetch() với header này — phân biệt để trả JSON thay vì redirect. */
+    /**
+     * true chỉ khi đây thực sự là gọi fetch() từ JS, KHÔNG phải điều hướng cấp cao nhất (gõ URL,
+     * F5, mở tab mới, back/forward...). Chỉ dựa vào "X-Requested-With" là không đủ an toàn — nếu
+     * một điều hướng thật (VD: F5 lại URL đã được history.pushState của tab lịch sử đơn hàng) vì
+     * lý do nào đó vẫn mang theo header này (cache trình duyệt, extension...), route "/admin/don-hang"
+     * sẽ trả về fragment trần (không header/sidebar/CSS) thay vì trang đầy đủ — vỡ giao diện hoàn
+     * toàn (đã xảy ra thực tế). "Sec-Fetch-Mode" do trình duyệt hiện đại tự gắn dựa trên loại
+     * request thật sự, JS không thể giả mạo — "navigate" LUÔN là điều hướng cấp cao nhất, dù có
+     * "X-Requested-With" hay không, vẫn phải trả về trang đầy đủ.
+     */
     private boolean isAjax(HttpServletRequest req) {
-        return "XMLHttpRequest".equals(req.getHeader("X-Requested-With"));
+        if (!"XMLHttpRequest".equals(req.getHeader("X-Requested-With"))) return false;
+        String secFetchMode = req.getHeader("Sec-Fetch-Mode");
+        return secFetchMode == null || !"navigate".equals(secFetchMode);
     }
 
     /**

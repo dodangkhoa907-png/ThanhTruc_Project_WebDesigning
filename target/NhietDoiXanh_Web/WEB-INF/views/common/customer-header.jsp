@@ -2,7 +2,9 @@
 <%-- Shared customer navbar. Included via <%@ include %> so it shares the
      caller's pageContext/taglibs. Requires request attribute "currentPage"
      to be set by the caller's servlet for active-state highlighting
-     ("menu" | "products" | "cart" | "account"); Home sets nothing and highlights nothing. --%>
+     ("products" | "cart" | "account"); Home sets nothing and highlights nothing.
+     "menu" vẫn được chấp nhận cho tương thích ngược (route /thuc-don cũ đã redirect
+     sang /san-pham nên currentPage="menu" không còn servlet nào set nữa). --%>
 <nav class="navbar" id="navbar">
     <div class="container">
         <a href="${pageContext.request.contextPath}/" class="navbar-brand">
@@ -17,24 +19,33 @@
         <div class="nav-links" id="navLinks">
             <a href="${pageContext.request.contextPath}/#story">Câu Chuyện</a>
             <a href="${pageContext.request.contextPath}/#values">Giá Trị</a>
-            <a href="${pageContext.request.contextPath}/thuc-don"
-               class="${currentPage == 'menu' ? 'active' : ''}">Thực Đơn</a>
-            <a href="${pageContext.request.contextPath}/san-pham"
-               class="${currentPage == 'products' ? 'active' : ''}">Sản Phẩm</a>
+            <c:choose>
+                <c:when test="${not empty sessionScope.user}">
+                    <%-- Đã đăng nhập: "Sản Phẩm" mở thẳng trang danh sách/chi tiết sản phẩm thật. --%>
+                    <a href="${pageContext.request.contextPath}/san-pham"
+                       class="${(currentPage == 'products' || currentPage == 'menu') ? 'active' : ''}">Sản Phẩm</a>
+                </c:when>
+                <c:otherwise>
+                    <%-- Chưa đăng nhập: cuộn mượt tới khu menu ngay trên trang chủ, chưa cần vào trang riêng. --%>
+                    <a href="${pageContext.request.contextPath}/#menu">Sản Phẩm</a>
+                </c:otherwise>
+            </c:choose>
             <a href="${pageContext.request.contextPath}/#team">Đội Ngũ</a>
-            <a href="${pageContext.request.contextPath}/cart"
-               class="nav-cart-link ${currentPage == 'cart' ? 'active' : ''}" aria-label="Giỏ hàng">
-                <i class="fa-solid fa-basket-shopping"></i>
-                <span class="nav-cart-badge" id="navCartBadge"
-                      ${empty sessionScope.cartCount || sessionScope.cartCount == 0 ? 'hidden' : ''}>
-                    ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
-                </span>
-            </a>
+            <c:if test="${not empty sessionScope.user}">
+                <a href="${pageContext.request.contextPath}/cart"
+                   class="nav-cart-link ${currentPage == 'cart' ? 'active' : ''}" aria-label="Giỏ hàng">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span class="nav-cart-badge" id="navCartBadge"
+                          ${empty sessionScope.cartCount || sessionScope.cartCount == 0 ? 'hidden' : ''}>
+                        ${empty sessionScope.cartCount ? 0 : sessionScope.cartCount}
+                    </span>
+                </a>
+            </c:if>
             <c:choose>
                 <c:when test="${not empty sessionScope.user}">
                     <div class="nav-user-wrap" id="navUserWrap">
                         <button type="button" class="nav-user-trigger ${currentPage == 'account' ? 'active' : ''}" id="navUserTrigger" aria-haspopup="true" aria-expanded="false">
-                            <c:out value="${sessionScope.user.fullName}"/>
+                            <i class="fa-solid fa-user"></i> Tài Khoản
                             <i class="fa-solid fa-chevron-down nav-user-caret"></i>
                         </button>
                         <div class="nav-user-menu" id="navUserMenu" role="menu">
@@ -53,10 +64,14 @@
                     </div>
                 </c:when>
                 <c:otherwise>
-                    <a href="${pageContext.request.contextPath}/login">Đăng Nhập</a>
+                    <a href="${pageContext.request.contextPath}/login" class="nav-login-link">
+                        <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+                    </a>
                 </c:otherwise>
             </c:choose>
-            <a href="${pageContext.request.contextPath}/#checkout" class="nav-cta">Đặt Hàng</a>
+            <c:if test="${empty sessionScope.user}">
+                <a href="${pageContext.request.contextPath}/san-pham" class="nav-cta">Đặt Hàng</a>
+            </c:if>
         </div>
 
         <button class="nav-toggle" id="navToggle" aria-label="Menu">

@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="/WEB-INF/views/admin/layout/header.jsp" />
@@ -99,28 +100,6 @@ a.uq-code:hover{border-color:var(--admin-gold)}
 
 /* ============================ BẢNG LỊCH SỬ ============================ */
 
-/* -------- Tab trạng thái (underline style, độ tương phản cao) -------- */
-.ord-tabs{display:flex;flex-wrap:wrap;gap:2px;border-bottom:2px solid var(--admin-border);margin-bottom:20px}
-.ord-tab{
-    position:relative;display:inline-flex;align-items:center;gap:9px;padding:13px 16px;
-    font-family:var(--fb);font-size:14.5px;font-weight:700;color:#5B6B63;
-    text-decoration:none;border-radius:10px 10px 0 0;
-    transition:color .18s ease,background .18s ease;
-}
-.ord-tab::after{
-    content:"";position:absolute;left:10px;right:10px;bottom:-2px;height:3.5px;border-radius:4px 4px 0 0;
-    background:transparent;transition:background .18s ease,transform .18s ease;transform:scaleX(.6);
-}
-.ord-tab:hover{color:var(--admin-text);background:var(--admin-bg)}
-.ord-tab.active{color:var(--admin-primary);font-weight:800;background:rgba(42,92,56,.08)}
-.ord-tab.active::after{background:#10B981;transform:scaleX(1)}
-.ord-tab-count{
-    min-width:22px;padding:2px 8px;border-radius:20px;background:var(--admin-bg);
-    color:var(--admin-text-light);font-size:12.5px;font-weight:800;text-align:center;
-    transition:background .18s ease,color .18s ease;
-}
-.ord-tab.active .ord-tab-count{background:var(--admin-primary);color:#fff}
-
 /* -------- Bảng: cột khách hàng gộp, chỉ báo thanh toán nhẹ, hành động gọn -------- */
 .ord-cust-cell b{display:block;font-size:14px;font-weight:700;color:var(--admin-text)}
 .ord-cust-cell span{display:block;font-size:12px;color:var(--admin-text-light);font-weight:500;margin-top:1px}
@@ -136,6 +115,10 @@ a.uq-code:hover{border-color:var(--admin-gold)}
 
 .ord-row-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .ord-inline-form{display:inline}
+.ord-ship-form{display:inline-flex;gap:6px;align-items:center}
+.ord-ship-select{padding:7px 9px;border:1px solid var(--admin-border);border-radius:8px;
+    font-size:12.5px;font-family:var(--fb);background:var(--admin-bg);color:var(--admin-text);max-width:130px}
+.ord-ship-select:focus{border-color:var(--admin-primary);outline:none;background:#fff}
 .btn-sm{padding:8px 14px;font-size:12.5px;border-radius:9px}
 .ord-link-action{font-size:12.5px;font-weight:700;color:var(--admin-text-light);text-decoration:none;
     padding:6px 2px;transition:color .15s}
@@ -481,6 +464,10 @@ a.uq-code:hover{border-color:var(--admin-gold)}
     }
 
     historySection.addEventListener('click', function (e) {
+        // Ctrl/Cmd/Shift+click, click giữa (mở tab mới), hoặc chuột phải -> để trình duyệt xử lý
+        // như bình thường (mở tab mới...), KHÔNG cướp bằng preventDefault(). Trước đây thiếu check
+        // này nên Ctrl+click vào tab lịch sử bị chặn mất, không mở tab mới được như trình duyệt vẫn làm.
+        if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
         var a = e.target.closest('a[href]');
         if (!a || !historySection.contains(a)) return;
         var href = a.getAttribute('href');

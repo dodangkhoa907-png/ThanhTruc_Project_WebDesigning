@@ -47,14 +47,91 @@
 .account-field-error { font-size: 0.78rem; color: #b44242; font-weight: 600; margin-top: 2px; }
 .account-field-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 2px; }
 
+/* ===== Show/hide password ===== */
+.account-password-wrap { position: relative; display: flex; align-items: center; }
+.account-password-wrap input { flex: 1; padding-right: 44px; }
+.account-password-toggle {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--text-muted);
+    width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    transition: color .2s ease, background .2s ease;
+}
+.account-password-toggle:hover { color: var(--green); background: rgba(42,92,56,0.06); }
+
+/* ===== Password strength meter ===== */
+.account-strength { margin-top: 8px; }
+.account-strength-bar {
+    height: 6px; border-radius: 50px; background: var(--cream-dark); overflow: hidden;
+}
+.account-strength-bar span {
+    display: block; height: 100%; width: 0; border-radius: 50px;
+    transition: width .3s ease, background .3s ease; background: #D9534F;
+}
+.account-strength-label { font-size: 0.74rem; font-weight: 700; margin-top: 4px; }
+
+/* ===== OTP step ===== */
+.account-otp-lead {
+    font-size: 0.88rem; color: var(--text-body); line-height: 1.6; margin: 0 0 18px;
+    background: var(--cream-warm); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+}
+.account-otp-lead strong { color: var(--green-dark); }
+.account-otp-timer { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin: -6px 0 16px; text-align: center; }
+
 /* ===== Avatar upload ===== */
 .account-avatar-upload { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; flex-wrap: wrap; }
 .account-avatar-preview {
     width: 88px; height: 88px; border-radius: 50%; object-fit: cover;
     border: 3px solid var(--cream-warm); flex-shrink: 0;
 }
+/* Site-wide "img{display:block}" (style.css) là author CSS nên thắng UA-stylesheet
+   "[hidden]{display:none}" bất kể specificity — không override thì ảnh rỗng vẫn hiện. */
+.account-avatar-preview[hidden] { display: none; }
 .account-avatar-upload input[type="file"] { display: none; }
 .account-avatar-upload-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 6px; }
+
+/* Ô chữ cái thay ảnh mặc định (không phụ thuộc dịch vụ ảnh bên ngoài — an toàn CSP) */
+.account-avatar-fallback {
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff; font-size: 2rem; font-weight: 800; text-transform: uppercase;
+}
+.account-avatar-fallback[hidden] { display: none; }
+
+/* ===== Modal cắt ảnh đại diện ===== */
+.avatar-crop-modal {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(26,46,26,0.55); backdrop-filter: blur(2px);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.avatar-crop-modal.is-open { display: flex; }
+.avatar-crop-dialog {
+    background: var(--white); border-radius: 20px; padding: 24px;
+    width: 100%; max-width: 380px; box-shadow: 0 24px 60px rgba(26,46,26,0.28);
+}
+.avatar-crop-header {
+    font-weight: 800; color: var(--green-dark); font-size: 1.02rem;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+}
+.avatar-crop-header i { color: var(--gold); }
+.avatar-crop-stage {
+    position: relative; width: 320px; max-width: 100%; aspect-ratio: 1/1; margin: 0 auto 16px;
+    border-radius: 14px; overflow: hidden; background: var(--cream-dark);
+}
+.avatar-crop-stage canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+.avatar-crop-stage canvas:active { cursor: grabbing; }
+/* Vòng tròn hướng dẫn vùng crop (ảnh đại diện hiển thị dạng tròn) */
+.avatar-crop-overlay {
+    position: absolute; inset: 0; pointer-events: none;
+    box-shadow: 0 0 0 2000px rgba(255,255,255,0.28) inset;
+    border-radius: 50%;
+}
+.avatar-crop-controls {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 8px; color: var(--text-muted);
+}
+.avatar-crop-controls input[type="range"] { flex: 1; accent-color: var(--green); }
+.avatar-crop-hint { font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-bottom: 18px; }
+.avatar-crop-actions { display: flex; gap: 12px; }
+.avatar-crop-actions .btn-shop { flex: 1; justify-content: center; }
 
 /* ===== Radio/checkbox option cards (payment-method-style — dùng cho preferences/space type) ===== */
 .account-option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -321,8 +398,27 @@
 .account-pager a:hover { background: var(--cream-warm); }
 .account-pager span.current { background: var(--green); color: var(--white); }
 
+/* ===== Nút quay lại danh sách đơn hàng (đặt trong account-card "Thông tin đơn hàng") ===== */
+.account-back-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 30px; border-radius: 50px; border: 1.5px solid var(--green-dark);
+    background: var(--green-dark); color: #fff; cursor: pointer; text-decoration: none;
+    letter-spacing: 1px; text-transform: uppercase; font-weight: 700; font-size: 0.78rem;
+    font-family: var(--font); margin-bottom: 20px;
+    box-shadow: 0 8px 20px -12px rgba(30,63,39,.6);
+    transition: letter-spacing .35s ease, background .35s ease, color .35s ease, box-shadow .35s ease;
+}
+.account-back-btn i { transition: transform .35s ease; }
+.account-back-btn:hover {
+    letter-spacing: 2px; background: rgba(42,92,56,.12); color: var(--green-dark);
+    box-shadow: 0 8px 20px -14px rgba(30,63,39,.35);
+}
+.account-back-btn:hover i { transform: translateX(-3px); }
+.account-back-btn:active { transform: translateY(2px); transition-duration: .1s; }
+@media (prefers-reduced-motion: reduce) { .account-back-btn, .account-back-btn i { transition: none; } }
+
 /* ===== Order detail ===== */
-.account-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; align-items: start; }
+.account-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 26px 32px; align-items: start; }
 .account-kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px 14px; font-size: 0.9rem; }
 .account-kv dt { color: var(--text-muted); font-weight: 600; }
 .account-kv dd { font-weight: 600; color: var(--text-body); }
@@ -335,11 +431,56 @@
 
 .account-cancel-note { background: rgba(180,66,66,0.08); border-radius: 12px; padding: 14px 16px; font-size: 0.84rem; color: #8a3030; margin-bottom: 18px; }
 
-.account-timeline { list-style: none; display: flex; flex-direction: column; gap: 16px; }
-.account-timeline li { display: flex; gap: 12px; }
-.account-timeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; }
+/* Timeline: các bước đã qua = chấm xanh đậm đặc + đường nối liền mạch (đã hoàn tất);
+   bước hiện tại = chấm to hơn, có vòng pulse, màu theo đúng trạng thái đơn (PENDING/CONFIRMED/
+   SHIPPING/DONE/CANCELLED — cùng bảng màu với acc-badge-* phía trên) để biết ngay đang ở đâu. */
+.account-timeline { list-style: none; }
+.account-timeline li { display: flex; gap: 14px; position: relative; padding-bottom: 20px; }
+.account-timeline li:last-child { padding-bottom: 0; }
+.account-timeline li::before {
+    content: ''; position: absolute; left: 4px; top: 16px; bottom: -4px; width: 2px;
+    background: var(--green); opacity: .35;
+}
+.account-timeline li:last-child::before { display: none; }
+.account-timeline .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--green);
+    margin-top: 5px; flex-shrink: 0; position: relative; z-index: 1;
+    box-shadow: 0 0 0 3px #fff;
+}
 .account-timeline .tl-body b { display: block; font-size: 0.88rem; color: var(--text-body); font-weight: 700; }
 .account-timeline .tl-body span { font-size: 0.76rem; color: var(--text-muted); }
+
+.account-timeline li.is-current { padding-bottom: 4px; }
+.account-timeline li.is-current .dot {
+    width: 16px; height: 16px; margin-top: 2px; margin-left: -3px;
+    background: var(--green-dark); box-shadow: 0 0 0 4px #fff;
+}
+.account-timeline li.is-current .dot::after {
+    content: ''; position: absolute; inset: -5px; border-radius: 50%;
+    border: 2px solid var(--green-dark); opacity: .55;
+    animation: tlPulse 1.8s ease-out infinite;
+}
+.account-timeline li.is-current .tl-body b { font-size: 0.94rem; }
+.account-timeline li.is-current .tl-body span { font-weight: 700; }
+
+.account-timeline li.is-current[data-status="PENDING"] .dot,
+.account-timeline li.is-current[data-status="PENDING"] .dot::after { background: #B96A2E; border-color: #B96A2E; }
+.account-timeline li.is-current[data-status="PENDING_CANCEL"] .dot,
+.account-timeline li.is-current[data-status="PENDING_CANCEL"] .dot::after { background: #b45f24; border-color: #b45f24; }
+.account-timeline li.is-current[data-status="CONFIRMED"] .dot,
+.account-timeline li.is-current[data-status="CONFIRMED"] .dot::after { background: #3965FF; border-color: #3965FF; }
+.account-timeline li.is-current[data-status="SHIPPING"] .dot,
+.account-timeline li.is-current[data-status="SHIPPING"] .dot::after { background: #7A5AF8; border-color: #7A5AF8; }
+.account-timeline li.is-current[data-status="DONE"] .dot,
+.account-timeline li.is-current[data-status="DONE"] .dot::after { background: var(--green-dark); border-color: var(--green-dark); }
+.account-timeline li.is-current[data-status="CANCELLED"] .dot,
+.account-timeline li.is-current[data-status="CANCELLED"] .dot::after { background: #b44242; border-color: #b44242; }
+.account-timeline li.is-current[data-status="CANCELLED"] .tl-body b { color: #b44242; }
+
+@keyframes tlPulse { 0% { transform: scale(.6); opacity: .6; } 100% { transform: scale(2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .account-timeline li.is-current .dot::after { animation: none; }
+}
 
 .account-cancel-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .account-cancel-form textarea {

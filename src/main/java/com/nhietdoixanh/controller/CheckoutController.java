@@ -171,8 +171,19 @@ public class CheckoutController extends HttpServlet {
         String checkoutToken = CsrfFilter.generateToken();
         session.setAttribute("checkoutToken", checkoutToken);
 
-        List<UserAddress> savedAddresses = userAddressDao.findByUserId(userId);
-        UserAddress defaultAddress = userAddressDao.findDefaultByUserId(userId).orElse(null);
+        // Sổ địa chỉ là tính năng phụ trợ (autofill) — lỗi DB ở đây (vd. cột địa chỉ/tọa độ
+        // chưa được migrate) không được phép kéo sập cả trang checkout, vì luồng đặt hàng
+        // chính (nhập tay địa chỉ) không phụ thuộc vào nó.
+        List<UserAddress> savedAddresses;
+        UserAddress defaultAddress;
+        try {
+            savedAddresses = userAddressDao.findByUserId(userId);
+            defaultAddress = userAddressDao.findDefaultByUserId(userId).orElse(null);
+        } catch (RuntimeException e) {
+            System.err.println("[CheckoutController] Không tải được sổ địa chỉ (userId=" + userId + "): " + e.getMessage());
+            savedAddresses = List.of();
+            defaultAddress = null;
+        }
 
         req.setAttribute("checkoutItems", items);
         req.setAttribute("subtotal", sumTotal(items));

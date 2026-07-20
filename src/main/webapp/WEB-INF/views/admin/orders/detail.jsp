@@ -2,11 +2,17 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="/WEB-INF/views/admin/layout/header.jsp" />
 
+<!-- Dùng cdnjs (đã whitelist sẵn trong CSP của SecurityHeadersFilter — xem checkout.jsp) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
 <style>
+.od-map{width:100%;height:240px;border-radius:14px;border:1.5px solid var(--admin-border);overflow:hidden;margin-top:14px}
 .od-back{display:inline-flex;align-items:center;gap:8px;color:var(--admin-text-light);font-weight:700;font-size:13.5px;margin-bottom:16px}
 .od-back:hover{color:var(--admin-primary)}
 .od-grid{display:grid;grid-template-columns:2fr 1fr;gap:22px;align-items:start}
@@ -27,6 +33,8 @@
 .od-actions{display:flex;flex-direction:column;gap:10px}
 .od-actions form{display:flex;flex-direction:column;gap:8px}
 .od-actions textarea{width:100%;padding:10px 12px;border:1.5px solid var(--admin-border);border-radius:10px;font-family:var(--fb);font-size:14px;resize:vertical;min-height:64px}
+.od-actions select{width:100%;padding:10px 12px;border:1.5px solid var(--admin-border);border-radius:10px;font-family:var(--fb);font-size:14px;color:var(--admin-text);background:var(--admin-bg)}
+.od-actions select:focus{border-color:var(--admin-primary);outline:none;background:#fff}
 .od-timeline{list-style:none;display:flex;flex-direction:column;gap:16px}
 .od-timeline li{display:flex;gap:12px}
 .od-timeline .dot{width:10px;height:10px;border-radius:50%;background:var(--admin-primary);margin-top:6px;flex:none}
@@ -96,6 +104,12 @@
                     <dd><fmt:formatDate value="${order.statusUpdatedAt}" pattern="HH:mm dd/MM/yyyy"/></dd>
                 </c:if>
             </dl>
+
+            <c:if test="${not empty order.shippingLatitude and not empty order.shippingLongitude}">
+                <div class="od-map" id="odMap"
+                     data-lat="${order.shippingLatitude}" data-lng="${order.shippingLongitude}"
+                     data-addr="${fn:escapeXml(order.shippingAddress)}"></div>
+            </c:if>
         </div>
 
         <div class="card">
@@ -156,17 +170,30 @@
             </c:if>
 
             <c:if test="${canShip}">
-                <form method="post" action="${ctx}/admin/don-hang/cap-nhat-trang-thai">
-                    <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
-                    <input type="hidden" name="orderId" value="${order.orderId}">
-                    <input type="hidden" name="newStatus" value="SHIPPING">
-                    <input type="hidden" name="returnTo" value="detail">
-                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-truck"></i> Chuyển đang giao</button>
-                </form>
+                <c:choose>
+                    <c:when test="${not empty activeShippers}">
+                        <form method="post" action="${ctx}/admin/don-hang/giao-van-chuyen" class="od-ship-form">
+                            <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
+                            <input type="hidden" name="orderId" value="${order.orderId}">
+                            <input type="hidden" name="returnTo" value="detail">
+                            <select name="handlerId" required>
+                                <option value="">-- Người giao --</option>
+                                <c:forEach var="s" items="${activeShippers}">
+                                    <option value="${s.staffId}"><c:out value="${s.fullName}"/></option>
+                                </c:forEach>
+                            </select>
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-truck"></i> Chuyển đang giao</button>
+                        </form>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="${ctx}/admin/nhan-vien?formOpen=them&amp;role=DELIVERY" class="od-back">Chưa có ai trong đội giao hàng — Thêm nhân viên</a>
+                    </c:otherwise>
+                </c:choose>
             </c:if>
 
             <c:if test="${canDone}">
-                <form method="post" action="${ctx}/admin/don-hang/cap-nhat-trang-thai">
+                <form method="post" action="${ctx}/admin/don-hang/cap-nhat-trang-thai"
+                      onsubmit="return confirm('Xác nhận đơn #${order.orderId} đã giao thành công tới khách hàng?\n\nThao tác này sẽ chuyển đơn sang trạng thái Hoàn thành, không thể quay lại Đang giao.');">
                     <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
                     <input type="hidden" name="orderId" value="${order.orderId}">
                     <input type="hidden" name="newStatus" value="DONE">
@@ -207,5 +234,36 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    var el = document.getElementById('odMap');
+    if (!el || typeof L === 'undefined') return;
+    var lat = parseFloat(el.dataset.lat);
+    var lng = parseFloat(el.dataset.lng);
+    if (isNaN(lat) || isNaN(lng)) return;
+
+    var pin = L.divIcon({
+        className: '',
+        html: '<div style="position:relative;width:26px;height:39px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35))">' +
+              '<svg width="26" height="39" viewBox="0 0 30 45" xmlns="http://www.w3.org/2000/svg">' +
+              '<path d="M15 0C6.7 0 0 6.7 0 15c0 11.25 15 30 15 30s15-18.75 15-30C30 6.7 23.3 0 15 0z" fill="#2A5C38"/>' +
+              '<circle cx="15" cy="14" r="6" fill="#fff"/></svg></div>',
+        iconSize: [26, 39],
+        iconAnchor: [13, 39],
+        popupAnchor: [0, -35]
+    });
+
+    var map = L.map('odMap', { scrollWheelZoom: false }).setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    // Chỉ xem, không kéo-thả — sửa vị trí giao hàng phải qua checkout/sổ địa chỉ của khách.
+    L.marker([lat, lng], { icon: pin, draggable: false })
+        .addTo(map)
+        .bindPopup('<b>Địa chỉ giao hàng</b><br><small>' + (el.dataset.addr || '') + '</small>');
+})();
+</script>
 
 <jsp:include page="/WEB-INF/views/admin/layout/footer.jsp" />

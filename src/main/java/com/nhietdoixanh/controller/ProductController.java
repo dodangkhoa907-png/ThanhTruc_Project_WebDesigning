@@ -147,8 +147,34 @@ public class ProductController extends HttpServlet {
             return;
         }
 
-        req.setAttribute("product", productOpt.get());
+        Product product = productOpt.get();
+        req.setAttribute("product", product);
+        req.setAttribute("otherProducts", findOtherProducts(product));
         req.setAttribute("currentPage", "products");
         req.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(req, resp);
+    }
+
+    private static final int OTHER_PRODUCTS_LIMIT = 4;
+
+    /**
+     * Sản phẩm khác cho khách chọn thêm ngay dưới trang chi tiết — ưu tiên cùng danh mục,
+     * bù thêm sản phẩm bất kỳ (khác danh mục) nếu danh mục hiện tại không đủ số lượng.
+     */
+    private List<Product> findOtherProducts(Product current) {
+        List<Product> sameCategory = productDao.findActiveForShop(current.getCategoryId(), null, ProductSort.DEFAULT);
+        List<Product> result = new java.util.ArrayList<>();
+        for (Product p : sameCategory) {
+            if (p.getProductId() != current.getProductId()) result.add(p);
+            if (result.size() >= OTHER_PRODUCTS_LIMIT) return result;
+        }
+
+        List<Product> anyCategory = productDao.findActiveForShop(null, null, ProductSort.DEFAULT);
+        for (Product p : anyCategory) {
+            if (p.getProductId() == current.getProductId()) continue;
+            if (result.stream().anyMatch(r -> r.getProductId() == p.getProductId())) continue;
+            result.add(p);
+            if (result.size() >= OTHER_PRODUCTS_LIMIT) break;
+        }
+        return result;
     }
 }

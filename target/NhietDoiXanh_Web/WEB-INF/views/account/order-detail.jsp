@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -29,10 +30,6 @@
     <section class="section" style="padding-top:130px;">
         <div class="container">
 
-            <a href="${pageContext.request.contextPath}/account/orders" class="cart-continue-link" style="margin-bottom:16px;display:inline-flex;">
-                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn hàng
-            </a>
-
             <c:if test="${not empty flashSuccess}"><div class="account-flash success"><c:out value="${flashSuccess}"/></div></c:if>
             <c:if test="${not empty flashError}"><div class="account-flash error"><c:out value="${flashError}"/></div></c:if>
 
@@ -47,6 +44,9 @@
                 <div class="account-detail-grid">
                     <div>
                         <div class="account-card">
+                            <a href="${pageContext.request.contextPath}/account/orders" class="account-back-btn">
+                                <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách đơn hàng
+                            </a>
                             <div class="account-card-title">
                                 <span><i class="fa-solid fa-receipt"></i> Thông tin đơn hàng</span>
                                 <span class="acc-badge acc-badge-${order.orderStatus}" id="orderStatusBadge"><c:out value="${order.orderStatusLabel}"/></span>
@@ -99,15 +99,15 @@
                         <div class="account-card">
                             <div class="account-card-title"><span><i class="fa-solid fa-timeline"></i> Timeline trạng thái</span></div>
                             <ul class="account-timeline">
-                                <li>
+                                <li class="${empty auditTrail ? 'is-current' : ''}" data-status="${empty auditTrail ? order.orderStatus : ''}">
                                     <span class="dot"></span>
                                     <div class="tl-body">
                                         <b>Đơn hàng được tạo</b>
                                         <span><fmt:formatDate value="${order.createdAt}" pattern="HH:mm dd/MM/yyyy"/></span>
                                     </div>
                                 </li>
-                                <c:forEach var="log" items="${auditTrail}">
-                                    <li>
+                                <c:forEach var="log" items="${auditTrail}" varStatus="logStatus">
+                                    <li class="${logStatus.last ? 'is-current' : ''}" data-status="${logStatus.last ? order.orderStatus : ''}">
                                         <span class="dot"></span>
                                         <div class="tl-body">
                                             <b><c:out value="${log.detail}"/></b>

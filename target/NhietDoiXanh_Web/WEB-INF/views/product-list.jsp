@@ -2,15 +2,16 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sản Phẩm — Nhiệt Đới Xanh | Cây Cảnh &amp; Decor Nhiệt Đới</title>
+    <title>Sản Phẩm — Nhiệt Đới Xanh | Nước Ép &amp; Sinh Tố Trái Cây Tươi</title>
     <meta name="description"
-        content="Khu sản phẩm Nhiệt Đới Xanh — cây cảnh, chậu decor phong cách nhiệt đới, chọn size và số lượng, giao tận nơi.">
+        content="Khu sản phẩm Nhiệt Đới Xanh — nước ép, sinh tố trái cây nguyên chất, chọn size và số lượng, giao tận nơi.">
     <meta name="csrf-token" content="${sessionScope._csrf}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,12 +40,12 @@
     <section class="shop-hero">
         <div class="container">
             <div class="shop-hero-eyebrow">
-                <i class="fa-solid fa-seedling"></i> Cây cảnh &amp; decor phong cách nhiệt đới
+                <i class="fa-solid fa-glass-water-droplet"></i> Nước ép &amp; sinh tố trái cây nguyên chất
             </div>
-            <h1 class="shop-hero-title">Mang không gian<br>xanh mát về nhà bạn.</h1>
+            <h1 class="shop-hero-title">Mang vị tươi mát<br>nhiệt đới về với bạn.</h1>
             <p class="shop-hero-desc">
-                Chọn cây, chọn chậu, chọn kích thước phù hợp với góc nhà của bạn —
-                giao tận nơi, chăm sóc dễ dàng.
+                Chọn loại trái cây, chọn size ly phù hợp với khẩu vị của bạn —
+                ép tươi mỗi ngày, giao tận nơi.
             </p>
         </div>
     </section>
@@ -112,7 +113,7 @@
                                     <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${fn:escapeXml(p.name)}" loading="lazy">
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="ph-icon">🌿</span>
+                                    <span class="ph-icon">🍹</span>
                                 </c:otherwise>
                             </c:choose>
                             <c:if test="${not empty p.categoryName}">
@@ -126,7 +127,7 @@
                                 </a>
                             </div>
                             <div class="shop-card-desc">
-                                <c:out value="${not empty p.description ? p.description : 'Sản phẩm chất lượng, phù hợp không gian sống xanh mát.'}"/>
+                                <c:out value="${not empty p.description ? p.description : 'Nước ép nguyên chất, tươi ngon mỗi ngày.'}"/>
                             </div>
                             <c:if test="${not empty p.variants}">
                                 <div class="shop-card-variants">
@@ -162,7 +163,7 @@
             </c:when>
             <c:otherwise>
                 <div class="shop-empty">
-                    <i class="fa-solid fa-seedling"></i>
+                    <i class="fa-solid fa-glass-water-droplet"></i>
                     <h3>Chưa tìm thấy sản phẩm phù hợp</h3>
                     <p>Thử đổi từ khóa tìm kiếm hoặc chọn danh mục khác.</p>
                 </div>
@@ -191,6 +192,15 @@
         document.querySelectorAll('.btn-quick-add').forEach(btn => {
             btn.addEventListener('click', () => {
                 NhietDoiXanhCart.addToCart(btn.dataset.variantId, 1, btn);
+            });
+        });
+
+        // Bấm vào ảnh/tên/mô tả sản phẩm là vào luôn trang chi tiết — cố tình KHÔNG gộp
+        // vùng footer (giá + nút "Thêm"/"Xem chi tiết") vào đây để tránh chạm nhầm trên di động.
+        document.querySelectorAll('.shop-card-media, .shop-card-desc').forEach(zone => {
+            zone.addEventListener('click', () => {
+                const link = zone.closest('.shop-card').querySelector('.shop-card-name a');
+                if (link) window.location.href = link.href;
             });
         });
     </script>

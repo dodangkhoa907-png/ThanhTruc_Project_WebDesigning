@@ -1,6 +1,7 @@
 package com.nhietdoixanh.dao.impl;
 
 import com.nhietdoixanh.config.Database;
+import com.nhietdoixanh.config.DbRetry;
 import com.nhietdoixanh.dao.ProductDao;
 import com.nhietdoixanh.model.Product;
 import com.nhietdoixanh.model.ProductVariant;
@@ -74,55 +75,62 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public Optional<Product> findActiveById(int productId) {
-        String sql = BASE_SELECT + "WHERE p.ProductID = ? AND p.IsActive = 1";
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, productId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Product p = mapRow(rs);
-                    p.setVariants(loadVariants(con, p.getProductId()));
-                    return Optional.of(p);
+        // Đường khách hàng xem chi tiết sản phẩm — retry 1 lần nếu gặp lỗi kết nối thoáng qua,
+        // tránh khách bị màn hình lỗi chỉ vì một lần mạng chập chờn tới DB ở xa.
+        return DbRetry.read(() -> {
+            String sql = BASE_SELECT + "WHERE p.ProductID = ? AND p.IsActive = 1";
+            try (Connection con = Database.getConnection();
+                 PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Product p = mapRow(rs);
+                        p.setVariants(loadVariants(con, p.getProductId()));
+                        return Optional.of(p);
+                    }
                 }
+            } catch (SQLException e) {
+                throw new RuntimeException("ProductDao.findActiveById thất bại: " + productId, e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("ProductDao.findActiveById thất bại: " + productId, e);
-        }
-        return Optional.empty();
+            return Optional.<Product>empty();
+        });
     }
 
     @Override
     public List<Product> findActiveForShop(Integer categoryId, String keyword, ProductSort sort) {
-        List<Product> list = new ArrayList<>();
-        StringBuilder sql = new StringBuilder(BASE_SELECT).append("WHERE p.IsActive = 1 ");
+        // Đường khách hàng duyệt khu sản phẩm — retry 1 lần nếu gặp lỗi kết nối thoáng qua (xem DbRetry).
+        return DbRetry.read(() -> {
+            List<Product> list = new ArrayList<>();
+            StringBuilder sql = new StringBuilder(BASE_SELECT).append("WHERE p.IsActive = 1 ");
 
-        boolean hasCategory = categoryId != null;
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
+            boolean hasCategory = categoryId != null;
+            boolean hasKeyword = keyword != null && !keyword.isBlank();
 
-        if (hasCategory) sql.append("AND p.CategoryID = ? ");
-        if (hasKeyword) sql.append("AND p.ProductName LIKE ? ");
+            if (hasCategory) sql.append("AND p.CategoryID = ? ");
+            if (hasKeyword) sql.append("AND p.ProductName LIKE ? ");
 
-        ProductSort effectiveSort = sort != null ? sort : ProductSort.DEFAULT;
-        switch (effectiveSort) {
-            case PRICE_ASC -> sql.append("ORDER BY ").append(MIN_PRICE_SUBQUERY).append(" ASC, p.ProductName");
-            case PRICE_DESC -> sql.append("ORDER BY ").append(MIN_PRICE_SUBQUERY).append(" DESC, p.ProductName");
-            case NAME_ASC -> sql.append("ORDER BY p.ProductName ASC");
-            default -> sql.append("ORDER BY p.ProductID DESC");
-        }
-
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
-            int idx = 1;
-            if (hasCategory) ps.setInt(idx++, categoryId);
-            if (hasKeyword) ps.setNString(idx, "%" + keyword.trim() + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+            ProductSort effectiveSort = sort != null ? sort : ProductSort.DEFAULT;
+            switch (effectiveSort) {
+                case PRICE_ASC -> sql.append("ORDER BY ").append(MIN_PRICE_SUBQUERY).append(" ASC, p.ProductName");
+                case PRICE_DESC -> sql.append("ORDER BY ").append(MIN_PRICE_SUBQUERY).append(" DESC, p.ProductName");
+                case NAME_ASC -> sql.append("ORDER BY p.ProductName ASC");
+                default -> sql.append("ORDER BY p.ProductID DESC");
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("ProductDao.findActiveForShop thất bại", e);
-        }
-        attachVariants(list);
-        return list;
+
+            try (Connection con = Database.getConnection();
+                 PreparedStatement ps = con.prepareStatement(sql.toString())) {
+                int idx = 1;
+                if (hasCategory) ps.setInt(idx++, categoryId);
+                if (hasKeyword) ps.setNString(idx, "%" + keyword.trim() + "%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) list.add(mapRow(rs));
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("ProductDao.findActiveForShop thất bại", e);
+            }
+            attachVariants(list);
+            return list;
+        });
     }
 
     @Override

@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <jsp:include page="/WEB-INF/views/admin/layout/header.jsp" />
@@ -463,6 +464,10 @@ a.uq-code:hover{border-color:var(--admin-gold)}
     }
 
     historySection.addEventListener('click', function (e) {
+        // Ctrl/Cmd/Shift+click, click giữa (mở tab mới), hoặc chuột phải -> để trình duyệt xử lý
+        // như bình thường (mở tab mới...), KHÔNG cướp bằng preventDefault(). Trước đây thiếu check
+        // này nên Ctrl+click vào tab lịch sử bị chặn mất, không mở tab mới được như trình duyệt vẫn làm.
+        if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
         var a = e.target.closest('a[href]');
         if (!a || !historySection.contains(a)) return;
         var href = a.getAttribute('href');

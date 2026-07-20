@@ -83,6 +83,9 @@
     width: 88px; height: 88px; border-radius: 50%; object-fit: cover;
     border: 3px solid var(--cream-warm); flex-shrink: 0;
 }
+/* Site-wide "img{display:block}" (style.css) là author CSS nên thắng UA-stylesheet
+   "[hidden]{display:none}" bất kể specificity — không override thì ảnh rỗng vẫn hiện. */
+.account-avatar-preview[hidden] { display: none; }
 .account-avatar-upload input[type="file"] { display: none; }
 .account-avatar-upload-hint { font-size: 0.76rem; color: var(--text-muted); margin-top: 6px; }
 
@@ -92,6 +95,7 @@
     background: linear-gradient(135deg, var(--green), var(--green-dark));
     color: #fff; font-size: 2rem; font-weight: 800; text-transform: uppercase;
 }
+.account-avatar-fallback[hidden] { display: none; }
 
 /* ===== Modal cắt ảnh đại diện ===== */
 .avatar-crop-modal {
@@ -394,8 +398,27 @@
 .account-pager a:hover { background: var(--cream-warm); }
 .account-pager span.current { background: var(--green); color: var(--white); }
 
+/* ===== Nút quay lại danh sách đơn hàng (đặt trong account-card "Thông tin đơn hàng") ===== */
+.account-back-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 30px; border-radius: 50px; border: 1.5px solid var(--green-dark);
+    background: var(--green-dark); color: #fff; cursor: pointer; text-decoration: none;
+    letter-spacing: 1px; text-transform: uppercase; font-weight: 700; font-size: 0.78rem;
+    font-family: var(--font); margin-bottom: 20px;
+    box-shadow: 0 8px 20px -12px rgba(30,63,39,.6);
+    transition: letter-spacing .35s ease, background .35s ease, color .35s ease, box-shadow .35s ease;
+}
+.account-back-btn i { transition: transform .35s ease; }
+.account-back-btn:hover {
+    letter-spacing: 2px; background: rgba(42,92,56,.12); color: var(--green-dark);
+    box-shadow: 0 8px 20px -14px rgba(30,63,39,.35);
+}
+.account-back-btn:hover i { transform: translateX(-3px); }
+.account-back-btn:active { transform: translateY(2px); transition-duration: .1s; }
+@media (prefers-reduced-motion: reduce) { .account-back-btn, .account-back-btn i { transition: none; } }
+
 /* ===== Order detail ===== */
-.account-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 22px; align-items: start; }
+.account-detail-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 26px 32px; align-items: start; }
 .account-kv { display: grid; grid-template-columns: 150px 1fr; gap: 10px 14px; font-size: 0.9rem; }
 .account-kv dt { color: var(--text-muted); font-weight: 600; }
 .account-kv dd { font-weight: 600; color: var(--text-body); }
@@ -408,11 +431,56 @@
 
 .account-cancel-note { background: rgba(180,66,66,0.08); border-radius: 12px; padding: 14px 16px; font-size: 0.84rem; color: #8a3030; margin-bottom: 18px; }
 
-.account-timeline { list-style: none; display: flex; flex-direction: column; gap: 16px; }
-.account-timeline li { display: flex; gap: 12px; }
-.account-timeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); margin-top: 6px; flex-shrink: 0; }
+/* Timeline: các bước đã qua = chấm xanh đậm đặc + đường nối liền mạch (đã hoàn tất);
+   bước hiện tại = chấm to hơn, có vòng pulse, màu theo đúng trạng thái đơn (PENDING/CONFIRMED/
+   SHIPPING/DONE/CANCELLED — cùng bảng màu với acc-badge-* phía trên) để biết ngay đang ở đâu. */
+.account-timeline { list-style: none; }
+.account-timeline li { display: flex; gap: 14px; position: relative; padding-bottom: 20px; }
+.account-timeline li:last-child { padding-bottom: 0; }
+.account-timeline li::before {
+    content: ''; position: absolute; left: 4px; top: 16px; bottom: -4px; width: 2px;
+    background: var(--green); opacity: .35;
+}
+.account-timeline li:last-child::before { display: none; }
+.account-timeline .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--green);
+    margin-top: 5px; flex-shrink: 0; position: relative; z-index: 1;
+    box-shadow: 0 0 0 3px #fff;
+}
 .account-timeline .tl-body b { display: block; font-size: 0.88rem; color: var(--text-body); font-weight: 700; }
 .account-timeline .tl-body span { font-size: 0.76rem; color: var(--text-muted); }
+
+.account-timeline li.is-current { padding-bottom: 4px; }
+.account-timeline li.is-current .dot {
+    width: 16px; height: 16px; margin-top: 2px; margin-left: -3px;
+    background: var(--green-dark); box-shadow: 0 0 0 4px #fff;
+}
+.account-timeline li.is-current .dot::after {
+    content: ''; position: absolute; inset: -5px; border-radius: 50%;
+    border: 2px solid var(--green-dark); opacity: .55;
+    animation: tlPulse 1.8s ease-out infinite;
+}
+.account-timeline li.is-current .tl-body b { font-size: 0.94rem; }
+.account-timeline li.is-current .tl-body span { font-weight: 700; }
+
+.account-timeline li.is-current[data-status="PENDING"] .dot,
+.account-timeline li.is-current[data-status="PENDING"] .dot::after { background: #B96A2E; border-color: #B96A2E; }
+.account-timeline li.is-current[data-status="PENDING_CANCEL"] .dot,
+.account-timeline li.is-current[data-status="PENDING_CANCEL"] .dot::after { background: #b45f24; border-color: #b45f24; }
+.account-timeline li.is-current[data-status="CONFIRMED"] .dot,
+.account-timeline li.is-current[data-status="CONFIRMED"] .dot::after { background: #3965FF; border-color: #3965FF; }
+.account-timeline li.is-current[data-status="SHIPPING"] .dot,
+.account-timeline li.is-current[data-status="SHIPPING"] .dot::after { background: #7A5AF8; border-color: #7A5AF8; }
+.account-timeline li.is-current[data-status="DONE"] .dot,
+.account-timeline li.is-current[data-status="DONE"] .dot::after { background: var(--green-dark); border-color: var(--green-dark); }
+.account-timeline li.is-current[data-status="CANCELLED"] .dot,
+.account-timeline li.is-current[data-status="CANCELLED"] .dot::after { background: #b44242; border-color: #b44242; }
+.account-timeline li.is-current[data-status="CANCELLED"] .tl-body b { color: #b44242; }
+
+@keyframes tlPulse { 0% { transform: scale(.6); opacity: .6; } 100% { transform: scale(2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+    .account-timeline li.is-current .dot::after { animation: none; }
+}
 
 .account-cancel-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .account-cancel-form textarea {

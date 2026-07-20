@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -113,6 +114,70 @@
                     </c:choose>
                 </div>
             </div>
+
+            <c:if test="${not empty otherProducts}">
+            <div class="detail-related">
+                <div class="shop-results-header">
+                    <span class="shop-results-count"><strong>Sản Phẩm Khác</strong></span>
+                </div>
+                <div class="shop-grid">
+                    <c:forEach var="p" items="${otherProducts}">
+                        <div class="shop-card">
+                            <div class="shop-card-media">
+                                <c:choose>
+                                    <c:when test="${not empty p.imageUrl}">
+                                        <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${fn:escapeXml(p.name)}" loading="lazy">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="ph-icon">🍹</span>
+                                    </c:otherwise>
+                                </c:choose>
+                                <c:if test="${not empty p.categoryName}">
+                                    <span class="shop-card-cat"><c:out value="${p.categoryName}"/></span>
+                                </c:if>
+                            </div>
+                            <div class="shop-card-body">
+                                <div class="shop-card-name">
+                                    <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}">
+                                        <c:out value="${p.name}"/>
+                                    </a>
+                                </div>
+                                <div class="shop-card-desc">
+                                    <c:out value="${not empty p.description ? p.description : 'Nước ép nguyên chất, tươi ngon mỗi ngày.'}"/>
+                                </div>
+                                <c:if test="${not empty p.variants}">
+                                    <div class="shop-card-variants">
+                                        <c:forEach var="v" items="${p.variants}" varStatus="vs" begin="0" end="2">
+                                            <span class="shop-variant-pill"><c:out value="${v.sizeLabel}"/></span>
+                                        </c:forEach>
+                                    </div>
+                                </c:if>
+                                <div class="shop-card-footer">
+                                    <div class="shop-card-price">
+                                        <small>Từ</small>
+                                        <fmt:formatNumber value="${p.fromPrice}" type="number" groupingUsed="true"/>đ
+                                    </div>
+                                    <c:choose>
+                                        <c:when test="${fn:length(p.variants) == 1}">
+                                            <button type="button" class="btn-shop btn-shop-primary btn-quick-add"
+                                                    data-variant-id="${p.variants[0].variantId}">
+                                                <i class="fa-solid fa-cart-plus"></i> Thêm
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}"
+                                               class="btn-shop btn-shop-outline">
+                                                Xem chi tiết
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+                            </div>
+                        </div>
+                    </c:forEach>
+                </div>
+            </div>
+            </c:if>
             </c:otherwise>
             </c:choose>
         </div>
@@ -172,6 +237,21 @@
                 NhietDoiXanhCart.addToCart(checked.value, qty, addBtn);
             });
         }
+
+        document.querySelectorAll('.btn-quick-add').forEach(btn => {
+            btn.addEventListener('click', () => {
+                NhietDoiXanhCart.addToCart(btn.dataset.variantId, 1, btn);
+            });
+        });
+
+        // Bấm vào ảnh/tên/mô tả sản phẩm (trong "Sản Phẩm Khác") là vào luôn trang chi tiết —
+        // cố tình KHÔNG gộp vùng footer (giá + nút "Thêm"/"Xem chi tiết") để tránh chạm nhầm trên di động.
+        document.querySelectorAll('.shop-card-media, .shop-card-desc').forEach(zone => {
+            zone.addEventListener('click', () => {
+                const link = zone.closest('.shop-card').querySelector('.shop-card-name a');
+                if (link) window.location.href = link.href;
+            });
+        });
     </script>
 </body>
 </html>

@@ -30,8 +30,10 @@ public class SecurityHeadersFilter implements Filter {
                     + "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; "
                     + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
                     + "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
-                    + "img-src 'self' data: blob: https://images.unsplash.com; "
-                    + "connect-src 'self'; "
+                    // checkout-addr-map (Leaflet): tile ảnh bản đồ tải từ các subdomain a/b/c.tile.openstreetmap.org.
+                    + "img-src 'self' data: blob: https://images.unsplash.com https://*.tile.openstreetmap.org; "
+                    // checkout-addr-map: reverse-geocode (tự điền địa chỉ từ tọa độ) qua Nominatim.
+                    + "connect-src 'self' https://nominatim.openstreetmap.org; "
                     + "frame-ancestors 'self'");
         }
         chain.doFilter(request, response);

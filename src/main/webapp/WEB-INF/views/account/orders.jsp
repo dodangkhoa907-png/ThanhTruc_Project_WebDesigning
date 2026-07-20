@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -28,6 +29,10 @@
 
     <section class="section" style="padding-top:130px;">
         <div class="container">
+
+            <a href="${pageContext.request.contextPath}/account" class="cart-continue-link" style="margin-bottom:16px;display:inline-flex;">
+                <i class="fa-solid fa-arrow-left"></i> Quay lại Tổng quan
+            </a>
 
             <c:if test="${not empty flashSuccess}"><div class="account-flash success"><c:out value="${flashSuccess}"/></div></c:if>
             <c:if test="${not empty flashError}"><div class="account-flash error"><c:out value="${flashError}"/></div></c:if>

@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -44,10 +45,10 @@
                     <div class="account-profile-card">
                         <c:choose>
                             <c:when test="${not empty user.profileImage}">
-                                <img class="account-avatar" src="${pageContext.request.contextPath}${user.profileImage}" alt="Avatar">
+                                <img class="account-avatar" src="${pageContext.request.contextPath}${user.profileImage}" alt="Ảnh đại diện">
                             </c:when>
                             <c:otherwise>
-                                <img class="account-avatar" src="https://ui-avatars.com/api/?name=${fn:escapeXml(user.fullName)}&background=2A5C38&color=fff&bold=true" alt="Avatar">
+                                <div class="account-avatar account-avatar-fallback" aria-hidden="true"><c:out value="${not empty user.fullName ? fn:substring(user.fullName, 0, 1) : 'N'}"/></div>
                             </c:otherwise>
                         </c:choose>
                         <div class="account-profile-info">

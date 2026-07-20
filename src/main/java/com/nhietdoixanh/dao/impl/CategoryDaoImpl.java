@@ -1,6 +1,7 @@
 package com.nhietdoixanh.dao.impl;
 
 import com.nhietdoixanh.config.Database;
+import com.nhietdoixanh.config.DbRetry;
 import com.nhietdoixanh.dao.CategoryDao;
 import com.nhietdoixanh.model.Category;
 
@@ -19,18 +20,22 @@ public class CategoryDaoImpl implements CategoryDao {
 
     @Override
     public List<Category> findAll() {
-        List<Category> list = new ArrayList<>();
-        try (Connection con = Database.getConnection();
-             PreparedStatement ps = con.prepareStatement(SQL_FIND_ALL);
-             ResultSet rs = ps.executeQuery()) {
+        // Load cùng lúc với danh sách sản phẩm ở /san-pham — retry 1 lần nếu gặp lỗi kết nối
+        // thoáng qua (xem DbRetry), tránh khách bị lỗi trang chỉ vì mạng chập chờn tới DB ở xa.
+        return DbRetry.read(() -> {
+            List<Category> list = new ArrayList<>();
+            try (Connection con = Database.getConnection();
+                 PreparedStatement ps = con.prepareStatement(SQL_FIND_ALL);
+                 ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                list.add(mapRow(rs));
+                while (rs.next()) {
+                    list.add(mapRow(rs));
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException("CategoryDao.findAll thất bại", e);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("CategoryDao.findAll thất bại", e);
-        }
-        return list;
+            return list;
+        });
     }
 
     @Override

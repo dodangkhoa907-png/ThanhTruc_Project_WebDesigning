@@ -15,6 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
@@ -95,11 +97,38 @@
                                 </div>
                             </div>
 
+                            <c:set var="prefillLat" value="${formAddress.latitude}"/>
+                            <c:set var="prefillLng" value="${formAddress.longitude}"/>
+
                             <div class="account-gps-row">
                                 <button type="button" class="account-gps-btn" id="gpsLocateBtn">
                                     <i class="fa-solid fa-location-crosshairs"></i> Lấy vị trí hiện tại
                                 </button>
-                                <span class="account-gps-status" id="gpsStatusText"></span>
+                                <span class="account-gps-status ${(not empty prefillLat && not empty prefillLng) ? 'is-success' : ''}" id="gpsStateText">
+                                    <c:choose>
+                                        <c:when test="${not empty prefillLat && not empty prefillLng}">Địa chỉ này đã có tọa độ.</c:when>
+                                        <c:otherwise>Chưa lấy vị trí.</c:otherwise>
+                                    </c:choose>
+                                </span>
+                            </div>
+
+                            <div class="checkout-gps-card ${(empty prefillLat || empty prefillLng) ? 'is-hidden' : ''}" id="gpsResultCard">
+                                <div class="checkout-gps-card-head">
+                                    <i class="fa-solid fa-circle-check"></i> Đã lấy vị trí hiện tại
+                                </div>
+                                <div class="checkout-gps-card-coords">
+                                    <span>Latitude: <strong id="gpsLatText">${fn:escapeXml(prefillLat)}</strong></span>
+                                    <span>Longitude: <strong id="gpsLngText">${fn:escapeXml(prefillLng)}</strong></span>
+                                </div>
+                                <button type="button" class="checkout-gps-clear-btn" id="gpsClearBtn">
+                                    <i class="fa-solid fa-trash-can"></i> Xóa vị trí
+                                </button>
+                            </div>
+                            <div class="checkout-gps-error" id="gpsErrorText" hidden></div>
+
+                            <div class="checkout-addr-map ${(empty prefillLat || empty prefillLng) ? 'is-hidden' : ''}" id="addrMap"></div>
+                            <div class="checkout-addr-map-hint ${(empty prefillLat || empty prefillLng) ? 'is-hidden' : ''}" id="addrMapHint">
+                                <i class="fa-solid fa-hand-pointer"></i> Kéo ghim trên bản đồ để chỉnh vị trí chính xác hơn.
                             </div>
 
                             <div class="account-field" id="isDefaultRow" ${not empty formAddress.addressId ? 'style="display:none"' : ''}>
@@ -201,6 +230,22 @@
                 document.getElementById('houseNumberStreet').value = card.dataset.house;
                 document.getElementById('latitudeField').value = card.dataset.lat || '';
                 document.getElementById('longitudeField').value = card.dataset.lng || '';
+
+                const map = window.NDXAddrMap;
+                if (card.dataset.lat && card.dataset.lng && map) {
+                    const lat = parseFloat(card.dataset.lat);
+                    const lng = parseFloat(card.dataset.lng);
+                    const latField = document.getElementById('latitudeField');
+                    const lngField = document.getElementById('longitudeField');
+                    map.showGpsCard(latField, lngField);
+                    map.setGpsState(document.getElementById('gpsStateText'), 'Địa chỉ này đã có tọa độ. Kéo ghim trên bản đồ để chỉnh lại nếu cần.', true);
+                    map.showAddrMap(lat, lng);
+                } else if (map) {
+                    map.hideGpsCard();
+                    map.setAddrMapVisible(false);
+                    map.setGpsState(document.getElementById('gpsStateText'), 'Chưa lấy vị trí.', false);
+                }
+
                 addressFormTitle.textContent = 'Sửa địa chỉ';
                 cancelEditLink.style.display = 'inline-flex';
                 isDefaultRow.style.display = 'none';

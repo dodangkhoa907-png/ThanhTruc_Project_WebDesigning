@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -60,7 +61,8 @@
                 <p class="hero-slogan">"Trọn Vị Thanh Mát — Tươi Mát Từ Thiên Nhiên"</p>
 
                 <div class="hero-actions">
-                    <a href="#checkout" class="btn btn-primary">
+                    <%-- Chưa đăng nhập: mời đăng nhập/đăng ký trước để đặt hàng. Đã đăng nhập: vào thẳng khu sản phẩm. --%>
+                    <a href="${pageContext.request.contextPath}${empty sessionScope.user ? '/login' : '/san-pham'}" class="btn btn-primary">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0020 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
                         Đặt Hàng Ngay
                     </a>
@@ -197,6 +199,12 @@
     <!-- ================================================================
      SẢN PHẨM NỔI BẬT — đọc thật từ DB (ProductDao.findAllActive), mỗi card
      trỏ đúng /san-pham/chi-tiet?id=<ProductID> theo sản phẩm được click.
+     3 sản phẩm đầu trình bày dạng "zigzag" nổi bật (Best-Sellers), phần còn
+     lại gọn trong "Các Món Khác" — tái dùng CSS .zigzag-*/.bestseller-* đã có
+     sẵn trong style.css (từng thiết kế cho mục này nhưng chưa nối HTML).
+     Ảnh: ưu tiên p.imageUrl thật (admin upload qua /admin/san-pham); nếu sản
+     phẩm chưa có ảnh riêng thì đoán theo tên khớp ảnh trái cây có sẵn trong
+     /images (cam/thơm/dưa hấu), cuối cùng mới rơi về icon chung.
      ================================================================ -->
     <section class="menu section" id="menu">
         <div class="container">
@@ -204,51 +212,84 @@
                 <span class="section-label">Sản Phẩm</span>
                 <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
                 <p class="section-subtitle">
-                    Cây cảnh và decor phong cách nhiệt đới, chọn size phù hợp với không gian của bạn.
+                    Những ly nước ép trái cây tươi nguyên chất, chọn size phù hợp với nhu cầu của bạn.
                 </p>
             </div>
 
             <c:choose>
             <c:when test="${not empty featuredProducts}">
-            <div class="shop-grid">
-                <c:forEach var="p" items="${featuredProducts}">
-                    <div class="shop-card reveal">
-                        <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}" class="shop-card-media" aria-label="Xem chi tiết ${fn:escapeXml(p.name)}">
+
+            <div class="bestseller-zone">
+                <div class="bestseller-label reveal">⭐ Best-Sellers</div>
+
+                <c:forEach var="p" items="${featuredProducts}" begin="0" end="2" varStatus="loop">
+                    <c:set var="zigzagFruitClass" value="${(fn:containsIgnoreCase(p.name, 'dưa hấu') or fn:containsIgnoreCase(p.name, 'dua hau')) ? 'zigzag-watermelon' : ((fn:containsIgnoreCase(p.name, 'thơm') or fn:containsIgnoreCase(p.name, 'dứa') or fn:containsIgnoreCase(p.name, 'thom')) ? 'zigzag-pineapple' : '')}"/>
+                    <div class="zigzag-block reveal ${loop.index % 2 == 1 ? 'zigzag-reverse' : ''} ${zigzagFruitClass}">
+                        <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}"
+                           class="zigzag-image" aria-label="Xem chi tiết ${fn:escapeXml(p.name)}">
                             <c:choose>
                                 <c:when test="${not empty p.imageUrl}">
-                                    <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${fn:escapeXml(p.name)}" loading="lazy">
+                                    <img src="${pageContext.request.contextPath}${p.imageUrl}" alt="${fn:escapeXml(p.name)}" class="zigzag-img" loading="lazy">
+                                </c:when>
+                                <c:when test="${fn:containsIgnoreCase(p.name, 'cam')}">
+                                    <img src="${pageContext.request.contextPath}/images/cam.png" alt="${fn:escapeXml(p.name)}" class="zigzag-img" loading="lazy">
+                                </c:when>
+                                <c:when test="${fn:containsIgnoreCase(p.name, 'dưa hấu') or fn:containsIgnoreCase(p.name, 'dua hau')}">
+                                    <img src="${pageContext.request.contextPath}/images/duahau.png" alt="${fn:escapeXml(p.name)}" class="zigzag-img" loading="lazy">
+                                </c:when>
+                                <c:when test="${fn:containsIgnoreCase(p.name, 'thơm') or fn:containsIgnoreCase(p.name, 'dứa') or fn:containsIgnoreCase(p.name, 'thom')}">
+                                    <img src="${pageContext.request.contextPath}/images/thom.png" alt="${fn:escapeXml(p.name)}" class="zigzag-img" loading="lazy">
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="ph-icon">🌿</span>
+                                    <span class="ph-icon">🍹</span>
                                 </c:otherwise>
                             </c:choose>
-                            <c:if test="${not empty p.categoryName}">
-                                <span class="shop-card-cat"><c:out value="${p.categoryName}"/></span>
-                            </c:if>
                         </a>
-                        <div class="shop-card-body">
-                            <div class="shop-card-name">
-                                <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}">
-                                    <c:out value="${p.name}"/>
-                                </a>
-                            </div>
-                            <div class="shop-card-desc">
-                                <c:out value="${not empty p.description ? p.description : 'Sản phẩm chất lượng, phù hợp không gian sống xanh mát.'}"/>
-                            </div>
-                            <div class="shop-card-footer">
-                                <div class="shop-card-price">
-                                    <small>Từ</small>
-                                    <fmt:formatNumber value="${p.fromPrice}" type="number" groupingUsed="true"/>đ
-                                </div>
-                                <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}"
-                                   class="btn-shop btn-shop-outline">
-                                    Xem chi tiết
-                                </a>
+                        <div class="zigzag-content">
+                            <h3 class="zigzag-name">
+                                <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}"><c:out value="${p.name}"/></a>
+                            </h3>
+                            <p class="zigzag-desc">
+                                <c:out value="${not empty p.description ? p.description : 'Thức uống tươi mát, nguyên chất, ép trực tiếp mỗi ngày.'}"/>
+                            </p>
+                            <div class="zigzag-prices">
+                                <c:forEach var="v" items="${p.variants}" varStatus="vloop">
+                                    <c:if test="${not vloop.first}"><span class="zigzag-divider">|</span></c:if>
+                                    <span class="zigzag-price"><c:out value="${v.sizeLabel}"/> —
+                                        <strong><fmt:formatNumber value="${v.price}" type="number" groupingUsed="true"/>đ</strong></span>
+                                </c:forEach>
                             </div>
                         </div>
                     </div>
                 </c:forEach>
             </div>
+
+            <c:if test="${fn:length(featuredProducts) > 3}">
+                <div class="classic-menu-zone reveal">
+                    <div class="classic-menu-header">
+                        <h3 class="classic-menu-title">Các Món Khác</h3>
+                        <div class="classic-menu-size-legend"><span>Size M</span><span>/</span><span>Size L</span></div>
+                    </div>
+                    <c:forEach var="p" items="${featuredProducts}" begin="3">
+                        <a href="${pageContext.request.contextPath}/san-pham/chi-tiet?id=${p.productId}" class="classic-menu-item">
+                            <div class="classic-item-left">
+                                <span class="classic-item-name"><c:out value="${p.name}"/></span>
+                                <c:if test="${not empty p.description}">
+                                    <span class="classic-item-note"><c:out value="${p.description}"/></span>
+                                </c:if>
+                            </div>
+                            <div class="classic-item-dots"></div>
+                            <div class="classic-item-price">
+                                <c:forEach var="v" items="${p.variants}" varStatus="vloop">
+                                    <c:if test="${not vloop.first}"> / </c:if>
+                                    <fmt:formatNumber value="${v.price}" type="number" groupingUsed="true"/>đ
+                                </c:forEach>
+                            </div>
+                        </a>
+                    </c:forEach>
+                </div>
+            </c:if>
+
             </c:when>
             <c:otherwise>
                 <div class="shop-empty">
@@ -314,97 +355,6 @@
         </div>
     </section>
 
-    <!-- ================================================================
-     CHECKOUT — Dark Section, Floating Labels
-     ================================================================ -->
-    <section class="checkout section" id="checkout">
-        <div class="container">
-            <div class="checkout-info reveal">
-                <span class="section-label">Đặt Hàng</span>
-                <h2 class="section-title">Đặt Hàng Ngay</h2>
-                <p class="section-subtitle">
-                    Điền thông tin bên dưới để đặt thức uống tươi.
-                    Chúng tôi sẽ giao hàng trong 20-30 phút!
-                </p>
-
-                <div class="checkout-features">
-                    <div class="checkout-feature">
-                        <div class="checkout-feature-icon">🚀</div>
-                        <div class="checkout-feature-text">
-                            <h4>Giao siêu tốc</h4>
-                            <p>20-30 phút đến tay bạn</p>
-                        </div>
-                    </div>
-                    <div class="checkout-feature">
-                        <div class="checkout-feature-icon">💳</div>
-                        <div class="checkout-feature-text">
-                            <h4>Thanh toán khi nhận</h4>
-                            <p>COD — không cần trả trước</p>
-                        </div>
-                    </div>
-                    <div class="checkout-feature">
-                        <div class="checkout-feature-icon">🎁</div>
-                        <div class="checkout-feature-text">
-                            <h4>Miễn phí ship</h4>
-                            <p>Cho đơn hàng trong khu vực trường</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="order-form-wrapper reveal reveal-delay-2">
-                <div class="order-form-title">
-                    📝 Thông Tin Đặt Hàng
-                </div>
-
-                <c:if test="${not empty errorMessage}">
-                    <div class="alert alert-error" id="alertError">
-                        ⚠️ ${errorMessage}
-                    </div>
-                </c:if>
-
-                <form action="${pageContext.request.contextPath}/order" method="POST" id="orderForm" novalidate>
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="customerName" name="customerName"
-                            placeholder="Họ và tên" value="${prevName}" required>
-                        <label for="customerName">
-                            Họ và Tên <span class="required">*</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
-                            placeholder="Số điện thoại" value="${prevPhone}" required>
-                        <label for="phoneNumber">
-                            Số Điện Thoại <span class="required">*</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="shippingAddress" name="shippingAddress"
-                            placeholder="Địa chỉ giao hàng" value="${prevAddress}" required>
-                        <label for="shippingAddress">
-                            Địa Chỉ Giao Hàng <span class="required">*</span>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <textarea class="form-control" id="orderNote" name="orderNote"
-                            placeholder="Ghi chú">${prevNote}</textarea>
-                        <label for="orderNote">
-                            Ghi Chú Đơn Hàng
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="btnSubmit">
-                        Xác Nhận Đặt Hàng
-                    </button>
-                    <div class="freeship-notice">✨ Miễn phí vận chuyển khu vực ở trường ✨</div>
-                </form>
-            </div>
-        </div>
-    </section>
 
     <!-- ================================================================
      FOOTER

@@ -18,7 +18,7 @@
          → chỉ cần tăng số này lên 1. -->
     <context-param>
         <param-name>assetVer</param-name>
-        <param-value>6</param-value>
+        <param-value>16</param-value>
     </context-param>
 
     <!-- ===== Welcome File ===== -->

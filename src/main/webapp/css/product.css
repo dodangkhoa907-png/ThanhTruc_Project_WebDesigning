@@ -82,13 +82,18 @@
    ================================================================ */
 .shop-toolbar {
     position: sticky;
-    top: 0;
+    /* .navbar là position:fixed (không đẩy nội dung xuống) cao ~68px khi cuộn
+       (.navbar.scrolled: padding 12px + logo 44px + padding 12px). top:0 trước đây khiến
+       toolbar dính thẳng lên đỉnh trang và chui xuống DƯỚI navbar (z-index cao hơn) khi cuộn —
+       nhìn như đè/lệch nhau. Neo đúng bằng chiều cao navbar để toolbar luôn nằm sát dưới navbar. */
+    top: 68px;
     z-index: 40;
-    background: rgba(253, 251, 247, 0.85);
+    background: rgba(253, 251, 247, 0.95);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
     border-bottom: 1px solid var(--border);
     padding: 18px 0;
+    box-shadow: 0 8px 20px -16px rgba(42,92,56,0.15);
 }
 
 .shop-toolbar .container {
@@ -234,6 +239,7 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .shop-card-media img {
@@ -290,6 +296,7 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    cursor: pointer;
 }
 
 .shop-card-variants {
@@ -415,8 +422,16 @@
     grid-template-columns: 1fr 1fr;
     gap: 56px;
     align-items: start;
-    padding-bottom: 110px;
+    padding-bottom: 56px;
 }
+
+.detail-related {
+    padding-top: 40px;
+    padding-bottom: 80px;
+    border-top: 1px solid var(--border);
+}
+
+.detail-related .shop-results-header { margin-bottom: 20px; }
 
 .detail-media {
     position: sticky;
@@ -1273,6 +1288,31 @@
 }
 
 .checkout-gps-error[hidden] { display: none; }
+
+.checkout-addr-map {
+    width: 100%;
+    height: 220px;
+    border-radius: 14px;
+    border: 1.5px solid var(--border);
+    margin: -4px 0 8px;
+    overflow: hidden;
+    background: var(--cream-warm);
+}
+
+.checkout-addr-map.is-hidden { display: none; }
+
+.checkout-addr-map-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin: 0 0 18px;
+}
+
+.checkout-addr-map-hint i { color: var(--green); }
+.checkout-addr-map-hint.is-hidden { display: none; }
 
 .checkout-card-title-row {
     display: flex;

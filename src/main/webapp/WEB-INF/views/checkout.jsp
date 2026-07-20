@@ -17,6 +17,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Dùng cdnjs (không phải unpkg) vì Content-Security-Policy (SecurityHeadersFilter) chỉ
+         whitelist cdnjs.cloudflare.com cho script-src/style-src — unpkg.com sẽ bị CSP chặn âm thầm. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
@@ -103,7 +107,7 @@
                                                         data-lng="${a.longitude}"
                                                         ${(not empty defaultAddress && defaultAddress.addressId == a.addressId) ? 'selected' : ''}>
                                                     <c:out value="${a.label == 'HOME' ? 'Nhà riêng' : (a.label == 'OFFICE' ? 'Công ty' : 'Khác')}"/> —
-                                                    <c:out value="${a.recipientName}"/><c:if test="${a.default}"> (Mặc định)</c:if>
+                                                    <c:out value="${a.recipientName}"/><c:if test="${a['default']}"> (Mặc định)</c:if>
                                                 </option>
                                             </c:forEach>
                                         </select>
@@ -187,6 +191,11 @@
                                 </button>
                             </div>
                             <div class="checkout-gps-error" id="gpsErrorText" hidden></div>
+
+                            <div class="checkout-addr-map ${(empty prefillLat || empty prefillLng) ? 'is-hidden' : ''}" id="addrMap"></div>
+                            <div class="checkout-addr-map-hint ${(empty prefillLat || empty prefillLng) ? 'is-hidden' : ''}" id="addrMapHint">
+                                <i class="fa-solid fa-hand-pointer"></i> Kéo ghim trên bản đồ để chỉnh vị trí chính xác hơn.
+                            </div>
 
                             <div class="checkout-field checkout-field-full ${not empty formErrors.note ? 'has-error' : ''}">
                                 <label for="note">Ghi chú đơn hàng</label>
