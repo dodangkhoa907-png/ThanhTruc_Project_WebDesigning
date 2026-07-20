@@ -3,6 +3,7 @@ package com.nhietdoixanh.controller.admin;
 import com.nhietdoixanh.dao.StaffDao;
 import com.nhietdoixanh.dao.impl.StaffDaoImpl;
 import com.nhietdoixanh.model.Staff;
+import com.nhietdoixanh.util.AdminAuth;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.Passwords;
 import com.nhietdoixanh.util.StaffRoles;
@@ -307,8 +308,7 @@ public class AdminStaffController extends HttpServlet {
     }
 
     private Staff currentAdmin(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+        return AdminAuth.currentAdmin(req);
     }
 
     private void writeJson(HttpServletResponse resp, boolean success, String message) throws IOException {

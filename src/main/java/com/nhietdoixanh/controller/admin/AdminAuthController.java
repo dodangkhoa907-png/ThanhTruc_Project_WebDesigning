@@ -3,6 +3,7 @@ package com.nhietdoixanh.controller.admin;
 import com.nhietdoixanh.dao.StaffDao;
 import com.nhietdoixanh.dao.impl.StaffDaoImpl;
 import com.nhietdoixanh.model.Staff;
+import com.nhietdoixanh.util.AdminAuth;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.Passwords;
 
@@ -11,14 +12,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.Optional;
 
 /**
  * Đăng nhập/đăng xuất khu vực quản trị — dùng bảng Staffs có sẵn (Username,
- * KHÔNG phải Email). Session riêng "adminUser", tách biệt session "user".
+ * KHÔNG phải Email). Đăng nhập qua cookie riêng {@link AdminAuth}, hoàn toàn tách biệt
+ * HttpSession/session "user" của khách hàng (xem AdminAuth để biết lý do).
  * Chỉ tài khoản Role = ADMIN mới được vào /admin (nhân viên MANAGER/DELIVERY/
  * PROCESSOR/SALES bị chặn ở đây, giống logic bên PureNut).
  */
@@ -37,7 +38,6 @@ public class AdminAuthController extends HttpServlet {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-        HttpSession session = request.getSession(false);
 
         if ("/admin/logout".equals(path)) {
             // GET không thực hiện đăng xuất (tránh CSRF/logout qua link/prefetch) — chỉ chuyển
@@ -46,8 +46,8 @@ public class AdminAuthController extends HttpServlet {
             return;
         }
 
-        if (session != null && session.getAttribute("adminUser") instanceof Staff s
-                && "ADMIN".equals(s.getRole())) {
+        Staff current = AdminAuth.currentAdmin(request);
+        if (current != null && "ADMIN".equals(current.getRole())) {
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             return;
         }
@@ -62,8 +62,7 @@ public class AdminAuthController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         if ("/admin/logout".equals(request.getServletPath())) {
-            HttpSession session = request.getSession(false);
-            if (session != null) session.invalidate();
+            AdminAuth.logout(request, response);
             response.sendRedirect(request.getContextPath() + "/admin/login");
             return;
         }
@@ -77,9 +76,7 @@ public class AdminAuthController extends HttpServlet {
 
         if (credentialsOk && "ADMIN".equals(staffOpt.get().getRole())) {
             Staff staff = staffOpt.get();
-            HttpSession session = request.getSession();
-            request.changeSessionId(); // chống session fixation
-            session.setAttribute("adminUser", staff);
+            AdminAuth.login(request, response, staff);
             AuditLogger.log(request, staff.getStaffId(), "ADMIN_LOGIN", staff.getUsername(), "Đăng nhập khu vực quản trị");
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         } else if (credentialsOk) {

@@ -96,7 +96,7 @@
                         <div class="story-glow-blob blob-2"></div>
                         <div class="story-glow-blob blob-3"></div>
                     </div>
-                    <img src="${pageContext.request.contextPath}/images/story.png" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img">
+                    <img src="${pageContext.request.contextPath}/images/category/poster.jpg" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img">
                 </div>
                 <div class="story-stat">
                     <div class="story-stat-number">100%</div>

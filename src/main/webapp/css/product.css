@@ -45,6 +45,27 @@
     66% { transform: translate(-18px,16px) scale(0.96); }
 }
 
+/* Banner quảng cáo — làm mờ phía sau. Bản thân banner khá chói (cam/đỏ) nên cần thêm lớp
+   scrim (phủ màu kem mờ) đè lên trên để chữ tiêu đề xanh đậm không bị "đấu màu" với banner. */
+.shop-hero-banner {
+    position: absolute;
+    inset: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(10px);
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.shop-hero-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(253,251,247,0.82) 0%, rgba(253,251,247,0.68) 55%, rgba(253,251,247,0.85) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
 .shop-hero .container { position: relative; z-index: 2; }
 
 .shop-hero-eyebrow {

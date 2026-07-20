@@ -80,8 +80,9 @@ public class AuthController extends HttpServlet {
 
     /**
      * Đăng xuất thật — chỉ qua POST (đã được {@link com.nhietdoixanh.filter.CsrfFilter} kiểm tra
-     * token "_csrf" trước khi vào đây). Invalidate toàn bộ session (xóa cả "user" lẫn "adminUser"
-     * nếu có, giỏ hàng, CSRF token cũ...) rồi redirect về trang chủ.
+     * token "_csrf" trước khi vào đây). Invalidate toàn bộ session ("user", giỏ hàng, CSRF token
+     * cũ...) rồi redirect về trang chủ. Admin dùng cookie riêng (xem {@link com.nhietdoixanh.util.AdminAuth})
+     * nên không bị ảnh hưởng dù test cùng 1 trình duyệt.
      */
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession(false);

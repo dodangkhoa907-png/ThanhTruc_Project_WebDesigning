@@ -2,6 +2,7 @@ package com.nhietdoixanh.filter;
 
 import com.nhietdoixanh.model.Staff;
 import com.nhietdoixanh.model.User;
+import com.nhietdoixanh.util.AdminAuth;
 
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
@@ -31,13 +32,18 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        HttpSession session = req.getSession(false);
         boolean isAdminArea = servletPath.startsWith("/admin");
         String loginUri = req.getContextPath() + (isAdminArea ? "/admin/login" : "/login");
 
         if (isAdminArea) {
-            Staff admin = (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+            // Admin dùng cookie riêng (AdminAuth) — hoàn toàn tách biệt HttpSession của khách
+            // hàng, xem AdminAuth để biết lý do (tránh admin/khách hàng vô tình đăng xuất lẫn
+            // nhau khi test chung 1 trình duyệt).
+            Staff admin = AdminAuth.currentAdmin(req);
             if (admin != null && admin.isActive() && "ADMIN".equals(admin.getRole())) {
+                // JSP admin (vd. layout/header.jsp) đọc thông tin admin qua request attribute —
+                // admin không còn nằm trong HttpSession nên không thể dùng sessionScope nữa.
+                req.setAttribute("adminUser", admin);
                 chain.doFilter(request, response);
             } else {
                 res.sendRedirect(loginUri);
@@ -45,6 +51,7 @@ public class AuthFilter implements Filter {
             return;
         }
 
+        HttpSession session = req.getSession(false);
         User user = (session != null) ? (User) session.getAttribute("user") : null;
         if (user != null) {
             chain.doFilter(request, response);

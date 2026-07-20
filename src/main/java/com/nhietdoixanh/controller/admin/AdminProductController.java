@@ -10,6 +10,7 @@ import com.nhietdoixanh.dao.impl.ProductVariantDaoImpl;
 import com.nhietdoixanh.model.Product;
 import com.nhietdoixanh.model.ProductVariant;
 import com.nhietdoixanh.model.Staff;
+import com.nhietdoixanh.util.AdminAuth;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.ProductImageUpload;
 import com.nhietdoixanh.util.Validators;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
  * là mảng độ dài thay đổi và file ảnh vốn dĩ không thể khôi phục qua URL, nên không đáng công).
  *
  * Quyền hạn: nằm dưới urlPattern "/admin/*" nên đã được {@link com.nhietdoixanh.filter.AuthFilter}
- * chặn — chỉ Staff đã đăng nhập (session "adminUser") mới tới được. Mọi POST đã được
+ * chặn — chỉ Staff đã đăng nhập (cookie {@link com.nhietdoixanh.util.AdminAuth}) mới tới được. Mọi POST đã được
  * {@link com.nhietdoixanh.filter.CsrfFilter} kiểm tra token "_csrf" trước khi vào servlet này.
  *
  * Biến thể (size/giá) không có servlet riêng — được sửa trực tiếp trong form sản phẩm dưới dạng
@@ -352,10 +353,9 @@ public class AdminProductController extends HttpServlet {
     // Helpers
     // =========================================================================================
 
-    /** Luôn lấy admin thao tác từ session — KHÔNG BAO GIỜ nhận staffId từ client. */
+    /** Luôn lấy admin thao tác từ cookie AdminAuth — KHÔNG BAO GIỜ nhận staffId từ client. */
     private Staff currentAdmin(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+        return AdminAuth.currentAdmin(req);
     }
 
     private boolean containsIgnoreCase(String haystack, String needle) {

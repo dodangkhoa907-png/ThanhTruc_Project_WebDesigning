@@ -165,15 +165,15 @@
         <header class="admin-header">
             <div class="admin-header-title">
                 <c:out value="${pageTitle != null ? pageTitle : 'Dashboard'}"/>
-                <small>Chào mừng trở lại, <c:out value="${sessionScope.adminUser.fullName}"/>!</small>
+                <small>Chào mừng trở lại, <c:out value="${requestScope.adminUser.fullName}"/>!</small>
             </div>
             <div class="admin-header-right">
                 <div class="admin-user">
                     <div>
-                        <div class="u-name"><c:out value="${sessionScope.adminUser.fullName}"/></div>
-                        <div class="u-role"><c:out value="${fn:toLowerCase(sessionScope.adminUser.role)}"/></div>
+                        <div class="u-name"><c:out value="${requestScope.adminUser.fullName}"/></div>
+                        <div class="u-role"><c:out value="${fn:toLowerCase(requestScope.adminUser.role)}"/></div>
                     </div>
-                    <div class="u-avatar" aria-hidden="true"><c:out value="${not empty sessionScope.adminUser.fullName ? fn:substring(sessionScope.adminUser.fullName, 0, 1) : 'A'}"/></div>
+                    <div class="u-avatar" aria-hidden="true"><c:out value="${not empty requestScope.adminUser.fullName ? fn:substring(requestScope.adminUser.fullName, 0, 1) : 'A'}"/></div>
                 </div>
             </div>
         </header>

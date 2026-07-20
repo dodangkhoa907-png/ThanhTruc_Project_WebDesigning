@@ -15,6 +15,12 @@ import java.sql.SQLException;
  * mẫu (bảng Users) nếu chưa tồn tại — mật khẩu hash BCrypt.
  * Admin/nhân viên dùng bảng Staffs có sẵn (không seed ở đây), xem
  * sql/migration_purenut_port_v2.sql để reset mật khẩu test.
+ *
+ * seedUsers() chạy ĐỒNG BỘ ngay trong contextInitialized (không tách thread riêng) —
+ * chỉ là 1-2 INSERT nhanh nên không đáng phải background, và tránh hẳn lỗi "started a
+ * thread but failed to stop it" / NoClassDefFoundError khi context bị dừng đột ngột
+ * (vd. Tomcat start thất bại do cổng shutdown 8009 đã bị chiếm bởi tiến trình cũ) trong
+ * lúc thread nền còn đang chạy dở, dùng classloader của context đã bị unload.
  */
 @WebListener
 public class AppContextListener implements ServletContextListener {
@@ -25,7 +31,7 @@ public class AppContextListener implements ServletContextListener {
         Database.init();
         System.out.println("[AppInit] Database pool ready");
 
-        new Thread(this::seedUsers, "UserSeedThread").start();
+        seedUsers();
     }
 
     @Override

@@ -19,17 +19,11 @@
         <div class="nav-links" id="navLinks">
             <a href="${pageContext.request.contextPath}/#story">Câu Chuyện</a>
             <a href="${pageContext.request.contextPath}/#values">Giá Trị</a>
-            <c:choose>
-                <c:when test="${not empty sessionScope.user}">
-                    <%-- Đã đăng nhập: "Sản Phẩm" mở thẳng trang danh sách/chi tiết sản phẩm thật. --%>
-                    <a href="${pageContext.request.contextPath}/san-pham"
-                       class="${(currentPage == 'products' || currentPage == 'menu') ? 'active' : ''}">Sản Phẩm</a>
-                </c:when>
-                <c:otherwise>
-                    <%-- Chưa đăng nhập: cuộn mượt tới khu menu ngay trên trang chủ, chưa cần vào trang riêng. --%>
-                    <a href="${pageContext.request.contextPath}/#menu">Sản Phẩm</a>
-                </c:otherwise>
-            </c:choose>
+            <%-- Luôn dẫn thẳng vào trang sản phẩm thật, bất kể đăng nhập hay chưa — tách khỏi
+                 nhóm anchor-link (Câu Chuyện/Giá Trị/Đội Ngũ) để tránh việc cùng 1 vị trí trong
+                 nav mà hành vi đổi khác nhau tuỳ trạng thái đăng nhập, dễ gây bất ngờ cho khách. --%>
+            <a href="${pageContext.request.contextPath}/san-pham"
+               class="${(currentPage == 'products' || currentPage == 'menu') ? 'active' : ''}">Sản Phẩm</a>
             <a href="${pageContext.request.contextPath}/#team">Đội Ngũ</a>
             <c:if test="${not empty sessionScope.user}">
                 <a href="${pageContext.request.contextPath}/cart"

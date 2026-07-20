@@ -4,6 +4,7 @@ import com.nhietdoixanh.dao.FeedbackDao;
 import com.nhietdoixanh.dao.impl.FeedbackDaoImpl;
 import com.nhietdoixanh.model.Feedback;
 import com.nhietdoixanh.model.Staff;
+import com.nhietdoixanh.util.AdminAuth;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.FeedbackStatuses;
 
@@ -26,7 +27,7 @@ import java.util.List;
  * theo {@link FeedbackStatuses}.
  *
  * Quyền hạn: nằm dưới urlPattern "/admin/*" nên đã được {@link com.nhietdoixanh.filter.AuthFilter}
- * chặn — chỉ Staff đã đăng nhập (session "adminUser") mới tới được. Mọi POST đã được
+ * chặn — chỉ Staff đã đăng nhập (cookie {@link com.nhietdoixanh.util.AdminAuth}) mới tới được. Mọi POST đã được
  * {@link com.nhietdoixanh.filter.CsrfFilter} kiểm tra token "_csrf" trước khi vào servlet này.
  * Người thao tác luôn lấy từ session, KHÔNG bao giờ nhận staffId từ request.
  *
@@ -151,10 +152,9 @@ public class AdminFeedbackController extends HttpServlet {
     // Helpers
     // =========================================================================================
 
-    /** Luôn lấy admin thao tác từ session — KHÔNG BAO GIỜ nhận staffId từ client. */
+    /** Luôn lấy admin thao tác từ cookie AdminAuth — KHÔNG BAO GIỜ nhận staffId từ client. */
     private Staff currentAdmin(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+        return AdminAuth.currentAdmin(req);
     }
 
     /** Nút hành động trong bảng gọi bằng fetch() với header này — phân biệt để trả JSON thay vì redirect. */

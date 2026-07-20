@@ -10,6 +10,7 @@ import com.nhietdoixanh.model.Order;
 import com.nhietdoixanh.model.OrderAdminFilter;
 import com.nhietdoixanh.model.OrderTabCounts;
 import com.nhietdoixanh.model.Staff;
+import com.nhietdoixanh.util.AdminAuth;
 import com.nhietdoixanh.util.AuditLogger;
 import com.nhietdoixanh.util.OrderStatuses;
 import com.nhietdoixanh.util.PaymentStatuses;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * trạng thái theo state machine {@link OrderStatuses}, duyệt/từ chối yêu cầu hủy.
  *
  * Quyền hạn: nằm dưới urlPattern "/admin/*" nên đã được {@link com.nhietdoixanh.filter.AuthFilter}
- * chặn — chỉ Staff đã đăng nhập (session "adminUser") mới tới được. Mọi POST đã được
+ * chặn — chỉ Staff đã đăng nhập (cookie {@link com.nhietdoixanh.util.AdminAuth}) mới tới được. Mọi POST đã được
  * {@link com.nhietdoixanh.filter.CsrfFilter} kiểm tra token "_csrf" trước khi vào servlet này.
  * Người thao tác luôn lấy từ session, KHÔNG bao giờ nhận staffId từ request.
  */
@@ -441,10 +442,9 @@ public class AdminOrderController extends HttpServlet {
     // Helpers
     // =========================================================================================
 
-    /** Luôn lấy admin thao tác từ session — KHÔNG BAO GIỜ nhận staffId/adminId từ client. */
+    /** Luôn lấy admin thao tác từ cookie AdminAuth — KHÔNG BAO GIỜ nhận staffId/adminId từ client. */
     private Staff currentAdmin(HttpServletRequest req) {
-        HttpSession session = req.getSession(false);
-        return (session != null) ? (Staff) session.getAttribute("adminUser") : null;
+        return AdminAuth.currentAdmin(req);
     }
 
     /** Hàng đợi khẩn cấp gọi bằng fetch() với header này — phân biệt để trả JSON thay vì redirect. */

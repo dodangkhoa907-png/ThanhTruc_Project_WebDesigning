@@ -54,7 +54,7 @@
                             </div>
                             <div class="f-group">
                                 <label>Trạng thái</label>
-                                <select name="status">
+                                <select name="status" id="orderStatusSelect">
                                     <option value="">Tất cả</option>
                                     <option value="PENDING" ${orderStatus == 'PENDING' ? 'selected' : ''}>Chờ xác nhận</option>
                                     <option value="CONFIRMED" ${orderStatus == 'CONFIRMED' ? 'selected' : ''}>Đang xử lý</option>
@@ -167,6 +167,13 @@
         const navToggle = document.getElementById('navToggle');
         const navLinks = document.getElementById('navLinks');
         navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+
+        // Đổi trạng thái lọc là submit ngay — tránh hiểu lầm "đổi dropdown mà danh sách
+        // không cập nhật" (chỉ đổi lựa chọn hiển thị, phải bấm "Lọc" mới submit form GET).
+        const orderStatusSelect = document.getElementById('orderStatusSelect');
+        if (orderStatusSelect) {
+            orderStatusSelect.addEventListener('change', () => orderStatusSelect.form.submit());
+        }
     </script>
 </body>
 </html>

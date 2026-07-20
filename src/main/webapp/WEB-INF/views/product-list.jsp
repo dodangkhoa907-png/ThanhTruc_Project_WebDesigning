@@ -38,6 +38,8 @@
      SHOP HERO
      ================================================================ -->
     <section class="shop-hero">
+        <div class="shop-hero-banner" style="background-image:url('${pageContext.request.contextPath}/images/category/Standee.png')" aria-hidden="true"></div>
+        <div class="shop-hero-scrim" aria-hidden="true"></div>
         <div class="container">
             <div class="shop-hero-eyebrow">
                 <i class="fa-solid fa-glass-water-droplet"></i> Nước ép &amp; sinh tố trái cây nguyên chất

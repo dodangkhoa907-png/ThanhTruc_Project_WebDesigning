@@ -31,48 +31,72 @@ public class CartItemDaoImpl implements CartItemDao {
             "WHERE c.UserID = ? " +
             "ORDER BY c.CreatedAt DESC";
 
+    // Chỉ khớp giá trị SQL Server dùng cho vi phạm unique index/constraint (2601/2627) —
+    // dùng để phân biệt "đụng race" (retry được) với lỗi DB khác (không retry).
+    private static final int SQLSTATE_UNIQUE_VIOLATION_2601 = 2601;
+    private static final int SQLSTATE_UNIQUE_VIOLATION_2627 = 2627;
+
     @Override
     public int insertOrUpdate(int userId, int variantId, int quantity) {
-        String checkSql = "SELECT CartItemID, Quantity FROM CartItems WHERE UserID = ? AND VariantID = ?";
+        // Atomic UPDATE trước (row-level lock nằm trong chính câu UPDATE, không tách riêng
+        // SELECT rồi UPDATE) — đóng race "2 request cùng cộng dồn Quantity" (lost update) khi
+        // user bấm thêm giỏ liên tục hoặc mở 2 tab. Cap 99 ngay trong SQL bằng CASE.
+        String updateSql = "UPDATE CartItems SET Quantity = CASE WHEN Quantity + ? > 99 THEN 99 ELSE Quantity + ? END " +
+                "WHERE UserID = ? AND VariantID = ?";
+        String selectIdSql = "SELECT CartItemID FROM CartItems WHERE UserID = ? AND VariantID = ?";
+        String insertSql = "INSERT INTO CartItems (UserID, VariantID, Quantity) VALUES (?, ?, ?)";
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-
-            checkPs.setInt(1, userId);
-            checkPs.setInt(2, variantId);
-
-            try (ResultSet rs = checkPs.executeQuery()) {
-                if (rs.next()) {
-                    int cartItemId = rs.getInt("CartItemID");
-                    int newQuantity = Math.min(rs.getInt("Quantity") + quantity, 99);
-
-                    String updateSql = "UPDATE CartItems SET Quantity = ? WHERE CartItemID = ?";
-                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
-                        updatePs.setInt(1, newQuantity);
-                        updatePs.setInt(2, cartItemId);
-                        updatePs.executeUpdate();
-                    }
-                    return cartItemId;
-                } else {
-                    String insertSql = "INSERT INTO CartItems (UserID, VariantID, Quantity) VALUES (?, ?, ?)";
-                    try (PreparedStatement insertPs = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
-                        insertPs.setInt(1, userId);
-                        insertPs.setInt(2, variantId);
-                        insertPs.setInt(3, quantity);
-                        insertPs.executeUpdate();
-
-                        try (ResultSet insertRs = insertPs.getGeneratedKeys()) {
-                            if (insertRs.next()) {
-                                return insertRs.getInt(1);
-                            }
-                        }
-                    }
+        try (Connection conn = Database.getConnection()) {
+            try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
+                updatePs.setInt(1, quantity);
+                updatePs.setInt(2, quantity);
+                updatePs.setInt(3, userId);
+                updatePs.setInt(4, variantId);
+                if (updatePs.executeUpdate() > 0) {
+                    return findCartItemId(conn, selectIdSql, userId, variantId);
                 }
+            }
+
+            // Chưa có dòng nào — thử INSERT. Nếu đúng lúc này có request khác vừa INSERT trước
+            // (race giữa lúc UPDATE báo 0 dòng và lúc ta INSERT), unique index UX_CartItems_User_Variant
+            // (xem sql/migration_cart_unique_index.sql) sẽ chặn trùng — bắt lỗi đó rồi quay lại UPDATE,
+            // không để tạo 2 dòng CartItems cho cùng 1 variant.
+            try (PreparedStatement insertPs = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                insertPs.setInt(1, userId);
+                insertPs.setInt(2, variantId);
+                insertPs.setInt(3, Math.min(quantity, 99));
+                insertPs.executeUpdate();
+                try (ResultSet insertRs = insertPs.getGeneratedKeys()) {
+                    if (insertRs.next()) return insertRs.getInt(1);
+                }
+            } catch (SQLException dupEx) {
+                if (dupEx.getErrorCode() != SQLSTATE_UNIQUE_VIOLATION_2601
+                        && dupEx.getErrorCode() != SQLSTATE_UNIQUE_VIOLATION_2627) {
+                    throw dupEx;
+                }
+                try (PreparedStatement retryUpdatePs = conn.prepareStatement(updateSql)) {
+                    retryUpdatePs.setInt(1, quantity);
+                    retryUpdatePs.setInt(2, quantity);
+                    retryUpdatePs.setInt(3, userId);
+                    retryUpdatePs.setInt(4, variantId);
+                    retryUpdatePs.executeUpdate();
+                }
+                return findCartItemId(conn, selectIdSql, userId, variantId);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    private int findCartItemId(Connection conn, String selectIdSql, int userId, int variantId) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(selectIdSql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, variantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt("CartItemID") : 0;
+            }
+        }
     }
 
     @Override

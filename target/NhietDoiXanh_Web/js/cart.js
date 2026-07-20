@@ -137,6 +137,11 @@
         return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + 'đ';
     }
 
+    /** Không có hậu tố "đ" — dùng cho .cart-item-subtotal-value vì markup đã có sẵn "đ" tĩnh bên ngoài span. */
+    function formatVndNumber(n) {
+        return new Intl.NumberFormat('vi-VN').format(Math.round(n));
+    }
+
     /**
      * Điều khiển trang /cart: chọn item, chọn tất cả, tăng/giảm/nhập số lượng,
      * xóa item, xóa nhiều item, chuẩn bị checkout.
@@ -173,6 +178,10 @@
                 const unitPrice = parseFloat(card.dataset.unitPrice) || 0;
                 const qtyInput = card.querySelector('.cart-qty-input');
                 const qty = qtyInput ? (parseInt(qtyInput.value, 10) || 0) : 0;
+
+                // Thành tiền theo từng dòng — ăn theo số lượng ngay khi user bấm +/-, không đợi reload trang.
+                const subtotalEl = card.querySelector('.cart-item-subtotal-value');
+                if (subtotalEl) subtotalEl.textContent = formatVndNumber(unitPrice * qty);
 
                 if (checkbox && checkbox.checked && !checkbox.disabled) {
                     selectedCount++;
@@ -240,6 +249,20 @@
 
         const quantityDebounce = new Map();
 
+        // Cập nhật UI tức thì (số + thành tiền dòng) rồi DEBOUNCE lời gọi /cart/update — dùng chung
+        // cho cả gõ tay lẫn bấm +/-. Trước đây +/- gọi thẳng sendQuantityUpdate mỗi click: bấm
+        // nhanh 5 lần = 5 request /cart/update song song, response về không đảm bảo thứ tự nên badge
+        // giỏ hàng có thể nhấp nháy về giá trị cũ, và spam server. Debounce gộp thành 1 request cuối.
+        function scheduleQuantitySync(card, qtyInput) {
+            recalcSummary();
+            const cartItemId = card.dataset.cartItemId;
+            if (quantityDebounce.has(cartItemId)) clearTimeout(quantityDebounce.get(cartItemId));
+            quantityDebounce.set(cartItemId, setTimeout(() => {
+                sendQuantityUpdate(card, qtyInput);
+                quantityDebounce.delete(cartItemId);
+            }, 400));
+        }
+
         function sendQuantityUpdate(card, qtyInput) {
             const cartItemId = card.dataset.cartItemId;
             const quantity = clampQty(qtyInput.value);
@@ -270,36 +293,34 @@
 
             if (e.target.closest('.cart-qty-minus')) {
                 qtyInput.value = clampQty(qtyInput.value) - 1 < 1 ? 1 : clampQty(qtyInput.value) - 1;
-                sendQuantityUpdate(card, qtyInput);
+                scheduleQuantitySync(card, qtyInput);
             } else if (e.target.closest('.cart-qty-plus')) {
                 qtyInput.value = clampQty(qtyInput.value) + 1 > 99 ? 99 : clampQty(qtyInput.value) + 1;
-                sendQuantityUpdate(card, qtyInput);
+                scheduleQuantitySync(card, qtyInput);
             } else if (e.target.closest('.cart-item-remove-btn')) {
                 removeItem(card);
             }
         });
 
+        // Mất focus (blur/change) — flush ngay: hủy timer debounce đang chờ rồi gửi luôn.
         list.addEventListener('change', (e) => {
             if (!e.target.classList.contains('cart-qty-input')) return;
             const card = e.target.closest('.cart-item-card');
             if (!card) return;
+            const cartItemId = card.dataset.cartItemId;
+            if (quantityDebounce.has(cartItemId)) {
+                clearTimeout(quantityDebounce.get(cartItemId));
+                quantityDebounce.delete(cartItemId);
+            }
             sendQuantityUpdate(card, e.target);
         });
 
-        // Debounce khi nhập tay (nhấn giữ số/gõ nhiều ký tự) — chỉ gửi request sau khi ngừng gõ 500ms.
+        // Gõ tay — cùng cơ chế debounce dùng chung với +/- (xem scheduleQuantitySync).
         list.addEventListener('input', (e) => {
             if (!e.target.classList.contains('cart-qty-input')) return;
             const card = e.target.closest('.cart-item-card');
             if (!card) return;
-            const cartItemId = card.dataset.cartItemId;
-
-            recalcSummary();
-
-            if (quantityDebounce.has(cartItemId)) clearTimeout(quantityDebounce.get(cartItemId));
-            quantityDebounce.set(cartItemId, setTimeout(() => {
-                sendQuantityUpdate(card, e.target);
-                quantityDebounce.delete(cartItemId);
-            }, 500));
+            scheduleQuantitySync(card, e.target);
         });
 
         // ===== Xóa 1 item =====

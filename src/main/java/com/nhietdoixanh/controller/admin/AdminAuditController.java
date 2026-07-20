@@ -23,7 +23,7 @@ import java.time.format.DateTimeParseException;
  * này không đụng tới đường ghi đó.
  *
  * Quyền hạn: nằm dưới urlPattern "/admin/*" nên đã được {@link com.nhietdoixanh.filter.AuthFilter}
- * chặn — chỉ Staff đã đăng nhập (session "adminUser") mới tới được. Chỉ nhận GET nên
+ * chặn — chỉ Staff đã đăng nhập (cookie {@link com.nhietdoixanh.util.AdminAuth}) mới tới được. Chỉ nhận GET nên
  * {@link com.nhietdoixanh.filter.CsrfFilter} (chỉ kiểm tra POST/PUT/DELETE) không áp dụng ở đây.
  */
 @WebServlet(name = "AdminAuditController", urlPatterns = {"/admin/nhat-ky"})

@@ -18,8 +18,15 @@
          → chỉ cần tăng số này lên 1. -->
     <context-param>
         <param-name>assetVer</param-name>
-        <param-value>16</param-value>
+        <param-value>23</param-value>
     </context-param>
+
+    <!-- ===== Session timeout — khai báo tường minh thay vì phụ thuộc mặc định ngầm của
+         Tomcat (30 phút). AdminAuth.MAX_AGE_SECONDS (cookie admin riêng) đã hard-code khớp
+         giá trị này — đổi 1 trong 2 nhớ đổi luôn cái kia. ===== -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
 
     <!-- ===== Welcome File ===== -->
     <welcome-file-list>

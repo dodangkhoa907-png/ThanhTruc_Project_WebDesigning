@@ -670,29 +670,35 @@ ul { list-style: none; }
 
 .story-ambient-glow {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 5%;
-    left: 5%;
-    background: radial-gradient(circle, 
-        rgba(29, 209, 161, 0.28) 0%, 
-        rgba(255, 159, 67, 0.22) 40%, 
+    /* Đây mới là quầng sáng thật sự nhìn thấy được bao quanh card (không phải
+       .story-glow-container — cái đó nằm dưới ảnh poster.jpg opaque nên bị che khuất
+       hoàn toàn, chỉnh scale nó không có tác dụng gì). Thu nhỏ + giảm blur/mờ để bớt "thô". */
+    width: 70%;
+    height: 70%;
+    top: 15%;
+    left: 15%;
+    background: radial-gradient(circle,
+        rgba(29, 209, 161, 0.22) 0%,
+        rgba(255, 159, 67, 0.16) 40%,
         transparent 75%
     );
-    filter: blur(60px);
+    filter: blur(40px);
     z-index: 0;
     pointer-events: none;
     animation: ambientPulse 12s ease-in-out infinite alternate;
 }
 
 @keyframes ambientPulse {
-    0% { transform: scale(0.9) translate(-15px, -15px); opacity: 0.8; }
-    100% { transform: scale(1.1) translate(15px, 15px); opacity: 1; }
+    0% { transform: scale(0.9) translate(-10px, -10px); opacity: 0.55; }
+    100% { transform: scale(1.05) translate(10px, 10px); opacity: 0.75; }
 }
 
 .story-image-wrapper {
     width: 100%;
-    aspect-ratio: 4/5;
+    /* poster.jpg gốc tỉ lệ ~0.567 (805x1419, khá cao/hẹp). 2/3 (0.667) trước đó tuy giảm
+       crop nhưng làm cả card cao vượt trội, lấn át cột chữ bên cạnh — lùi về 3/4 (0.75),
+       cân bằng hơn giữa "đỡ crop" và "không to thô". */
+    aspect-ratio: 3/4;
     border-radius: 30px;
     overflow: hidden;
     background: #fffbf5;
@@ -731,6 +737,7 @@ ul { list-style: none; }
     inset: 0;
     z-index: 1;
     overflow: hidden;
+    transform: scale(0.75);
     filter: blur(35px);
     opacity: 0.9;
     background: #fffdfc;
@@ -1973,7 +1980,7 @@ textarea.form-control {
 
     .story .container { grid-template-columns: 1fr; }
     .story-visual { order: -1; }
-    .story-image-wrapper { aspect-ratio: 1; }
+    .story-image-wrapper { aspect-ratio: 3/4; }
     .story-highlights { grid-template-columns: 1fr; gap: 12px; }
     .story-highlight-item { flex-direction: row; text-align: left; padding: 16px 20px; }
 
