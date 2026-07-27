@@ -266,6 +266,6 @@
             });
         });
     </script>
-
+    <%@ include file="/WEB-INF/views/common/customer-footer.jsp" %>
 </body>
 </html>

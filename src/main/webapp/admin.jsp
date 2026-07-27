@@ -2249,7 +2249,7 @@
               <div class="platform-info">
                 <div class="platform-text">
                   <h4>Facebook</h4>
-                  <a href="https://www.facebook.com/share/1EMX9PdG2D/" target="_blank" class="platform-link">facebook.com/share/1EMX9PdG2D/</a>
+                  <a href="https://www.facebook.com/share/1av8q4T7sp/" target="_blank" class="platform-link">facebook.com/share/1av8q4T7sp/</a>
                 </div>
                 <span class="status-connected">● Đã kết nối</span>
               </div>

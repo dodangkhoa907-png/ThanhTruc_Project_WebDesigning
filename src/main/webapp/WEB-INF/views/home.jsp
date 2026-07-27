@@ -359,26 +359,7 @@
     <!-- ================================================================
      FOOTER
      ================================================================ -->
-    <footer class="footer-nhiet-doi">
-        <div class="cursor-glow" id="cursorGlow"></div>
-        <div class="footer-content">
-            <div class="footer-brand-header">
-                <img src="${pageContext.request.contextPath}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="footer-logo-img">
-            </div>
-            <h2 class="brand-title">Nhiệt Đới Xanh</h2>
-            <p class="brand-slogan">Trọn Vị Thanh Mát — Trái Cây Tươi Mới Mỗi Ngày</p>
-
-            <div class="social-links">
-                <a href="https://www.facebook.com/share/1EMX9PdG2D/" target="_blank" class="social-btn" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                <a href="https://www.instagram.com/nhietdoixanh_05?igsh=dTR0dmgzcWg3aWV3" target="_blank" class="social-btn" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://tiktok.com/@nuocepnhietdoixanh_05" target="_blank" class="social-btn" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-            </div>
-
-            <div class="copyright">
-                &copy; 2026 Nhiệt Đới Xanh. All rights reserved. | Designed by IT Team.
-            </div>
-        </div>
-    </footer>
+    <%@ include file="/WEB-INF/views/common/customer-footer.jsp" %>
 
     <!-- ================================================================
      JAVASCRIPT

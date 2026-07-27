@@ -8,8 +8,8 @@
 <nav class="navbar" id="navbar">
     <div class="container">
         <a href="${pageContext.request.contextPath}/" class="navbar-brand">
-            <div class="navbar-logo">
-                <img src="${pageContext.request.contextPath}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="brand-logo-img">
+            <div class="navbar-logo" style="width:46px; height:46px; border-radius:50%; background:#ffffff; display:flex; align-items:center; justify-content:center; padding:3px; border:2px solid rgba(42,92,56,0.18); overflow:hidden; box-shadow:0 4px 14px rgba(42,92,56,0.22); flex:none;">
+                <img src="${pageContext.request.contextPath}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="brand-logo-img" style="width:100%; height:100%; object-fit:contain; border-radius:50%;">
             </div>
             <div class="navbar-name">Nhiệt Đới <span>Xanh</span></div>
         </a>

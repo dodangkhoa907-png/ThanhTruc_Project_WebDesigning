@@ -217,10 +217,13 @@
       <predefined_log_file id="Tomcat Catalina Log" />
       <predefined_log_file id="Tomcat Manager Log" />
       <predefined_log_file id="Tomcat Host Manager Log" />
-      <option name="adminPort" value="8001" />
+      <option name="adminPort" value="8004" />
       <option name="catalinaBase" value="C:\Users\KHOA\.SmartTomcat\ThanhTruc_Project_WebDesigning\NhietDoiXanh_Web" />
       <option name="contextPath" value="/NhietDoiXanh_Web" />
       <option name="docBase" value="$PROJECT_DIR$/src/main/webapp" />
+      <option name="envOptions">
+        <map />
+      </option>
       <option name="extraClassPath" value="" />
       <option name="port" value="8085" />
       <option name="tomcatInfo">
