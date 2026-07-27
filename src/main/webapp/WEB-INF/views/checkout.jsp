@@ -141,8 +141,9 @@
                                     </c:if>
                                 </div>
                                 <div class="checkout-field ${not empty formErrors.district ? 'has-error' : ''}">
-                                    <label for="district">Quận/Huyện <span class="required">*</span></label>
-                                    <input type="text" id="district" name="district" maxlength="100" required
+                                    <label for="district">Quận/Huyện <span class="checkout-field-optional">(nếu có)</span></label>
+                                    <input type="text" id="district" name="district" maxlength="100"
+                                           placeholder="Để trống nếu khu vực không còn cấp Quận/Huyện"
                                            value="${fn:escapeXml(not empty oldDistrict ? oldDistrict : defaultAddress.district)}">
                                     <c:if test="${not empty formErrors.district}">
                                         <div class="checkout-field-error"><c:out value="${formErrors.district}"/></div>
@@ -320,9 +321,7 @@
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+
     </script>
 </body>
 </html>

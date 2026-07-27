@@ -152,9 +152,7 @@
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+
 
         // Cập nhật trạng thái gần-realtime bằng cách polling nhẹ mỗi 20s — không cần WebSocket.
         (function pollOrderStatus() {

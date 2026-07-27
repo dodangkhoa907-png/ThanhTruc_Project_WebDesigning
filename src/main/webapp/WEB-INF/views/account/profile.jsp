@@ -131,9 +131,7 @@
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+
     </script>
     <script src="${pageContext.request.contextPath}/js/avatar-crop.js?v=${initParam.assetVer}"></script>
 </body>

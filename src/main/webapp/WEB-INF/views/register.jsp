@@ -25,7 +25,8 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
 @keyframes cardIn{from{opacity:0;transform:translateY(36px) scale(.97)}to{opacity:1;transform:none}}
 .auth{position:relative;z-index:5;width:min(1040px,100%);display:grid;grid-template-columns:.9fr 1.1fr;background:var(--paper);border-radius:30px;overflow:hidden;box-shadow:0 40px 90px -36px rgba(184,67,63,.3);border:1px solid var(--line);animation:cardIn .7s cubic-bezier(.16,1,.3,1)}
 .pane{padding:48px 54px}
-.logo{display:inline-flex;align-items:center;gap:9px;font-family:var(--fd);font-weight:700;font-size:22px;color:var(--green-dark);margin-bottom:20px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:700;font-size:22px;color:var(--green-dark);margin-bottom:20px}
+.auth-logo-img{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;box-shadow:0 3px 8px rgba(42,92,56,0.2);border:1.5px solid var(--line)}
 .logo b{color:var(--gold)}
 .pane h1{font-family:var(--fd);font-weight:700;font-size:clamp(26px,3vw,32px);line-height:1.15;color:var(--green-dark)}
 .pane .sub{color:var(--ink-soft);margin:8px 0 22px;font-size:14.5px}
@@ -89,7 +90,7 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
 <div class="auth">
   <div class="side" id="side3d">
     <div class="side-inner" id="sideInner">
-      <div class="badge">🌱</div>
+      <div class="badge"><img src="${ctx}/images/logo.png" alt="Logo" style="width:48px;height:48px;object-fit:contain;border-radius:50%"></div>
       <h2>Bắt đầu hành trình</h2>
       <p>Tạo tài khoản để lưu địa chỉ, theo dõi đơn hàng và đặt lại chỉ trong vài giây.</p>
       <div class="perk"><span class="ic">🛡️</span> Bảo mật thông tin tuyệt đối</div>
@@ -99,7 +100,7 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
   </div>
 
   <div class="pane">
-    <a href="${ctx}/" class="logo">Nhiệt Đới <b>Xanh</b></a>
+    <a href="${ctx}/" class="logo"><img src="${ctx}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="auth-logo-img"><span>Nhiệt Đới <b>Xanh</b></span></a>
     <h1>Tạo tài khoản</h1>
     <p class="sub">Tham gia Nhiệt Đới Xanh để đặt hàng nhanh hơn.</p>
 

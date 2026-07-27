@@ -25,7 +25,8 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
 @keyframes cardIn{from{opacity:0;transform:translateY(36px) scale(.97)}to{opacity:1;transform:none}}
 .auth{position:relative;z-index:5;width:min(920px,100%);display:grid;grid-template-columns:1fr 1fr;background:var(--paper);border-radius:30px;overflow:hidden;box-shadow:0 40px 90px -36px rgba(30,63,39,.35);border:1px solid var(--line);animation:cardIn .7s cubic-bezier(.16,1,.3,1)}
 .pane{padding:52px 50px}
-.logo{display:inline-flex;align-items:center;gap:9px;font-family:var(--fd);font-weight:700;font-size:20px;color:var(--green-dark);margin-bottom:26px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:700;font-size:20px;color:var(--green-dark);margin-bottom:26px}
+.auth-logo-img{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;box-shadow:0 3px 8px rgba(42,92,56,0.2);border:1.5px solid var(--line)}
 .logo b{color:var(--gold)}
 .pane h1{font-family:var(--fd);font-weight:700;font-size:clamp(24px,3vw,30px);line-height:1.15;color:var(--green-dark)}
 .pane .sub{color:var(--ink-soft);margin:10px 0 26px;font-size:14.5px}
@@ -54,12 +55,12 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
 
 <div class="auth">
   <div class="side">
-    <div class="badge">🌿</div>
+    <div class="badge"><img src="${ctx}/images/logo.png" alt="Logo" style="width:44px;height:44px;object-fit:contain;border-radius:50%"></div>
     <h2>Khu vực quản trị</h2>
     <p>Quản lý sản phẩm, đơn hàng và phản hồi khách hàng của Nhiệt Đới Xanh.</p>
   </div>
   <div class="pane">
-    <a href="${ctx}/" class="logo">Nhiệt Đới <b>Xanh</b></a>
+    <a href="${ctx}/" class="logo"><img src="${ctx}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="auth-logo-img"><span>Nhiệt Đới <b>Xanh</b></span></a>
     <h1>Đăng nhập quản trị</h1>
     <p class="sub">Dành cho nhân viên &amp; quản lý cửa hàng.</p>
 
@@ -69,7 +70,7 @@ a{text-decoration:none;color:inherit}button{font:inherit;cursor:pointer;border:n
       <input type="hidden" name="_csrf" value="${sessionScope._csrf}">
       <div class="field">
         <label for="username">Tên đăng nhập</label>
-        <div class="box"><input type="text" id="username" name="username" placeholder="oanhttk" required autofocus value="${fn:escapeXml(param.username)}"></div>
+        <div class="box"><input type="text" id="username" name="username" placeholder="trucdttty00312@gmail.com" required autofocus value="${fn:escapeXml(param.username)}"></div>
       </div>
       <div class="field">
         <label for="password">Mật khẩu</label>

@@ -12,7 +12,7 @@ public final class Validators {
             Pattern.compile("^0\\d{9,10}$");
 
     private static final Pattern USERNAME =
-            Pattern.compile("^[a-zA-Z0-9._-]{3,32}$");
+            Pattern.compile("^[a-zA-Z0-9._@-]{3,64}$");
 
     private Validators() { }
 
@@ -30,7 +30,7 @@ public final class Validators {
         return PHONE.matcher(normalized).matches();
     }
 
-    /** Username đăng nhập nhân viên: 3-32 ký tự, chữ/số/chấm/gạch dưới/gạch ngang. */
+    /** Username đăng nhập nhân viên: 3-64 ký tự, chữ/số/chấm/gạch dưới/gạch ngang/@. */
     public static boolean isValidUsername(String username) {
         return username != null && USERNAME.matcher(username.trim()).matches();
     }

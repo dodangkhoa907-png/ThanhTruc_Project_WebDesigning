@@ -101,12 +101,25 @@
   overflow-y: auto;
 }
 
-/* Logo 3D */
 #admin-dashboard-wrapper .sidebar-logo {
   text-align: center;
-  padding: 8px 0 36px;
+  padding: 8px 0 24px;
   border-bottom: 1px solid rgba(255, 255, 255, .08);
   margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+#admin-dashboard-wrapper .sidebar-logo-img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 4px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+  border: 2px solid rgba(255,255,255,0.3);
 }
 #admin-dashboard-wrapper .sidebar-logo h1 {
   font-size: 1.5rem;
@@ -1821,6 +1834,7 @@
          ================================================================ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
+        <img src="${pageContext.request.contextPath}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="sidebar-logo-img">
         <h1>Nhiệt Đới Xanh<span>Admin Dashboard</span></h1>
       </div>
 

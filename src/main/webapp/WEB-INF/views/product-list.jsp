@@ -182,9 +182,6 @@
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
 
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
 
         // Sort/category auto-submit khi đổi giá trị (giữ nguyên search text hiện tại)
         document.getElementById('shopSortSelect').addEventListener('change', () => {

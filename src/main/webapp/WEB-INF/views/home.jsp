@@ -362,6 +362,9 @@
     <footer class="footer-nhiet-doi">
         <div class="cursor-glow" id="cursorGlow"></div>
         <div class="footer-content">
+            <div class="footer-brand-header">
+                <img src="${pageContext.request.contextPath}/images/logo.png" alt="Nhiệt Đới Xanh Logo" class="footer-logo-img">
+            </div>
             <h2 class="brand-title">Nhiệt Đới Xanh</h2>
             <p class="brand-slogan">Trọn Vị Thanh Mát — Trái Cây Tươi Mới Mỗi Ngày</p>
 
@@ -389,13 +392,16 @@
             navbar.classList.toggle('scrolled', window.scrollY > 50);
         });
 
-        // ===== Mobile Nav Toggle =====
-        const navToggle = document.getElementById('navToggle');
+        // ===== Mobile Nav Links auto-close on item click =====
         const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => navLinks.classList.remove('active'));
-        });
+        if (navLinks) {
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.NhietDoiXanhToggleNav) window.NhietDoiXanhToggleNav();
+                });
+            });
+        }
+
 
         // ===== Scroll Reveal (Intersection Observer) =====
         const revealObserver = new IntersectionObserver((entries) => {

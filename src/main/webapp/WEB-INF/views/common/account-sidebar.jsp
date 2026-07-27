@@ -31,3 +31,29 @@
         </form>
     </nav>
 </aside>
+<script>
+    // Mobile: thanh tab cuộn ngang — tự đưa tab đang active vào giữa tầm nhìn (vd đang ở
+    // "Bảo mật" thì tab nằm khuất bên phải). Đặt scrollLeft trực tiếp trên .account-nav
+    // (không dùng scrollIntoView vì nó cuộn cả trang và kém ổn định với container lồng nhau).
+    (function () {
+        // Trả về true nếu đã căn xong (hoặc không cần), false nếu chưa đủ điều kiện để thử lại.
+        function centerActiveTab() {
+            var nav = document.querySelector('.account-nav');
+            var active = nav && nav.querySelector('a.active');
+            if (!nav || !active) return true;                 // không có gì để làm
+            if (nav.scrollWidth <= nav.clientWidth) return false; // layout ngang/FA font chưa xong → thử lại
+            var target = active.offsetLeft - (nav.clientWidth - active.offsetWidth) / 2;
+            if (target <= 0) return true;                     // tab đã nằm đầu, khỏi cuộn
+            // Gán scrollLeft trực tiếp (tức thời): scrollTo({behavior:'smooth'}) là no-op trên
+            // một số trình duyệt với container cuộn lồng nhau. Căn vị trí lúc tải nên tức thời.
+            nav.scrollLeft = target;
+            return true;
+        }
+        // Poll tự dừng: FontAwesome tải qua CDN có thể xong sau window.load nên bề rộng tab đổi
+        // muộn; cứ thử tới khi căn được (hoặc hết ~3s) thay vì đoán đúng một mốc thời gian.
+        var tries = 0;
+        var iv = setInterval(function () {
+            if (centerActiveTab() || ++tries > 20) clearInterval(iv);
+        }, 150);
+    })();
+</script>

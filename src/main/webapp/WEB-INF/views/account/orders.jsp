@@ -164,9 +164,7 @@
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+
 
         // Đổi trạng thái lọc là submit ngay — tránh hiểu lầm "đổi dropdown mà danh sách
         // không cập nhật" (chỉ đổi lựa chọn hiển thị, phải bấm "Lọc" mới submit form GET).

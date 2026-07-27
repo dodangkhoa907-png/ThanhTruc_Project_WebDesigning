@@ -33,7 +33,8 @@
 
         .sidebar{width:264px;background:linear-gradient(180deg,var(--admin-sidebar) 0%,var(--admin-sidebar-2) 100%);color:#fff;display:flex;flex-direction:column;position:fixed;height:100vh;left:0;top:0;z-index:100;box-shadow:6px 0 24px -12px rgba(30,63,39,.4)}
         .sidebar-brand{padding:26px 26px 22px;font-family:var(--fd);font-size:20px;font-weight:700;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.1)}
-        .sidebar-brand .logo-dot{width:38px;height:38px;border-radius:50%;background:var(--admin-gold);display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 8px 18px -6px rgba(244,162,97,.6)}
+        .sidebar-brand .logo-dot{width:40px;height:40px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);overflow:hidden;padding:2px;border:1.5px solid rgba(255,255,255,.3)}
+        .admin-sidebar-logo-img{width:100%;height:100%;object-fit:contain;border-radius:50%}
         .sidebar-brand span{color:#fff}.sidebar-brand b{color:var(--admin-gold)}
         .side-scroll{flex:1;overflow-y:auto;padding:16px 0}
         .menu-label{padding:14px 26px 8px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.4)}
@@ -123,7 +124,10 @@
         @media(max-width:900px){
             .sidebar{transform:translateX(-100%);transition:transform .3s}
             .sidebar.open{transform:none}
-            .main-content{margin-left:0;width:100%}
+            .main-content{margin-left:0;width:100%;padding:16px 14px 40px}
+            .admin-header{padding:14px;flex-wrap:wrap;gap:10px}
+            .admin-header-title{font-size:18px}
+            .admin-user .u-role{display:none}
         }
     </style>
 </head>
@@ -131,7 +135,7 @@
     <aside class="sidebar" id="adminSidebar">
         <div class="sidebar-brand">
             <span class="logo-dot">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--admin-sidebar)"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg>
+                <img src="${ctx}/images/logo.png" alt="Logo" class="admin-sidebar-logo-img">
             </span>
             <span>Nhiệt Đới <b>Xanh</b> · Admin</span>
         </div>
@@ -163,6 +167,9 @@
 
     <main class="main-content">
         <header class="admin-header">
+            <button type="button" class="hdr-ic mobile-only" id="adminSidebarToggle" aria-label="Toggle Navigation" style="margin-right:8px;">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="admin-header-title">
                 <c:out value="${pageTitle != null ? pageTitle : 'Dashboard'}"/>
                 <small>Chào mừng trở lại, <c:out value="${requestScope.adminUser.fullName}"/>!</small>
@@ -177,3 +184,4 @@
                 </div>
             </div>
         </header>
+

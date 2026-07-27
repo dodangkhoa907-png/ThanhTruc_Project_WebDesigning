@@ -35,20 +35,22 @@
     }
 
     function updateBadge(count, animate) {
-        const badge = document.getElementById('navCartBadge');
-        if (!badge) return;
-        badge.textContent = count;
-        if (count > 0) {
-            badge.removeAttribute('hidden');
-        } else {
-            badge.setAttribute('hidden', 'hidden');
-        }
-        if (animate) {
-            badge.classList.remove('pulse');
-            // force reflow để animation chạy lại
-            void badge.offsetWidth;
-            badge.classList.add('pulse');
-        }
+        const badges = document.querySelectorAll('.nav-cart-badge');
+        if (!badges.length) return;
+        badges.forEach((badge) => {
+            badge.textContent = count;
+            if (count > 0) {
+                badge.removeAttribute('hidden');
+            } else {
+                badge.setAttribute('hidden', 'hidden');
+            }
+            if (animate) {
+                badge.classList.remove('pulse');
+                // force reflow để animation chạy lại
+                void badge.offsetWidth;
+                badge.classList.add('pulse');
+            }
+        });
     }
 
     function refreshCartCount() {

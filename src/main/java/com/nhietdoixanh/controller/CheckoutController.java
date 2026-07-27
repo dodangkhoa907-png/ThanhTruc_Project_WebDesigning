@@ -30,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Checkout COD:
@@ -293,9 +295,10 @@ public class CheckoutController extends HttpServlet {
         } else if (provinceCity.length() > 100) {
             errors.put("provinceCity", "Tỉnh/Thành phố tối đa 100 ký tự.");
         }
-        if (district == null) {
-            errors.put("district", "Vui lòng nhập Quận/Huyện.");
-        } else if (district.length() > 100) {
+        // Quận/Huyện không bắt buộc: sau sáp nhập hành chính 2025, nhiều xã/phường báo cáo
+        // thẳng lên tỉnh/thành phố, không còn cấp quận/huyện — geocode API trả về rỗng cho
+        // các khu vực này là đúng thực tế, không nên chặn đặt hàng.
+        if (district != null && district.length() > 100) {
             errors.put("district", "Quận/Huyện tối đa 100 ký tự.");
         }
         if (ward == null) {
@@ -358,7 +361,11 @@ public class CheckoutController extends HttpServlet {
         BigDecimal finalAmount = totalAmount.add(shippingFee).subtract(discount);
         if (finalAmount.signum() < 0) finalAmount = BigDecimal.ZERO;
 
-        String shippingAddress = String.join(", ", houseNumberStreet, ward, district, provinceCity);
+        // district có thể rỗng (khu vực đã sáp nhập, không còn cấp quận/huyện) — lọc bỏ để
+        // tránh dấu phẩy thừa kiểu "..., , Thành phố Hồ Chí Minh" trong địa chỉ hiển thị.
+        String shippingAddress = Stream.of(houseNumberStreet, ward, district, provinceCity)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.joining(", "));
 
         Order order = new Order();
         order.setUserId(userId);

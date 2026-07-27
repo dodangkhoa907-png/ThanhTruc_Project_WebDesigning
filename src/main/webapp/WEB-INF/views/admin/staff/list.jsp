@@ -121,8 +121,8 @@
 
             <div class="form-group">
                 <label>Tên đăng nhập</label>
-                <input type="text" name="username" id="sfUsername" minlength="3" maxlength="32" placeholder="VD: nhanvien01">
-                <p class="sf-hint" id="sfUsernameHint">3-32 ký tự: chữ, số, dấu chấm/gạch dưới/gạch ngang.</p>
+                <input type="text" name="username" id="sfUsername" minlength="3" maxlength="64" placeholder="VD: trucdttty00312@gmail.com">
+                <p class="sf-hint" id="sfUsernameHint">3-64 ký tự: chữ, số, @, dấu chấm/gạch dưới/gạch ngang.</p>
             </div>
 
             <div class="form-group">

@@ -183,6 +183,20 @@
         </div>
     </section>
 
+    <c:if test="${not empty product && not empty product.variants}">
+    <div class="mobile-sticky-bottom-bar mobile-only">
+        <div style="flex:1;">
+            <div style="font-size:0.72rem;color:var(--text-muted);font-weight:500;">Giá tổng</div>
+            <div style="font-size:1.15rem;font-weight:900;color:var(--green-dark);" id="mobileDetailPriceNow">
+                <fmt:formatNumber value="${product.variants[0].price}" type="number" groupingUsed="true"/>đ
+            </div>
+        </div>
+        <button type="button" class="btn-shop btn-shop-primary" id="btnMobileAddToCart" style="padding:12px 22px;">
+            <i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ
+        </button>
+    </div>
+    </c:if>
+
     <div class="toast-stack" id="toastStack" aria-live="polite"></div>
 
     <script src="${pageContext.request.contextPath}/js/cart.js?v=${initParam.assetVer}"></script>
@@ -191,15 +205,14 @@
         window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 50));
         navbar.classList.add('scrolled');
 
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
 
         const qtyInput = document.getElementById('qtyInput');
         const qtyMinus = document.getElementById('qtyMinus');
         const qtyPlus = document.getElementById('qtyPlus');
         const priceNow = document.getElementById('detailPriceNow');
+        const mobilePriceNow = document.getElementById('mobileDetailPriceNow');
         const addBtn = document.getElementById('btnAddToCart');
+        const mobileAddBtn = document.getElementById('btnMobileAddToCart');
 
         function clampQty(v) {
             v = parseInt(v, 10);
@@ -217,9 +230,10 @@
         }
 
         function updatePriceNow() {
-            if (!priceNow) return;
-            const qty = clampQty(qtyInput.value);
-            priceNow.textContent = formatVnd(currentVariantPrice() * qty);
+            const qty = clampQty(qtyInput ? qtyInput.value : 1);
+            const totalStr = formatVnd(currentVariantPrice() * qty);
+            if (priceNow) priceNow.textContent = totalStr;
+            if (mobilePriceNow) mobilePriceNow.textContent = totalStr;
         }
 
         if (qtyInput) {
@@ -229,14 +243,15 @@
             document.querySelectorAll('input[name="variantId"]').forEach(r => r.addEventListener('change', updatePriceNow));
         }
 
-        if (addBtn) {
-            addBtn.addEventListener('click', () => {
-                const checked = document.querySelector('input[name="variantId"]:checked');
-                if (!checked) return;
-                const qty = clampQty(qtyInput.value);
-                NhietDoiXanhCart.addToCart(checked.value, qty, addBtn);
-            });
+        function handleAddToCart(btn) {
+            const checked = document.querySelector('input[name="variantId"]:checked');
+            if (!checked) return;
+            const qty = clampQty(qtyInput ? qtyInput.value : 1);
+            NhietDoiXanhCart.addToCart(checked.value, qty, btn);
         }
+
+        if (addBtn) addBtn.addEventListener('click', () => handleAddToCart(addBtn));
+        if (mobileAddBtn) mobileAddBtn.addEventListener('click', () => handleAddToCart(mobileAddBtn));
 
         document.querySelectorAll('.btn-quick-add').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -244,8 +259,6 @@
             });
         });
 
-        // Bấm vào ảnh/tên/mô tả sản phẩm (trong "Sản Phẩm Khác") là vào luôn trang chi tiết —
-        // cố tình KHÔNG gộp vùng footer (giá + nút "Thêm"/"Xem chi tiết") để tránh chạm nhầm trên di động.
         document.querySelectorAll('.shop-card-media, .shop-card-desc').forEach(zone => {
             zone.addEventListener('click', () => {
                 const link = zone.closest('.shop-card').querySelector('.shop-card-name a');
@@ -253,5 +266,6 @@
             });
         });
     </script>
+
 </body>
 </html>

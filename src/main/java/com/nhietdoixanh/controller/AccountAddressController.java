@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * /account/addresses — sổ địa chỉ giao hàng: thêm/sửa/xóa/đặt mặc định.
@@ -181,9 +183,12 @@ public class AccountAddressController extends HttpServlet {
         a.setWard(trimOrNull(req.getParameter("ward")));
         a.setHouseNumberStreet(trimOrNull(req.getParameter("houseNumberStreet")));
         // "Street" giữ bản rút gọn để tương thích trang /checkout đang fallback đọc field này.
+        // district có thể rỗng (khu vực đã sáp nhập, không còn cấp quận/huyện) — lọc bỏ để
+        // tránh dấu phẩy thừa kiểu "..., , Thành phố Hồ Chí Minh".
         if (a.getHouseNumberStreet() != null) {
-            a.setStreet(String.join(", ", nonNull(a.getHouseNumberStreet()), nonNull(a.getWard()),
-                    nonNull(a.getDistrict()), nonNull(a.getProvinceCity())));
+            a.setStreet(Stream.of(a.getHouseNumberStreet(), a.getWard(), a.getDistrict(), a.getProvinceCity())
+                    .filter(s -> s != null && !s.isEmpty())
+                    .collect(Collectors.joining(", ")));
         }
         a.setLatitude(parseBigDecimal(req.getParameter("latitude")));
         a.setLongitude(parseBigDecimal(req.getParameter("longitude")));
@@ -204,8 +209,10 @@ public class AccountAddressController extends HttpServlet {
         if (a.getProvinceCity() == null || a.getProvinceCity().length() > 100) {
             errors.put("provinceCity", "Vui lòng nhập Tỉnh/Thành phố (tối đa 100 ký tự).");
         }
-        if (a.getDistrict() == null || a.getDistrict().length() > 100) {
-            errors.put("district", "Vui lòng nhập Quận/Huyện (tối đa 100 ký tự).");
+        // Quận/Huyện không bắt buộc: sau sáp nhập hành chính 2025, nhiều xã/phường báo cáo
+        // thẳng lên tỉnh/thành phố, không còn cấp quận/huyện.
+        if (a.getDistrict() != null && a.getDistrict().length() > 100) {
+            errors.put("district", "Quận/Huyện tối đa 100 ký tự.");
         }
         if (a.getWard() == null || a.getWard().length() > 100) {
             errors.put("ward", "Vui lòng nhập Phường/Xã (tối đa 100 ký tự).");
@@ -260,8 +267,6 @@ public class AccountAddressController extends HttpServlet {
         String trimmed = raw.trim();
         return trimmed.isEmpty() ? null : trimmed;
     }
-
-    private String nonNull(String s) { return s != null ? s : ""; }
 
     private Integer parsePositiveInt(String raw) {
         if (raw == null || raw.isBlank()) return null;

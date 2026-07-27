@@ -10,6 +10,7 @@
 .account-field-full { grid-column: 1 / -1; }
 .account-field label { font-size: 0.84rem; font-weight: 700; color: var(--green-dark); }
 .account-field label .required { color: #b44242; margin-left: 2px; }
+.account-field label .account-field-optional { color: var(--text-muted); font-weight: 400; font-size: 0.82em; margin-left: 4px; }
 
 .account-field input[type="text"],
 .account-field input[type="tel"],
@@ -23,7 +24,7 @@
     border: 1.5px solid var(--border);
     border-radius: 12px;
     font-family: var(--font);
-    font-size: 0.92rem;
+    font-size: 16px;
     color: var(--text-body);
     background: var(--cream);
     transition: var(--transition);
@@ -350,7 +351,7 @@
 .account-filter-bar label { font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
 .account-filter-bar input, .account-filter-bar select {
     padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 11px;
-    font-family: var(--font); font-size: 0.88rem; color: var(--text-body); background: var(--cream);
+    font-family: var(--font); font-size: 16px; color: var(--text-body); background: var(--cream);
 }
 .account-filter-bar input:focus, .account-filter-bar select:focus { outline: none; border-color: var(--green); background: var(--white); }
 .account-filter-bar .f-search { flex: 1; min-width: 200px; }
@@ -485,7 +486,7 @@
 .account-cancel-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .account-cancel-form textarea {
     width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px;
-    font-family: var(--font); font-size: 0.88rem; resize: vertical; min-height: 80px; background: var(--cream);
+    font-family: var(--font); font-size: 16px; resize: vertical; min-height: 80px; background: var(--cream);
 }
 .account-cancel-form textarea:focus { outline: none; border-color: var(--green); background: var(--white); }
 
@@ -494,21 +495,69 @@
 .account-flash.error { background: rgba(180,66,66,0.08); color: #8a3030; }
 
 @media (max-width: 980px) {
-    .account-shell { grid-template-columns: 1fr; }
-    .account-sidebar { position: static; }
-    .account-nav { flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; }
-    .account-nav a { white-space: nowrap; flex-shrink: 0; }
+    /* minmax(0,1fr) chứ không phải 1fr trần: cột "1fr" ngầm định minmax(auto,1fr) — không
+       co được dưới min-content của nội dung bên trong. Thanh tab ngang (.account-nav) chứa
+       nhiều nút không co (flex-shrink:0) nên min-content của nó rất rộng (~1000px+), kéo
+       theo cả cột grid (và mọi thứ trong đó, kể cả profile card) tràn hẳn ra ngoài màn hình
+       375px thay vì để .account-nav tự cuộn ngang bên trong khung đúng kích thước. */
+    .account-shell { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .account-sidebar { position: static; background: transparent; padding: 4px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .account-nav { flex-direction: row; overflow-x: auto; gap: 8px; padding: 6px 0; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none; }
+    .account-nav::-webkit-scrollbar { display: none; }
+    .account-nav a {
+        white-space: nowrap;
+        flex-shrink: 0;
+        /* Reset width:100% từ rule desktop (sidebar dọc): nếu không, mỗi pill chiếm trọn
+           bề rộng dải cuộn → chỉ thấy 1 tab, phải lướt từng cái. width:auto để pill vừa
+           nội dung, nhiều tab hiện cùng lúc và cuộn ngang mượt. */
+        width: auto;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 18px;
+        border-radius: 50px;
+        background: var(--white);
+        border: 1px solid var(--border);
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+    .account-nav a.active { background: var(--green); color: var(--white); border-color: var(--green); font-weight: 600; }
     .account-nav-divider { display: none; }
-    .account-stats { grid-template-columns: 1fr 1fr; }
-    .account-detail-grid { grid-template-columns: 1fr; }
+    .account-nav form { flex-shrink: 0; }
+    .account-nav form button {
+        white-space: nowrap;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 18px;
+        border-radius: 50px;
+        background: rgba(180,66,66,0.08);
+        color: #8a3030;
+        font-size: 0.88rem;
+        border: none;
+        font-weight: 500;
+    }
+    .account-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .account-detail-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
+
 @media (max-width: 640px) {
-    .account-profile-card { flex-direction: column; text-align: center; }
-    .account-profile-meta { justify-content: center; }
-    .account-stats { grid-template-columns: 1fr; }
-    .account-card { padding: 18px; }
-    .account-order-card-bottom { flex-direction: column; align-items: stretch; }
-    .account-order-actions { flex-direction: column; }
-    .account-order-actions .btn-shop { width: 100%; justify-content: center; }
+    /* Form 2 cột → 1 cột trên điện thoại: rộng rãi dễ bấm, đồng thời minmax(0,1fr) để ô
+       input không bị min-content đẩy tràn ngang ở màn hẹp (~320px). */
+    .account-field-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .account-profile-card { flex-direction: column; text-align: center; gap: 14px; }
+    .account-profile-meta { justify-content: center; flex-wrap: wrap; }
+    .account-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .account-card { padding: 16px; border-radius: 18px; }
+    .account-order-card-bottom { flex-direction: column; align-items: stretch; gap: 12px; }
+    .account-order-actions { flex-direction: column; gap: 8px; }
+    .account-order-actions .btn-shop {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+        border-radius: 12px;
+    }
 }
+
+
