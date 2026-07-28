@@ -56,8 +56,8 @@ import java.util.stream.Collectors;
         "/admin/san-pham/an-hien"
 })
 @MultipartConfig(
-        maxFileSize = 3 * 1024 * 1024,
-        maxRequestSize = 6 * 1024 * 1024,
+        maxFileSize = 15 * 1024 * 1024,
+        maxRequestSize = 25 * 1024 * 1024,
         fileSizeThreshold = 1024 * 1024
 )
 public class AdminProductController extends HttpServlet {

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Base64;
 
-@WebFilter(filterName = "CsrfFilter", urlPatterns = {"/*"}, asyncSupported = true)
+@WebFilter(filterName = "CsrfFilter", urlPatterns = { "/*" }, asyncSupported = true)
 public class CsrfFilter implements Filter {
 
     public static final String TOKEN_ATTR = "_csrf";
@@ -38,9 +38,12 @@ public class CsrfFilter implements Filter {
         if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
                 || "DELETE".equalsIgnoreCase(method)) {
 
-            // Webhook PayOS là POST server-to-server (không có session/_csrf token). Bỏ qua CSRF
-            // DUY NHẤT cho đúng path này — bảo mật của webhook do chữ ký HMAC-SHA256 đảm nhiệm
-            // (xem PaymentController#handleWebhook → PayOSPaymentService.verifyWebhook). Không nới
+            // Webhook PayOS là POST server-to-server (không có session/_csrf token). Bỏ qua
+            // CSRF
+            // DUY NHẤT cho đúng path này — bảo mật của webhook do chữ ký HMAC-SHA256 đảm
+            // nhiệm
+            // (xem PaymentController#handleWebhook → PayOSPaymentService.verifyWebhook).
+            // Không nới
             // lỏng CSRF cho bất kỳ endpoint nào khác.
             if ("/payment/payos/webhook".equals(request.getServletPath())) {
                 chain.doFilter(req, res);
@@ -51,11 +54,13 @@ public class CsrfFilter implements Filter {
                 String origin = request.getHeader("Origin");
                 if (origin == null) {
                     String ref = request.getHeader("Referer");
-                    if (ref != null) origin = ref.replaceAll("(https?://[^/]+).*", "$1");
+                    if (ref != null)
+                        origin = ref.replaceAll("(https?://[^/]+).*", "$1");
                 }
                 String expected = request.getScheme() + "://" + request.getServerName();
                 int port = request.getServerPort();
-                if (port != 80 && port != 443) expected += ":" + port;
+                if (port != 80 && port != 443)
+                    expected += ":" + port;
                 if (expected.equals(origin)) {
                     chain.doFilter(req, res);
                     return;

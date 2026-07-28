@@ -15,7 +15,7 @@ import java.nio.file.StandardCopyOption;
  */
 public final class ProductImageUpload {
 
-    private static final long MAX_BYTES = 3_000_000L; // ~3MB
+    private static final long MAX_BYTES = 15_000_000L; // ~15MB
     private static final String UPLOAD_SUBPATH = "/uploads/products";
 
     private ProductImageUpload() {}
@@ -29,7 +29,7 @@ public final class ProductImageUpload {
         if (filePart == null || filePart.getSize() <= 0) return null;
 
         if (filePart.getSize() > MAX_BYTES) {
-            throw new IllegalArgumentException("Ảnh sản phẩm tối đa 3MB.");
+            throw new IllegalArgumentException("Ảnh sản phẩm tối đa 15MB.");
         }
 
         byte[] header = new byte[12];
