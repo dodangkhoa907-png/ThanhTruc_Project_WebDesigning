@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f472a149-c38d-44ee-a687-da9671543d01" name="Changes" comment="kkk">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/AccountProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/AccountProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/admin/AdminProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/controller/admin/AdminProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/ProductDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/ProductDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/UserDao.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/UserDao.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/impl/ProductDaoImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/impl/ProductDaoImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/impl/UserDaoImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/dao/impl/UserDaoImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/filter/GzipFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/filter/GzipFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/util/AvatarUpload.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/util/AvatarUpload.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/util/ProductImageUpload.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/nhietdoixanh/util/ProductImageUpload.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/css/style.css" afterDir="false" />
-    </list>
+    <list default="true" id="f472a149-c38d-44ee-a687-da9671543d01" name="Changes" comment="kkk" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
