@@ -47,3 +47,5 @@ build/
 
 ### Sensitive files ###
 # src/main/resources/db.properties
+# Ảnh gốc trước khi nén (chỉ giữ ở máy, không deploy)
+src/main/webapp/images/_original_backup/

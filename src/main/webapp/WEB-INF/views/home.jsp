@@ -21,6 +21,9 @@
         rel="stylesheet">
 
     <!-- FontAwesome 6 -->
+    <!-- Bắt tay DNS/TLS với CDN sớm, song song với việc tải HTML — CSS FontAwesome
+         chặn render nên tiết kiệm được cả vòng handshake trên đường găng. -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Stylesheet -->
@@ -73,7 +76,7 @@
             <div class="hero-visual">
                 <div class="hero-3d-container">
                     <div class="hero-3d-bg"></div>
-                    <img src="${pageContext.request.contextPath}/images/cam.png" alt="Nước Ép Cam Tươi" class="hero-product-img">
+                    <img src="${pageContext.request.contextPath}/images/cam.png" alt="Nước Ép Cam Tươi" class="hero-product-img" width="800" height="800" fetchpriority="high" decoding="async">
                     <span class="floating-fruit fruit-1">🍊</span>
                     <span class="floating-fruit fruit-2">🍋</span>
                     <span class="floating-fruit fruit-3">🍎</span>
@@ -96,7 +99,7 @@
                         <div class="story-glow-blob blob-2"></div>
                         <div class="story-glow-blob blob-3"></div>
                     </div>
-                    <img src="${pageContext.request.contextPath}/images/category/poster.jpg" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img">
+                    <img src="${pageContext.request.contextPath}/images/category/poster.jpg" alt="Câu chuyện Nhiệt Đới Xanh" class="story-img" loading="lazy" decoding="async">
                 </div>
                 <div class="story-stat">
                     <div class="story-stat-number">100%</div>
@@ -323,31 +326,31 @@
 
             <div class="team-grid">
                 <div class="team-card reveal reveal-delay-1">
-                    <img src="${pageContext.request.contextPath}/images/oanh.png" alt="Oanh" class="team-avatar avatar-oanh">
+                    <img src="${pageContext.request.contextPath}/images/oanh.png" alt="Oanh" class="team-avatar avatar-oanh" width="100" height="100" loading="lazy" decoding="async">
                     <div class="team-name">Oanh</div>
                     <div class="team-role">Founder / Quản lý</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-2">
-                    <img src="${pageContext.request.contextPath}/images/tien.png" alt="Tiên" class="team-avatar avatar-tien">
+                    <img src="${pageContext.request.contextPath}/images/tien.png" alt="Tiên" class="team-avatar avatar-tien" width="100" height="100" loading="lazy" decoding="async">
                     <div class="team-name">Tiên</div>
                     <div class="team-role">Marketing</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-3">
-                    <img src="${pageContext.request.contextPath}/images/ky.png" alt="Kỳ" class="team-avatar avatar-ky">
+                    <img src="${pageContext.request.contextPath}/images/ky.png" alt="Kỳ" class="team-avatar avatar-ky" width="100" height="100" loading="lazy" decoding="async">
                     <div class="team-name">Kỳ</div>
                     <div class="team-role">Vận hành</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-4">
-                    <img src="${pageContext.request.contextPath}/images/thu.png" alt="Thư" class="team-avatar avatar-thu">
+                    <img src="${pageContext.request.contextPath}/images/thu.png" alt="Thư" class="team-avatar avatar-thu" width="100" height="100" loading="lazy" decoding="async">
                     <div class="team-name">Thư</div>
                     <div class="team-role">Chăm sóc khách hàng</div>
                 </div>
 
                 <div class="team-card reveal reveal-delay-5">
-                    <img src="${pageContext.request.contextPath}/images/truc.png" alt="Trúc" class="team-avatar avatar-truc">
+                    <img src="${pageContext.request.contextPath}/images/truc.png" alt="Trúc" class="team-avatar avatar-truc" width="100" height="100" loading="lazy" decoding="async">
                     <div class="team-name">Trúc</div>
                     <div class="team-role">Tài chính</div>
                 </div>

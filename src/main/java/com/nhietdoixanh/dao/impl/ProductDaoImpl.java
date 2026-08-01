@@ -229,11 +229,43 @@ public class ProductDaoImpl implements ProductDao {
         }
     }
 
+    /**
+     * Nạp variant cho CẢ danh sách bằng ĐÚNG 1 query (trước đây: 1 query / 1 sản phẩm — N+1).
+     * DB đặt ở VN còn app deploy ở nước ngoài nên mỗi round-trip tốn ~200ms; trang 10 sản phẩm
+     * trước đây mất 11 round-trip (~2.2s) chỉ để lấy dữ liệu, giờ còn 2 (~0.4s).
+     */
     private void attachVariants(List<Product> products) {
         if (products.isEmpty()) return;
-        try (Connection con = Database.getConnection()) {
-            for (Product p : products) {
-                p.setVariants(loadVariants(con, p.getProductId()));
+
+        // Gom ID rồi dựng mệnh đề IN (...) — số lượng sản phẩm/trang luôn nhỏ (<= vài chục).
+        Map<Integer, Product> byId = new LinkedHashMap<>();
+        for (Product p : products) {
+            p.setVariants(new ArrayList<>());   // mặc định rỗng, tránh null ở JSP
+            byId.put(p.getProductId(), p);
+        }
+
+        String placeholders = String.join(",", Collections.nCopies(byId.size(), "?"));
+        String sql = "SELECT VariantID, ProductID, Size, Price, IsActive FROM ProductVariants " +
+                     "WHERE IsActive = 1 AND ProductID IN (" + placeholders + ") " +
+                     "ORDER BY ProductID, Price";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            int i = 1;
+            for (Integer id : byId.keySet()) ps.setInt(i++, id);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Product owner = byId.get(rs.getInt("ProductID"));
+                    if (owner == null) continue;
+                    ProductVariant v = new ProductVariant();
+                    v.setVariantId(rs.getInt("VariantID"));
+                    v.setProductId(rs.getInt("ProductID"));
+                    v.setSize(rs.getString("Size"));
+                    v.setPrice(rs.getBigDecimal("Price"));
+                    v.setActive(rs.getBoolean("IsActive"));
+                    owner.getVariants().add(v);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("ProductDao.attachVariants thất bại", e);

@@ -1,0 +1,28 @@
+# ============================================================================
+# Render.com — cấu hình deploy cho Nhiệt Đới Xanh
+#
+# ĐIỂM QUAN TRỌNG NHẤT: region.
+# Database đặt tại VPS Việt Nam (14.225.217.109). Mặc định Render deploy ở
+# Oregon (Mỹ) -> mỗi câu query phải đi vòng Mỹ<->VN mất ~200ms. Một trang cần
+# vài query là mất luôn cả giây chỉ để chờ mạng.
+# Singapore là region gần VN nhất (~30-50ms) -> nhanh hơn khoảng 4-6 lần.
+# ============================================================================
+services:
+  - type: web
+    name: nhietdoixanh-web
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore          # BẮT BUỘC: gần DB ở VN nhất
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: TZ
+        value: Asia/Ho_Chi_Minh
+      # JVM tuning cho container RAM thấp + khởi động nhanh (xem thêm ở Dockerfile)
+      - key: JAVA_OPTS
+        value: >-
+          -XX:MaxRAMPercentage=70
+          -XX:TieredStopAtLevel=1
+          -XX:+UseSerialGC
+          -Djava.security.egd=file:/dev/./urandom
+          -Dfile.encoding=UTF-8

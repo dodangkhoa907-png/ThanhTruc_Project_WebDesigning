@@ -8,8 +8,11 @@
 <jsp:include page="/WEB-INF/views/admin/layout/header.jsp" />
 
 <!-- Dùng cdnjs (đã whitelist sẵn trong CSP của SecurityHeadersFilter — xem checkout.jsp) -->
+    <!-- Bắt tay DNS/TLS với CDN sớm, song song với việc tải HTML — CSS FontAwesome
+         chặn render nên tiết kiệm được cả vòng handshake trên đường găng. -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 
 <style>
 .od-map{width:100%;height:240px;border-radius:14px;border:1.5px solid var(--admin-border);overflow:hidden;margin-top:14px}

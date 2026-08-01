@@ -7,7 +7,14 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebFilter(filterName = "CacheHeaderFilter", urlPatterns = {"/css/*", "/images/*"}, asyncSupported = true)
+/*
+ * LƯU Ý: phải map cả "/js/*". Trước đây chỉ map /css/* và /images/* nên toàn bộ file JS
+ * (cart.js, checkout.js, avatar-crop.js ~44KB) KHÔNG hề được cache — mỗi lần chuyển trang
+ * trình duyệt tải lại từ đầu, gây cảm giác "chuyển trang chậm/khựng". Nhánh xử lý ".js"
+ * bên dưới đã có sẵn từ trước, chỉ thiếu url-pattern nên không bao giờ chạy.
+ */
+@WebFilter(filterName = "CacheHeaderFilter",
+        urlPatterns = {"/css/*", "/js/*", "/images/*"}, asyncSupported = true)
 public class CacheHeaderFilter implements Filter {
 
     @Override
