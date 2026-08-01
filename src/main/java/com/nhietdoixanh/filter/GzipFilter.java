@@ -31,6 +31,13 @@ public class GzipFilter implements Filter {
         }
 
         String path = request.getServletPath();
+        // ImageServlet (/uploads/products/{id}, /uploads/avatars/{id}) trả ảnh nhị phân đã nén
+        // sẵn (JPG/PNG/WEBP) nhưng KHÔNG có đuôi file trong URL — bỏ qua theo prefix vì so đuôi
+        // file bên dưới sẽ không khớp. Nén lại ảnh đã nén chỉ tốn CPU, không giảm dung lượng.
+        if (path != null && (path.startsWith("/uploads/products") || path.startsWith("/uploads/avatars"))) {
+            chain.doFilter(req, res);
+            return;
+        }
         if (path != null && (path.endsWith(".png") || path.endsWith(".jpg")
                 || path.endsWith(".jpeg") || path.endsWith(".gif")
                 || path.endsWith(".webp") || path.endsWith(".ico"))) {

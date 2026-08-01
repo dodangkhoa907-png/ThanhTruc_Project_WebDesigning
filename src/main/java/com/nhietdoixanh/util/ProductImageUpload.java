@@ -1,75 +1,58 @@
 package com.nhietdoixanh.util;
 
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 
 /**
- * Lưu ảnh sản phẩm — validate bằng magic bytes (không tin content-type/đuôi file client gửi
- * lên), giới hạn dung lượng, chỉ chấp nhận JPG/PNG/WEBP. Cùng cơ chế với {@link AvatarUpload}.
+ * Validate ảnh sản phẩm bằng magic bytes (không tin content-type/đuôi file client gửi lên),
+ * giới hạn dung lượng, chỉ chấp nhận JPG/PNG/WEBP.
+ *
+ * Ảnh được LƯU VÀO DB (Products.ImageData) qua {@link com.nhietdoixanh.dao.ProductDao#saveImageBlob}
+ * — KHÔNG ghi ra đĩa cục bộ như trước, vì đĩa của container trên Render là ephemeral (mất sạch
+ * mỗi lần deploy lại/khởi động lại), khiến ảnh admin upload biến mất sau mỗi lần deploy.
+ * Xem thêm: sql/migration_image_blob_storage.sql.
  */
 public final class ProductImageUpload {
 
     private static final long MAX_BYTES = 15_000_000L; // ~15MB
-    private static final String UPLOAD_SUBPATH = "/uploads/products";
 
     private ProductImageUpload() {}
 
+    public record Uploaded(byte[] data, String contentType) {}
+
     /**
-     * @return đường dẫn context-relative (vd. "/uploads/products/p_1737000000000.jpg") để lưu
-     *         vào Products.ImageURL, hoặc null nếu không có file nào được chọn (giữ ảnh cũ).
+     * @return dữ liệu ảnh đã validate, hoặc null nếu không có file nào được chọn (giữ ảnh cũ).
      * @throws IllegalArgumentException nếu file không hợp lệ (quá lớn / không phải ảnh cho phép)
      */
-    public static String store(Part filePart, ServletContext context) throws IOException {
+    public static Uploaded validate(Part filePart) throws IOException {
         if (filePart == null || filePart.getSize() <= 0) return null;
 
         if (filePart.getSize() > MAX_BYTES) {
             throw new IllegalArgumentException("Ảnh sản phẩm tối đa 15MB.");
         }
 
-        byte[] header = new byte[12];
-        int read;
+        byte[] data;
         try (InputStream in = filePart.getInputStream()) {
-            read = in.readNBytes(header, 0, header.length);
+            data = in.readAllBytes();
         }
 
-        String ext = detectExtension(header, read);
+        String ext = detectExtension(data, data.length);
         if (ext == null) {
             throw new IllegalArgumentException("Chỉ chấp nhận ảnh định dạng JPG, PNG hoặc WEBP.");
         }
 
-        String realDir = context.getRealPath(UPLOAD_SUBPATH);
-        if (realDir == null) {
-            throw new IOException("Không xác định được thư mục lưu ảnh trên server.");
-        }
-        Path dir = Path.of(realDir);
-        Files.createDirectories(dir);
-
-        // Tên file tự sinh — không dùng tên file client gửi lên, tránh path traversal.
-        String filename = "p_" + System.currentTimeMillis() + "." + ext;
-        Path target = dir.resolve(filename);
-
-        try (InputStream in = filePart.getInputStream()) {
-            Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        return UPLOAD_SUBPATH + "/" + filename;
+        return new Uploaded(data, contentTypeFor(ext));
     }
 
-    /** Xóa ảnh cũ khi thay ảnh mới — best-effort, không ném lỗi nếu không xóa được. */
-    public static void deleteQuietly(String contextRelativePath, ServletContext context) {
-        if (contextRelativePath == null || !contextRelativePath.startsWith(UPLOAD_SUBPATH)) return;
-        try {
-            String realPath = context.getRealPath(contextRelativePath);
-            if (realPath != null) Files.deleteIfExists(Path.of(realPath));
-        } catch (IOException ignored) {
-            // best-effort — không để lỗi xóa file cũ làm hỏng luồng cập nhật sản phẩm
-        }
+    private static String contentTypeFor(String ext) {
+        return switch (ext) {
+            case "jpg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "webp" -> "image/webp";
+            default -> "application/octet-stream";
+        };
     }
 
     private static String detectExtension(byte[] h, int len) {

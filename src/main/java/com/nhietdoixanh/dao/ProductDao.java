@@ -1,5 +1,6 @@
 package com.nhietdoixanh.dao;
 
+import com.nhietdoixanh.model.ImageBlob;
 import com.nhietdoixanh.model.Product;
 import java.util.List;
 import java.util.Optional;
@@ -36,4 +37,10 @@ public interface ProductDao {
     boolean setActive(int productId, boolean active);
 
     boolean existsByName(String name, Integer excludeId);
+
+    /** Lưu ảnh vào DB (thay vì đĩa cục bộ — xem migration_image_blob_storage.sql). */
+    void saveImageBlob(int productId, byte[] data, String contentType);
+
+    /** Đọc ảnh để ImageServlet stream ra — empty nếu sản phẩm chưa có ảnh upload. */
+    Optional<ImageBlob> findImageBlob(int productId);
 }

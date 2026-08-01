@@ -2,6 +2,7 @@ package com.nhietdoixanh.dao.impl;
 
 import com.nhietdoixanh.config.Database;
 import com.nhietdoixanh.dao.UserDao;
+import com.nhietdoixanh.model.ImageBlob;
 import com.nhietdoixanh.model.User;
 
 import java.sql.*;
@@ -131,6 +132,38 @@ public class UserDaoImpl implements UserDao {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void saveAvatarBlob(int userId, byte[] data, String contentType) {
+        String sql = "UPDATE Users SET AvatarData = ?, AvatarContentType = ? WHERE UserID = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBytes(1, data);
+            ps.setString(2, contentType);
+            ps.setInt(3, userId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.saveAvatarBlob thất bại", e);
+        }
+    }
+
+    @Override
+    public Optional<ImageBlob> findAvatarBlob(int userId) {
+        String sql = "SELECT AvatarData, AvatarContentType FROM Users WHERE UserID = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return Optional.empty();
+                byte[] data = rs.getBytes("AvatarData");
+                String contentType = rs.getString("AvatarContentType");
+                if (data == null || data.length == 0) return Optional.empty();
+                return Optional.of(new ImageBlob(data, contentType != null ? contentType : "application/octet-stream"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("UserDao.findAvatarBlob thất bại", e);
+        }
     }
 
     @Override

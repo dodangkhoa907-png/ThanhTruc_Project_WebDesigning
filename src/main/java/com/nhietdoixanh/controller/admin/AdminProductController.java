@@ -185,9 +185,9 @@ public class AdminProductController extends HttpServlet {
             return;
         }
 
-        String imageUrl;
+        ProductImageUpload.Uploaded uploaded;
         try {
-            imageUrl = ProductImageUpload.store(req.getPart("imageFile"), getServletContext());
+            uploaded = ProductImageUpload.validate(req.getPart("imageFile"));
         } catch (IllegalArgumentException e) {
             flashError(req, e.getMessage());
             resp.sendRedirect(returnTo);
@@ -204,7 +204,6 @@ public class AdminProductController extends HttpServlet {
         p.setDescription(description);
         p.setActive(true);
 
-        String oldImageUrl = null;
         if (isEdit) {
             p.setProductId(productId);
             Optional<Product> existing = productDao.findById(productId);
@@ -212,20 +211,29 @@ public class AdminProductController extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/admin/san-pham");
                 return;
             }
-            oldImageUrl = existing.get().getImageUrl();
             p.setActive(existing.get().isActive());
-            p.setImageUrl(imageUrl != null ? imageUrl : oldImageUrl);
+            if (uploaded != null) {
+                // Ảnh lưu trong DB (Products.ImageData) — xem ImageServlet. URL kèm ?v= để
+                // trình duyệt tải ảnh mới ngay, không dính cache "immutable" của ảnh cũ.
+                productDao.saveImageBlob(productId, uploaded.data(), uploaded.contentType());
+                p.setImageUrl("/uploads/products/" + productId + "?v=" + System.currentTimeMillis());
+            } else {
+                p.setImageUrl(existing.get().getImageUrl());
+            }
             productDao.update(p);
             saveVariants(productId, variantRows);
-            if (imageUrl != null && oldImageUrl != null) {
-                ProductImageUpload.deleteQuietly(oldImageUrl, getServletContext());
-            }
             AuditLogger.log(req, admin.getStaffId(), "UPDATE_PRODUCT", "Product#" + productId,
                     "Cập nhật sản phẩm \"" + name + "\"");
             flashSuccess(req, "Đã cập nhật sản phẩm \"" + name + "\".");
         } else {
-            p.setImageUrl(imageUrl);
+            // URL ảnh phụ thuộc ProductID nên phải insert trước để có ID, rồi update lại URL.
             int newId = productDao.insert(p);
+            if (uploaded != null) {
+                productDao.saveImageBlob(newId, uploaded.data(), uploaded.contentType());
+                p.setProductId(newId);
+                p.setImageUrl("/uploads/products/" + newId + "?v=" + System.currentTimeMillis());
+                productDao.update(p);
+            }
             saveVariants(newId, variantRows);
             AuditLogger.log(req, admin.getStaffId(), "CREATE_PRODUCT", "Product#" + newId,
                     "Thêm sản phẩm mới \"" + name + "\"");

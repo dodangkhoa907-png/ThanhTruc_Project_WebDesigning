@@ -1,5 +1,6 @@
 package com.nhietdoixanh.dao;
 
+import com.nhietdoixanh.model.ImageBlob;
 import com.nhietdoixanh.model.User;
 import java.util.Optional;
 
@@ -26,4 +27,10 @@ public interface UserDao {
     default boolean updatePasswordHash(int userId, String passwordHash) {
         return updatePassword(userId, passwordHash);
     }
+
+    /** Lưu avatar vào DB (thay vì đĩa cục bộ — xem migration_image_blob_storage.sql). */
+    void saveAvatarBlob(int userId, byte[] data, String contentType);
+
+    /** Đọc avatar để ImageServlet stream ra — empty nếu user chưa có avatar upload. */
+    Optional<ImageBlob> findAvatarBlob(int userId);
 }

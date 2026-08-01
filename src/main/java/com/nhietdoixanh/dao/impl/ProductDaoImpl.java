@@ -3,6 +3,7 @@ package com.nhietdoixanh.dao.impl;
 import com.nhietdoixanh.config.Database;
 import com.nhietdoixanh.config.DbRetry;
 import com.nhietdoixanh.dao.ProductDao;
+import com.nhietdoixanh.model.ImageBlob;
 import com.nhietdoixanh.model.Product;
 import com.nhietdoixanh.model.ProductVariant;
 import com.nhietdoixanh.util.ProductSort;
@@ -226,6 +227,38 @@ public class ProductDaoImpl implements ProductDao {
             }
         } catch (SQLException e) {
             throw new RuntimeException("ProductDao.existsByName thất bại", e);
+        }
+    }
+
+    @Override
+    public void saveImageBlob(int productId, byte[] data, String contentType) {
+        String sql = "UPDATE Products SET ImageData = ?, ImageContentType = ? WHERE ProductID = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setBytes(1, data);
+            ps.setString(2, contentType);
+            ps.setInt(3, productId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("ProductDao.saveImageBlob thất bại", e);
+        }
+    }
+
+    @Override
+    public Optional<ImageBlob> findImageBlob(int productId) {
+        String sql = "SELECT ImageData, ImageContentType FROM Products WHERE ProductID = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return Optional.empty();
+                byte[] data = rs.getBytes("ImageData");
+                String contentType = rs.getString("ImageContentType");
+                if (data == null || data.length == 0) return Optional.empty();
+                return Optional.of(new ImageBlob(data, contentType != null ? contentType : "application/octet-stream"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ProductDao.findImageBlob thất bại", e);
         }
     }
 

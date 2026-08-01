@@ -618,6 +618,11 @@ ul { list-style: none; }
     position: relative;
     z-index: 2;
     width: 65%;
+    /* height:auto + object-fit:contain: rule mobile (2 breakpoint dưới) đã có sẵn cặp này,
+       base rule desktop thì thiếu — nếu ảnh hero sau này đổi kích thước/tỉ lệ khác vuông,
+       thiếu 2 dòng này sẽ khiến ảnh bị kéo méo (đúng lỗi "kéo lỗi format" đã gặp). */
+    height: auto;
+    object-fit: contain;
     filter: drop-shadow(0 20px 40px rgba(42,92,56,0.2));
     animation: float3D 5s ease-in-out infinite;
     transform-style: preserve-3d;

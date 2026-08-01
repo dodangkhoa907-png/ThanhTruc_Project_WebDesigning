@@ -84,11 +84,11 @@ public class AccountProfileController extends HttpServlet {
             errors.put("email", "Email này đã được sử dụng bởi tài khoản khác.");
         }
 
-        String newAvatarPath = null;
+        AvatarUpload.Uploaded uploadedAvatar = null;
         if (errors.isEmpty()) {
             try {
                 Part avatarPart = req.getPart("avatar");
-                newAvatarPath = AvatarUpload.store(avatarPart, getServletContext(), userId);
+                uploadedAvatar = AvatarUpload.validate(avatarPart);
             } catch (IllegalArgumentException e) {
                 errors.put("avatar", e.getMessage());
             } catch (Exception e) {
@@ -111,11 +111,11 @@ public class AccountProfileController extends HttpServlet {
         }
 
         boolean updated = userDao.updateProfile(userId, fullName, phone, nickname, email);
-        if (updated && newAvatarPath != null) {
-            String oldAvatar = existing.getProfileImage();
-            if (userDao.updateAvatar(userId, newAvatarPath)) {
-                AvatarUpload.deleteQuietly(oldAvatar, getServletContext());
-            }
+        if (updated && uploadedAvatar != null) {
+            // Avatar lưu trong DB (Users.AvatarData) — xem ImageServlet. URL kèm ?v= để trình
+            // duyệt tải avatar mới ngay, không dính cache "immutable" của avatar cũ.
+            userDao.saveAvatarBlob(userId, uploadedAvatar.data(), uploadedAvatar.contentType());
+            userDao.updateAvatar(userId, "/uploads/avatars/" + userId + "?v=" + System.currentTimeMillis());
         }
 
         if (updated) {
