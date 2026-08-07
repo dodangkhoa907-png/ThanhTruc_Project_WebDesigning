@@ -13,8 +13,14 @@ import java.io.IOException;
  * trình duyệt tải lại từ đầu, gây cảm giác "chuyển trang chậm/khựng". Nhánh xử lý ".js"
  * bên dưới đã có sẵn từ trước, chỉ thiếu url-pattern nên không bao giờ chạy.
  */
+/*
+ * BỔ SUNG "/fonts/*": font chữ và bộ icon nay được lưu ngay trên máy chủ của mình
+ * (xem css/fonts.css, css/icons.css) thay vì tải từ Google/cdnjs. Nhánh xử lý
+ * ".woff2" bên dưới đã có sẵn nhưng nếu thiếu url-pattern này thì font sẽ bị hỏi
+ * lại máy chủ ở MỌI lần tải trang — đúng lỗi đã gặp với "/js/*" nói trên.
+ */
 @WebFilter(filterName = "CacheHeaderFilter",
-        urlPatterns = {"/css/*", "/js/*", "/images/*"}, asyncSupported = true)
+        urlPatterns = {"/css/*", "/js/*", "/images/*", "/fonts/*"}, asyncSupported = true)
 public class CacheHeaderFilter implements Filter {
 
     @Override

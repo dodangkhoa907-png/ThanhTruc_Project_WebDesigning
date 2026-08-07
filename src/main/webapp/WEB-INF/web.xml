@@ -18,7 +18,7 @@
          → chỉ cần tăng số này lên 1. -->
     <context-param>
         <param-name>assetVer</param-name>
-        <param-value>32</param-value>
+        <param-value>36</param-value>
     </context-param>
 
     <!-- ===== Session timeout — khai báo tường minh thay vì phụ thuộc mặc định ngầm của
@@ -66,6 +66,19 @@
     </error-page>
     <error-page>
         <error-code>500</error-code>
+        <location>/WEB-INF/views/error.jsp</location>
+    </error-page>
+    <!-- 403 xảy ra CHỦ YẾU khi phiên làm việc hết hạn (30 phút): khách mở trang đăng nhập
+         rồi để đó, lúc bấm gửi thì token CSRF trong form không còn khớp session mới.
+         Trước đây không khai báo trang lỗi cho 403 nên Tomcat trả trang trắng
+         "HTTP Status 403 – Forbidden" trông như web hỏng. -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/views/error.jsp</location>
+    </error-page>
+    <!-- 429 do RateLimitFilter chặn khi gửi biểu mẫu quá nhiều lần trong 15 phút. -->
+    <error-page>
+        <error-code>429</error-code>
         <location>/WEB-INF/views/error.jsp</location>
     </error-page>
 

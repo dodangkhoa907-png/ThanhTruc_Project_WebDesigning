@@ -10,15 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kết Quả Thanh Toán — Nhiệt Đới Xanh</title>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&display=swap"
-        rel="stylesheet">
-    <!-- Bắt tay DNS/TLS với CDN sớm, song song với việc tải HTML — CSS FontAwesome
-         chặn render nên tiết kiệm được cả vòng handshake trên đường găng. -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+                    <link rel="icon" href="${pageContext.request.contextPath}/favicon.ico" sizes="any">
+                    <link rel="apple-touch-icon" href="${pageContext.request.contextPath}/apple-touch-icon.png">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/fonts.css?v=${initParam.assetVer}">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/icons.css?v=${initParam.assetVer}">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css?v=${initParam.assetVer}">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/product.css?v=${initParam.assetVer}">
 </head>

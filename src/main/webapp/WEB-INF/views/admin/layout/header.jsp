@@ -10,13 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="ctx" content="${pageContext.request.contextPath}">
     <title>Nhiệt Đới Xanh · Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Bắt tay DNS/TLS với CDN sớm, song song với việc tải HTML — CSS FontAwesome
-         chặn render nên tiết kiệm được cả vòng handshake trên đường găng. -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root{
             --admin-bg:#F5F7F3;--admin-surface:#FFFFFF;
@@ -133,6 +126,12 @@
             .admin-user .u-role{display:none}
         }
     </style>
+                    <link rel="icon" href="${pageContext.request.contextPath}/favicon.ico" sizes="any">
+                    <link rel="apple-touch-icon" href="${pageContext.request.contextPath}/apple-touch-icon.png">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/fonts.css?v=${initParam.assetVer}">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/icons.css?v=${initParam.assetVer}">
 </head>
 <body>
     <aside class="sidebar" id="adminSidebar">

@@ -9,8 +9,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${isOtpStep ? 'Xác thực OTP' : 'Quên mật khẩu'} — Nhiệt Đới Xanh</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--green:#2A5C38;--green-dark:#1E3F27;--gold:#F4A261;--gold-light:#F9C784;--coral:#D9534F;--cream:#FDFBF7;--paper:#FFFFFF;--ink:#1A2E1A;--ink-soft:#7A8D7A;--line:#E8E0D0;--fd:'Baloo 2',sans-serif;--fb:'Be Vietnam Pro',sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -75,6 +73,12 @@ h1{font-family:var(--fd);font-weight:700;font-size:28px;color:var(--green-dark)}
   .paste-hint{display:block}
 }
 </style>
+                    <link rel="icon" href="${pageContext.request.contextPath}/favicon.ico" sizes="any">
+                    <link rel="apple-touch-icon" href="${pageContext.request.contextPath}/apple-touch-icon.png">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/fonts.css?v=${initParam.assetVer}">
+                    <link rel="stylesheet"
+                        href="${pageContext.request.contextPath}/css/icons.css?v=${initParam.assetVer}">
 </head>
 <body>
 <span class="blob b1"></span><span class="blob b2"></span>
